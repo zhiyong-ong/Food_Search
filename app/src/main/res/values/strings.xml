@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">FoodSearch</string>
+    <string name="title_activity_google_search">GoogleSearchActivity</string>
 </resources>
