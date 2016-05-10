@@ -23,6 +23,16 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".CameraActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_fullscreen"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/FullscreenTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="orbital.com.foodsearch.MainActivity" />
+        </activity>
+        <activity
             android:name=".GoogleSearchActivity"
             android:label="@string/title_activity_google_search"
             android:theme="@style/AppTheme.NoActionBar"></activity>
