@@ -1,7 +1,11 @@
 package orbital.com.foodsearch;
 
-import android.support.v7.app.AppCompatActivity;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -9,13 +13,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Button button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
     }
 
     /** Check if this device has a camera */
@@ -31,6 +28,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void goSearch(View view) {
         Intent intent = new Intent(this, GoogleSearchActivity.class);
+        startActivity(intent);
+    }
+
+    public void startCamera(View view) {
+        Intent intent = new Intent(this, CameraActivity.class);
         startActivity(intent);
     }
 
