@@ -13,9 +13,9 @@
     tools:showIn="@layout/activity_google_search">
 
     <TableLayout
+        android:id="@+id/table"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/table">
+        android:layout_height="wrap_content">
 
         <TableRow
             android:id="@+id/tableRow1"
@@ -24,28 +24,28 @@
             android:layout_margin="20dp" >
 
             <TextView
-                android:id="@+id/textView1"
-                android:textSize="16dp"
+                android:id="@+id/searchIDtext"
+                android:text="Search ID: "
                 android:textColor="@android:color/black"
-                android:text="Search ID: " />
+                android:textSize="16dp" />
 
             <EditText
                 android:id="@+id/inputSearch"
-                android:inputType="text"
-                android:ems="10"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:hint="Enter Search"/>
+                android:ems="10"
+                android:hint="Enter Search"
+                android:inputType="text"/>
         </TableRow>
     </TableLayout>
 
     <Button
+        android:id="@+id/searchButton"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="Search"
-        android:id="@+id/searchButton"
         android:layout_below="@+id/table"
         android:layout_centerHorizontal="true"
-        android:textSize="18dp"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:text="Search"
+        android:textSize="18dp" />
 </RelativeLayout>

@@ -2,10 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="orbital.com.foodsearch">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
     <uses-permission android:name="android.permission.CAMERA" />
-
-    <uses-feature android:name="android.hardware.camera" />
-
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -22,20 +26,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".CameraActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_fullscreen"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/FullscreenTheme">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="orbital.com.foodsearch.MainActivity" />
-        </activity>
-        <activity
-            android:name=".GoogleSearchActivity"
+        <activity android:name=".GoogleSearchActivity"
             android:label="@string/title_activity_google_search"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:parentActivityName=".MainActivity">
+        </activity>
+        <activity android:name=".OcrActivity"
+            android:label="@string/title_activity_ocr"
+            android:parentActivityName=".MainActivity">
+        </activity>
     </application>
 
 </manifest>

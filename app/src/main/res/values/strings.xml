@@ -5,9 +5,11 @@
     <string name="google_search">Google Search</string>
 
     <string name="title_activity_fullscreen">Camera</string>
-    <string name="title_activity_google_search">Google</string>
+    <string name="title_activity_google_search">Google search</string>
+    <string name="title_activity_ocr">OCR</string>
+    <string name="ocr_start">OCR start</string>
 
-    <string name="title_activity_test">test</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="snackbar_text">Photo was not taken!</string>
+    <string name="internet_error_text">There\'s something wrong with network connection!</string>
+    <string name="retry">Retry</string>
 </resources>

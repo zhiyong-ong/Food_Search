@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_ocr"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="orbital.com.foodsearch.OcrActivity"
+    tools:layout_editor_absoluteX="0dp"
+    tools:layout_editor_absoluteY="80dp">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="377dp"
+        android:layout_height="313dp"
+        android:layout_marginTop="16dp"
+        android:src="@color/accent_material_dark"
+        app:layout_constraintLeft_toLeftOf="@+id/activity_ocr"
+        app:layout_constraintRight_toRightOf="@+id/activity_ocr"
+        app:layout_constraintTop_toTopOf="@+id/activity_ocr"
+        tools:layout_constraintLeft_creator="0"
+        tools:layout_constraintRight_creator="0"
+        tools:layout_constraintTop_creator="0"
+        tools:layout_editor_absoluteX="17dp"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <TextView
+        android:id="@+id/jsonTextView"
+        android:layout_width="377dp"
+        android:layout_height="192dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="8dp"
+        android:scrollbars="vertical"
+        android:text="TextView"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_ocr"
+        app:layout_constraintLeft_toLeftOf="@+id/imageView"
+        app:layout_constraintRight_toRightOf="@+id/activity_ocr"
+        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        tools:layout_constraintBottom_creator="0"
+        tools:layout_constraintLeft_creator="0"
+        tools:layout_constraintRight_creator="0"
+        tools:layout_constraintTop_creator="0"
+        tools:layout_editor_absoluteX="17dp"
+        tools:layout_editor_absoluteY="365dp" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:indeterminate="true"
+        app:layout_constraintBottom_toBottomOf="@+id/activity_ocr"
+        app:layout_constraintLeft_toLeftOf="@+id/jsonTextView"
+        app:layout_constraintRight_toRightOf="@+id/jsonTextView"
+        app:layout_constraintTop_toTopOf="@+id/jsonTextView"
+        tools:layout_constraintBottom_creator="0"
+        tools:layout_constraintLeft_creator="0"
+        tools:layout_constraintRight_creator="0"
+        tools:layout_constraintTop_creator="0"
+        tools:layout_editor_absoluteX="182dp"
+        tools:layout_editor_absoluteY="451dp" />
+
+</android.support.constraint.ConstraintLayout>
