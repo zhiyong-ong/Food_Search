@@ -2,7 +2,6 @@ package orbital.com.foodsearch;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -15,9 +14,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -27,6 +26,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import orbital.com.foodsearch.Helpers.ImageUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -71,8 +71,9 @@ public class OcrDebugActivity extends AppCompatActivity {
 
         ImageView imgView = (ImageView) findViewById(R.id.cameraImageView);
         Picasso.with(this).load("file://" + filePath)
-                .placeholder(R.color.colorAccent)
-                .resize(512, 0)
+                .placeholder(R.color.black_overlay)
+                .memoryPolicy(MemoryPolicy.NO_CACHE)
+                .resize(256,0)
                 .into(imgView);
 
         startConnect();
@@ -187,14 +188,7 @@ public class OcrDebugActivity extends AppCompatActivity {
 
         @Override
         protected byte[] doInBackground(String... params) {
-            return compressFile(params[0]);
-        }
-
-        private byte[] compressFile(String filePath){
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            Bitmap bmp = BitmapFactory.decodeFile(filePath);
-            bmp.compress(Bitmap.CompressFormat.JPEG, 60, bos);
-            return bos.toByteArray();
+            return ImageUtils.compressImage(params[0]);
         }
     }
 }
