@@ -5,12 +5,12 @@
     android:id="@+id/activity_ocr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="orbital.com.foodsearch.OcrActivity"
+    tools:context="orbital.com.foodsearch.OcrDebugActivity"
     tools:layout_editor_absoluteX="0dp"
     tools:layout_editor_absoluteY="80dp">
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/cameraImageView"
         android:layout_width="377dp"
         android:layout_height="313dp"
         android:layout_marginTop="16dp"
@@ -35,9 +35,9 @@
         android:text="TextView"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/activity_ocr"
-        app:layout_constraintLeft_toLeftOf="@+id/imageView"
+        app:layout_constraintLeft_toLeftOf="@+id/cameraImageView"
         app:layout_constraintRight_toRightOf="@+id/activity_ocr"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/cameraImageView"
         tools:layout_constraintBottom_creator="0"
         tools:layout_constraintLeft_creator="0"
         tools:layout_constraintRight_creator="0"

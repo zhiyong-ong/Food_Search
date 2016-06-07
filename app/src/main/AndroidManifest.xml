@@ -30,7 +30,7 @@
             android:label="@string/title_activity_google_search"
             android:parentActivityName=".MainActivity">
         </activity>
-        <activity android:name=".OcrActivity"
+        <activity android:name=".OcrDebugActivity"
             android:label="@string/title_activity_ocr"
             android:parentActivityName=".MainActivity">
         </activity>

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -14,7 +15,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.File;
+import com.squareup.picasso.Picasso;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -33,7 +36,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.QueryMap;
 
-public class OcrActivity extends AppCompatActivity {
+public class OcrDebugActivity extends AppCompatActivity {
     private final String LOG_TAG = "FOODIES";
     private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
     private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
@@ -62,12 +65,16 @@ public class OcrActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
         filePath = getIntent().getStringExtra("filePath");
-        File file = new File(filePath);
+
         TextView textView = (TextView) findViewById(R.id.jsonTextView);
         textView.setMovementMethod(new ScrollingMovementMethod());
-        ImageView imgView = (ImageView) findViewById(R.id.imageView);
-        bitmap = BitmapFactory.decodeFile(filePath);
-        imgView.setImageBitmap(bitmap);
+
+        ImageView imgView = (ImageView) findViewById(R.id.cameraImageView);
+        Picasso.with(this).load("file://" + filePath)
+                .placeholder(R.color.colorAccent)
+                .resize(512, 0)
+                .into(imgView);
+
         startConnect();
     }
 
@@ -92,6 +99,18 @@ public class OcrActivity extends AppCompatActivity {
      * to the bing API server
      * */
     private void bingConnect() {
+        View root = findViewById(R.id.activity_ocr);
+        CompressAsyncTask compressTask = new CompressAsyncTask(this, root){
+            @Override
+            protected void onPostExecute(byte[] bytes) {
+                // When compressTask is done, invoke setupCall
+                setupCall(bytes);
+            }
+        };
+        compressTask.execute(filePath);
+    }
+
+    private void setupCall(byte[] rawImage) {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(OCR_BASE_URL)
@@ -99,7 +118,7 @@ public class OcrActivity extends AppCompatActivity {
                 .build();
         BingOCRService service = retrofit.create(BingOCRService.class);
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),
-                new File(filePath));
+                rawImage);
         // For params:
         // Map<String, String> params = new HashMap<String, String>();
         Call<ResponseBody> call = service.postImage(requestBody);
@@ -115,7 +134,7 @@ public class OcrActivity extends AppCompatActivity {
                     textView.setText(result);
                     Log.e(LOG_TAG, result);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.e(LOG_TAG, "Exception!" + e.getMessage());
                 }
 
             }
@@ -135,7 +154,7 @@ public class OcrActivity extends AppCompatActivity {
     }
 
     // To check for network conditions
-    private boolean isOnline() {
+    public boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
             Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
@@ -155,5 +174,27 @@ public class OcrActivity extends AppCompatActivity {
         @Multipart
         @POST("./")
         Call<ResponseBody> postImage(@Part("image") RequestBody image);
+    }
+
+    private static class CompressAsyncTask extends AsyncTask<String, Void, byte[]>{
+        private Context mContext = null;
+        private View mRootView = null;
+
+        public CompressAsyncTask(Context context, View rootView){
+            mContext = context;
+            mRootView = rootView;
+        }
+
+        @Override
+        protected byte[] doInBackground(String... params) {
+            return compressFile(params[0]);
+        }
+
+        private byte[] compressFile(String filePath){
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            Bitmap bmp = BitmapFactory.decodeFile(filePath);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 60, bos);
+            return bos.toByteArray();
+        }
     }
 }

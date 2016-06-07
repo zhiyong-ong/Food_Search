@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -34,15 +35,37 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    @TargetApi(23)
     public void startCamera(View view) {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        getPhotoFileUri(photoFileName);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-        startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA},
+                    CAMERA_PERMISSION_REQUEST_CODE);
+        } else {
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            getPhotoFileUri(photoFileName);
+            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+            startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case CAMERA_PERMISSION_REQUEST_CODE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    getPhotoFileUri(photoFileName);
+                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                    startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                }
+            }
+            return;
+        }
     }
 
     public void startOcr(View view) {
-        Intent intent = new Intent(this, OcrActivity.class);
+        Intent intent = new Intent(this, OcrDebugActivity.class);
         startActivity(intent);
     }
 
@@ -50,14 +73,8 @@ public class MainActivity extends AppCompatActivity {
         return uri;
     }
 
-    @TargetApi(23)
     // Use this method to get ready the output file for the camera in the cache dir
     private void getPhotoFileUri(String fileName) {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA},
-                    CAMERA_PERMISSION_REQUEST_CODE);
-        }
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                 , "FoodSearch");
         // Create the storage directory if it does not exist
@@ -74,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Intent intent = new Intent(this, OcrActivity.class);
+                Intent intent = new Intent(this, OcrDebugActivity.class);
                 intent.putExtra("filePath", uri.getPath());
                 startActivity(intent);
             } else { // Result was a failure, creates snackbar to show
