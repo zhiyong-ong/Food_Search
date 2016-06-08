@@ -58,6 +58,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * This method starts the camera by checking permissions for api > 23
+     * and if api < 23 it just dispatches Camera Intent
+     * @param view
+     */
     @TargetApi(23)
     public void startCamera(View view) {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
@@ -69,6 +74,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * This method dispatches the camera intent by generating uri and attaching
+     * it to the camera intent.
+     */
     private void dispatchCameraIntent(){
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         generateUri();
@@ -87,7 +96,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    // Use this method to get ready the output file for the camera in the cache dir
+    /**
+     * This method generates the Uri and saves it as the member variable
+     */
     private void generateUri() {
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                 , "FoodSearch");
@@ -101,6 +112,14 @@ public class MainActivity extends AppCompatActivity {
                 + File.separator + photoFileName));
     }
 
+    /**
+     * This method is called after user takes a photo. If result is OK
+     * then send the image file path to the ocr activity intent.
+     * @param requestCode requestCode for this request
+     * @param resultCode resultCode returned by camera
+     * @param data data as returned by camera, should be null because EXTRA_MEDIA_OUTPUT
+     *             was defined
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
