@@ -63,7 +63,7 @@ public class OcrDebugActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (filePath == null) {
+        if (filePath != null) {
             outState.putString("savedFilePath", filePath);
         }
     }
