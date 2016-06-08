@@ -80,9 +80,10 @@ public class MainActivity extends AppCompatActivity {
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d(LOG_TAG, "failed to create directory");
+                Log.e(LOG_TAG, "failed to create directory");
             }
         }
+        Log.e(LOG_TAG, "URI: " + uri);
         uri = Uri.fromFile(new File(mediaStorageDir.getPath() + File.separator +
                 fileName));
     }
