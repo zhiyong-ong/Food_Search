@@ -1,7 +1,6 @@
 package orbital.com.foodsearch;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -41,6 +40,7 @@ public class OcrDebugActivity extends AppCompatActivity {
     private final String LOG_TAG = "FOODIES";
     private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
     private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
+
     private final Interceptor interceptor = new Interceptor() {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -58,15 +58,11 @@ public class OcrDebugActivity extends AppCompatActivity {
     private final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
     private final OkHttpClient client = clientBuilder.addInterceptor(interceptor)
             .build();
-    private Bitmap bitmap = null;
     private String filePath = null;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (bitmap == null) {
-            outState.putParcelable("savedBitmap", bitmap);
-        }
         if (filePath == null) {
             outState.putString("savedFilePath", filePath);
         }
@@ -75,9 +71,7 @@ public class OcrDebugActivity extends AppCompatActivity {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
         super.onRestoreInstanceState(savedInstanceState, persistentState);
-        if (savedInstanceState.containsKey("savedBitmap") ||
-                savedInstanceState.containsKey("savedFilePath")) {
-            bitmap = savedInstanceState.getParcelable("savedBitmap");
+        if (savedInstanceState.containsKey("savedFilePath")) {
             filePath = savedInstanceState.getString("savedFilePath");
         }
     }
@@ -91,11 +85,11 @@ public class OcrDebugActivity extends AppCompatActivity {
         TextView textView = (TextView) findViewById(R.id.jsonTextView);
         textView.setMovementMethod(new ScrollingMovementMethod());
 
-        ImageView imgView = (ImageView) findViewById(R.id.cameraImageView);
+        ImageView imgView = (ImageView) findViewById(R.id.previewImageView);
         Picasso.with(this).load("file://" + filePath)
                 .placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
-                .resize(256,0)
+                .resize(imgView.getMaxWidth(),0)
                 .into(imgView);
 
         startConnect();
@@ -125,19 +119,30 @@ public class OcrDebugActivity extends AppCompatActivity {
         View root = findViewById(R.id.activity_ocr);
         CompressAsyncTask compressTask = new CompressAsyncTask(this, root){
             @Override
-            protected void onPostExecute(byte[] bytes) {
-                // When compressTask is done, invoke setupCall
-                setupCall(bytes);
+            protected void onPostExecute(byte[] result) {
+                // When compressTask is done, invoke dispatchCall for POST call
+                dispatchCall(result);
+                // After call is dispatched, load compress image into preview
+                ImageView previewImageView = (ImageView) findViewById(R.id.previewImageView);
+                Picasso.with(mContext).load("file://" + filePath)
+                        .resize(previewImageView.getWidth(), 0)
+                        .placeholder(previewImageView.getDrawable())
+                        .memoryPolicy(MemoryPolicy.NO_CACHE)
+                        .into((ImageView)findViewById(R.id.previewImageView));
             }
         };
         compressTask.execute(filePath);
     }
 
-    private void setupCall(byte[] rawImage) {
+    /**
+     * This method sets up the POST call query and enqueues it for async up/download.
+     * @param rawImage raw image binary data to be uploaded via POST
+     */
+    private void dispatchCall(byte[] rawImage) {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(client)
                 .baseUrl(OCR_BASE_URL)
-                //.addConverterFactory(GsonConverterFactory.create())
+                //.addConverterFactory(GsonConverterFactory.create()) //THIS IS PLACEHOLDER FOR SERIALIZATION
                 .build();
         BingOCRService service = retrofit.create(BingOCRService.class);
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),
@@ -187,6 +192,11 @@ public class OcrDebugActivity extends AppCompatActivity {
         return false;
     }
 
+    /**
+     * This interface works with retrofit to abstract the API calls into
+     * a java interface
+      */
+
     private interface BingOCRService {
         // Request method and URL specified in the annotation
         // Callback for the parsed response is the last parameter
@@ -199,9 +209,13 @@ public class OcrDebugActivity extends AppCompatActivity {
         Call<ResponseBody> postImage(@Part("image") RequestBody image);
     }
 
+    /**
+     * This async task is used to compress the image to be sent in the
+     * background thread using ImageUtils.compressImage
+     */
     private static class CompressAsyncTask extends AsyncTask<String, Void, byte[]>{
-        private Context mContext = null;
-        private View mRootView = null;
+        protected Context mContext = null;
+        protected View mRootView = null;
 
         public CompressAsyncTask(Context context, View rootView){
             mContext = context;

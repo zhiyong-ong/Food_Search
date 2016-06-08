@@ -21,25 +21,11 @@ import java.io.File;
 public class MainActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_REQUEST_CODE = 1;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-    public final String LOG_TAG = "FOODIES";
-    private String photoFileName = "photo.jpg";
-    private Uri uri = null;
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (uri != null) {
-            outState.putString("savedUri", uri.toString());
-        }
-    }
+    private final String LOG_TAG = "FOODIES";
+    private final String photoFileName = "photo.jpg";
 
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onRestoreInstanceState(savedInstanceState, persistentState);
-        if (savedInstanceState.containsKey("savedUri")) {
-            uri = Uri.parse(savedInstanceState.getString("savedUri"));
-        }
-    }
+    private Uri photoFileUri = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +33,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (photoFileUri != null) {
+            outState.putString("savedUri", photoFileUri.toString());
+        }
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onRestoreInstanceState(savedInstanceState, persistentState);
+        if (savedInstanceState.containsKey("savedUri")) {
+            photoFileUri = Uri.parse(savedInstanceState.getString("savedUri"));
+        }
+    }
+
     public void goSearch(View view) {
         Intent intent = new Intent(this, GoogleSearchActivity.class);
+        startActivity(intent);
+    }
+
+    public void startOcr(View view) {
+        Intent intent = new Intent(this, OcrDebugActivity.class);
         startActivity(intent);
     }
 
@@ -59,11 +66,15 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[]{Manifest.permission.CAMERA},
                     CAMERA_PERMISSION_REQUEST_CODE);
         } else {
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            getPhotoFileUri(photoFileName);
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-            startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+            dispatchCameraIntent();
         }
+    }
+
+    private void dispatchCameraIntent(){
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        generateUri();
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoFileUri);
+        startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
     }
 
     @Override
@@ -71,36 +82,24 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode){
             case CAMERA_PERMISSION_REQUEST_CODE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    getPhotoFileUri(photoFileName);
-                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                    startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                    dispatchCameraIntent();
                 }
             }
         }
     }
 
-    public void startOcr(View view) {
-        Intent intent = new Intent(this, OcrDebugActivity.class);
-        startActivity(intent);
-    }
-
-    public Uri getUri() {
-        return uri;
-    }
-
     // Use this method to get ready the output file for the camera in the cache dir
-    private void getPhotoFileUri(String fileName) {
+    private void generateUri() {
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                 , "FoodSearch");
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d(LOG_TAG, "failed to create directory");
+                Log.e(LOG_TAG, "failed to create directory");
             }
         }
-        uri = Uri.fromFile(new File(mediaStorageDir.getPath()
-                + File.separator + fileName));
+        photoFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
+                + File.separator + photoFileName));
     }
 
     @Override
@@ -108,11 +107,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 Intent intent = new Intent(this, OcrDebugActivity.class);
-                intent.putExtra("filePath", uri.getPath());
+                intent.putExtra("filePath", photoFileUri.getPath());
                 startActivity(intent);
             } else { // Result was a failure, creates snackbar to show
-                Snackbar.make(findViewById(R.id.container), R.string.snackbar_text, Snackbar.LENGTH_SHORT).
-                        show();
+                Snackbar.make(findViewById(R.id.container), R.string.snackbar_text, Snackbar.LENGTH_SHORT)
+                        .show();
             }
         }
     }
