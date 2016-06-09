@@ -6,24 +6,27 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="orbital.com.foodsearch.MainActivity">
+    tools:context="orbital.com.foodsearch.Activities.MainActivity">
     <Button
         android:id="@+id/cam_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:onClick="startCamera"
-        android:text="@string/cam_start"/>
+        android:onClick="startOcr"
+        android:text="@string/ocr_start"/>
+
+    <Button
+        android:id="@+id/ocr_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="startExp"
+        android:text="@string/exp_start" />
+
     <Button
         android:id="@+id/search_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="goSearch"
         android:text="@string/google_search" />
-    <Button
-        android:id="@+id/ocr_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="startOcr"
-        android:text="@string/ocr_start" />
+
 </LinearLayout>

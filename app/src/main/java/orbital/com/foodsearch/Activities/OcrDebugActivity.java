@@ -1,4 +1,4 @@
-package orbital.com.foodsearch;
+package orbital.com.foodsearch.Activities;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -26,6 +26,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import orbital.com.foodsearch.Helpers.ImageUtils;
+import orbital.com.foodsearch.R;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -36,7 +37,7 @@ import retrofit2.http.Part;
 import retrofit2.http.QueryMap;
 
 public class OcrDebugActivity extends AppCompatActivity {
-    private final String LOG_TAG = "FOODIES";
+    private static final String LOG_TAG = "FOODIES";
     private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
     private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
 
@@ -148,28 +149,9 @@ public class OcrDebugActivity extends AppCompatActivity {
                 rawImage);
         // For params:
         // Map<String, String> params = new HashMap<String, String>();
-        Call<ResponseBody> call = service.postImage(requestBody);
+        Call<ResponseBody> call = service.processImage(requestBody);
         // Enqueue the method to the call and wait for callback (Asynchronous call)
-        call.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                try {
-                    String result = response.body().string();
-                    TextView textView = (TextView) findViewById(R.id.jsonTextView);
-                    findViewById(R.id.progressBar).setVisibility(View.GONE);
-                    textView.setVisibility(View.VISIBLE);
-                    textView.setText(result);
-                    Log.e(LOG_TAG, result);
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "Exception!" + e.getMessage());
-                }
-
-            }
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-                Log.e(LOG_TAG, "FAILED! Error MSG:" + t.getMessage());
-            }
-        });
+        call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr)));
     }
 
     // To check for network conditions
@@ -201,11 +183,44 @@ public class OcrDebugActivity extends AppCompatActivity {
         // Callback for the parsed response is the last parameter
         @Multipart
         @POST("./")
-        Call<ResponseBody> postImage(@Part("image") RequestBody image,
-                                     @QueryMap Map<String, String> params);
+        Call<ResponseBody> processImage(@Part("image") RequestBody image,
+                                        @QueryMap Map<String, String> params);
         @Multipart
         @POST("./")
-        Call<ResponseBody> postImage(@Part("image") RequestBody image);
+        Call<ResponseBody> processImage(@Part("image") RequestBody image);
+    }
+
+    /**
+     * Callback class that implements callback method to be used for when a
+     * response is received from server
+     */
+    private static class OcrCallback implements Callback<ResponseBody>{
+        private View mRootView = null;
+
+        private OcrCallback(View view){
+            mRootView = view;
+        }
+        @Override
+        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            String result = null;
+            try {
+                result = response.body().string();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Exception!" + e.getMessage());
+            }
+            TextView textView = (TextView) mRootView.findViewById(R.id.jsonTextView);
+            mRootView.findViewById(R.id.progressBar).setVisibility(View.GONE);
+            textView.setVisibility(View.VISIBLE);
+            textView.setText(result);
+            Log.e(LOG_TAG, result);
+        }
+        @Override
+        public void onFailure(Call<ResponseBody> call, Throwable t) {
+            Snackbar.make(mRootView.findViewById(R.id.activity_ocr), R.string.post_fail_text,
+                    Snackbar.LENGTH_SHORT)
+                    .show();
+            Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
+        }
     }
 
     /**

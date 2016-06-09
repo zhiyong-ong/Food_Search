@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="orbital.com.foodsearch.OcrDebugActivity">
+    tools:context="orbital.com.foodsearch.Activities.OcrDebugActivity">
 
     <ImageView
         android:id="@+id/previewImageView"
