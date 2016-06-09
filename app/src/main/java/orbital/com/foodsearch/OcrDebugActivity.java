@@ -6,6 +6,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
@@ -49,7 +50,7 @@ public class OcrDebugActivity extends AppCompatActivity {
                 return chain.proceed(originalRequest);
             }
             return chain.proceed(originalRequest
-                    .newBuilder().addHeader("Ocp-Apim-Subscription-Key", "b2d6262c77174bafbb5bda3e5997dbfe")
+                    .newBuilder().addHeader("Ocp-Apim-Subscription-Key", API_KEY)
                     .addHeader("Content-Type", "multipart/form-data")
                     .build());
         }
@@ -59,6 +60,27 @@ public class OcrDebugActivity extends AppCompatActivity {
             .build();
     private Bitmap bitmap = null;
     private String filePath = null;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (bitmap == null) {
+            outState.putParcelable("savedBitmap", bitmap);
+        }
+        if (filePath == null) {
+            outState.putString("savedFilePath", filePath);
+        }
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onRestoreInstanceState(savedInstanceState, persistentState);
+        if (savedInstanceState.containsKey("savedBitmap") ||
+                savedInstanceState.containsKey("savedFilePath")) {
+            bitmap = savedInstanceState.getParcelable("savedBitmap");
+            filePath = savedInstanceState.getString("savedFilePath");
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

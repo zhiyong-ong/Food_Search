@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -23,6 +24,22 @@ public class MainActivity extends AppCompatActivity {
     public final String LOG_TAG = "FOODIES";
     private String photoFileName = "photo.jpg";
     private Uri uri = null;
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (uri != null) {
+            outState.putString("savedUri", uri.toString());
+        }
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onRestoreInstanceState(savedInstanceState, persistentState);
+        if (savedInstanceState.containsKey("savedUri")) {
+            uri = Uri.parse(savedInstanceState.getString("savedUri"));
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +77,6 @@ public class MainActivity extends AppCompatActivity {
                     startActivityForResult(cameraIntent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
                 }
             }
-            return;
         }
     }
 
