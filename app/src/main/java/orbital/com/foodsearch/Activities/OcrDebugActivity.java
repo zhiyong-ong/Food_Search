@@ -40,6 +40,8 @@ public class OcrDebugActivity extends AppCompatActivity {
     private static final String LOG_TAG = "FOODIES";
     private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
     private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
+    private final String OCP_APIM_KEY = "e801fac4192d4741976e816b93bdcb48";
+    private final String BING_IMAGE_URL = "https://bingapis.azure-api.net/api/v5/images/search?";
 
     private final Interceptor interceptor = new Interceptor() {
         @Override
@@ -175,7 +177,7 @@ public class OcrDebugActivity extends AppCompatActivity {
 
     /**
      * This interface works with retrofit to abstract the API calls into
-     * a java interface
+     * a java interface. Note the annotations.
       */
 
     private interface BingOCRService {
