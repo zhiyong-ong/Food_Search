@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.media.ExifInterface;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -93,7 +94,19 @@ public class ImageUtils {
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out);
-        return out.toByteArray();
+        byte[] result = out.toByteArray();
+        try {
+            writeFile(result, imagePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public static void writeFile(byte[] data, String fileName) throws IOException{
+        FileOutputStream out = new FileOutputStream(fileName);
+        out.write(data);
+        out.close();
     }
 
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

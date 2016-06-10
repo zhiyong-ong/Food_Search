@@ -1,4 +1,4 @@
-package orbital.com.foodsearch;
+package orbital.com.foodsearch.Activities;
 
 import android.app.SearchManager;
 import android.content.Intent;
@@ -7,6 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import orbital.com.foodsearch.R;
 
 public class GoogleSearchActivity extends AppCompatActivity {
 
