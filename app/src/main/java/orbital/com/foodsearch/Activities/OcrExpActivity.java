@@ -96,7 +96,6 @@ public class OcrExpActivity extends AppCompatActivity {
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
                 .resize(imgView.getMaxWidth(),0)
                 .into(imgView);
-
         startConnect();
     }
 
@@ -132,6 +131,7 @@ public class OcrExpActivity extends AppCompatActivity {
                 Picasso.with(mContext).load("file://" + filePath)
                         .placeholder(previewImageView2.getDrawable())
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
+                        .resize(previewImageView2.getWidth(), previewImageView2.getHeight())
                         .into(previewImageView2);
             }
         };
@@ -155,7 +155,11 @@ public class OcrExpActivity extends AppCompatActivity {
         // Map<String, String> params = new HashMap<String, String>();
         Call<BingResponse> call = service.processImage(requestBody);
         // Enqueue the method to the call and wait for callback (Asynchronous call)
-        call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp)));
+        call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
+    }
+
+    public String getFilePath() {
+        return filePath;
     }
 
     // To check for network conditions
@@ -200,20 +204,22 @@ public class OcrExpActivity extends AppCompatActivity {
      */
     private static class OcrCallback implements Callback<BingResponse> {
         private View mRootView = null;
+        private String mFilePath = null;
 
-        OcrCallback(View view){
-            mRootView = view;
+        OcrCallback(View rootView, String filePath){
+            mRootView = rootView;
+            mFilePath = filePath;
         }
 
         @Override
         public void onResponse(Call<BingResponse> call, Response<BingResponse> response) {
             BingResponse bingResponse = response.body();
-            List<Line> words = bingResponse.getAllLines();
+            List<Line> lines = bingResponse.getAllLines();
             DrawableView drawableView = (DrawableView) mRootView
                     .findViewById(R.id.drawable_view);
-            drawableView.setLines(words);
+            drawableView.setLinesForDraw(mRootView, mFilePath, lines,
+                    new Float(bingResponse.getTextAngle()));
             drawableView.invalidate();
-
             drawableView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
