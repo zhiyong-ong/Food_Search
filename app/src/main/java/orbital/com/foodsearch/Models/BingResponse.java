@@ -93,5 +93,14 @@ public class BingResponse {
         this.additionalProperties.put(name, value);
     }
 
+    public List<Line> getAllLines() {
+        List<Line> lines = new ArrayList<Line>();
+        List<Region> regions = getRegions();
+        for (Region region : regions) {
+            lines.addAll(region.getLines());
+        }
+        return lines;
+    }
+
 }
 

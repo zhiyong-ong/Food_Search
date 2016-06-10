@@ -4,15 +4,17 @@
     android:id="@+id/activity_ocr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context="orbital.com.foodsearch.Activities.OcrDebugActivity">
+
+    <include android:id="@+id/toolbar_dbg"
+        layout="@layout/toolbar_layout"/>
 
     <ImageView
         android:id="@+id/previewImageView"
         android:layout_width="match_parent"
         android:layout_height="360dp"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:layout_below="@id/toolbar_dbg"
         android:layout_margin="@dimen/activity_horizontal_margin" />
 
     <TextView

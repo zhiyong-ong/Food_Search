@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 
@@ -35,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
     }
 
     @Override
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
-            case OCR_CAMERA_PERMISSION_REQUEST_CODE: case EXP_CAMERA_PERMISSION_REQUEST_CODE: {
+            case OCR_CAMERA_PERMISSION_REQUEST_CODE: case EXP_CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     dispatchCameraIntent(requestCode * 100);
                 } else {
@@ -104,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
                             })
                             .show();
                 }
-            }
         }
     }
 
@@ -130,25 +131,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
-            case OCR_CAMERA_INTENT_REQUEST_CODE:{
+            case OCR_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(this, OcrDebugActivity.class);
                     intent.putExtra("filePath", photoFileUri.getPath());
                     startActivity(intent);
                 }
-            }
-            case EXP_CAMERA_INTENT_REQUEST_CODE: {
+                break;
+            case EXP_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(this, OcrExpActivity.class);
                     intent.putExtra("filePath", photoFileUri.getPath());
                     startActivity(intent);
                 }
-            } default: {
+                break;
+            default:
                 // requestCode fits none of the case so make snackbar to show that no
                 // photo was taken
                 Snackbar.make(findViewById(R.id.container), R.string.no_photo_text, Snackbar.LENGTH_SHORT)
                         .show();
-            }
         }
     }
 

@@ -1,182 +1,253 @@
 package orbital.com.foodsearch.Activities;
 
-import android.annotation.SuppressLint;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v4.app.NavUtils;
-import android.support.v7.app.ActionBar;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Picasso;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import orbital.com.foodsearch.DrawableView;
+import orbital.com.foodsearch.Helpers.ImageUtils;
+import orbital.com.foodsearch.Models.BingResponse;
+import orbital.com.foodsearch.Models.Line;
 import orbital.com.foodsearch.R;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
+import retrofit2.http.QueryMap;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class OcrExpActivity extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
+    private static final String LOG_TAG = "FOODIES";
+    private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
+    private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
 
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
+    private final Interceptor interceptor = new Interceptor() {
         @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
+        public okhttp3.Response intercept(Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            if (originalRequest.body() == null || originalRequest.header("Content-Type") != null
+                    || originalRequest.header("Ocp-Apim-Subscription-Key")!= null) {
+                return chain.proceed(originalRequest);
             }
-            return false;
+            return chain.proceed(originalRequest
+                    .newBuilder().addHeader("Ocp-Apim-Subscription-Key", API_KEY)
+                    .addHeader("Content-Type", "multipart/form-data")
+                    .build());
         }
     };
-    private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
+    private final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
+    private final OkHttpClient client = clientBuilder.addInterceptor(interceptor)
+            .build();
+    private String filePath = null;
 
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (filePath != null) {
+            outState.putString("savedFilePath", filePath);
         }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if (savedInstanceState.containsKey("savedFilePath")) {
+            filePath = savedInstanceState.getString("savedFilePath");
         }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_ocr_exp);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        filePath = getIntent().getStringExtra("filePath");
 
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_exp);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
+        Picasso.with(this).load("file://" + filePath)
+                .placeholder(R.color.black_overlay)
+                .memoryPolicy(MemoryPolicy.NO_CACHE)
+                .resize(imgView.getMaxWidth(),0)
+                .into(imgView);
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        startConnect();
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            // This ID represents the Home or Up button.
-            NavUtils.navigateUpFromSameTask(this);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
+    private void startConnect() {
+        if (isNetworkAvailable() && isOnline()) {
+            bingConnect();
         } else {
-            show();
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr_exp),
+                    R.string.internet_error_text, Snackbar.LENGTH_SHORT);
+            snackbar.setAction(R.string.retry, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    startConnect();
+                }
+            });
+            snackbar.show();
         }
-    }
-
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
     }
 
     /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
+     * Method that uses RetroFit library to perform a url connection query
+     * to the bing API server
+     * */
+    private void bingConnect() {
+        View root = findViewById(R.id.activity_ocr_exp);
+        CompressAsyncTask compressTask = new CompressAsyncTask(this, root){
+            @Override
+            protected void onPostExecute(byte[] result) {
+                // When compressTask is done, invoke dispatchCall for POST call
+                dispatchCall(result);
+                // After call is dispatched, load compress image into preview
+                ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
+                Picasso.with(mContext).load("file://" + filePath)
+                        .placeholder(previewImageView2.getDrawable())
+                        .memoryPolicy(MemoryPolicy.NO_CACHE)
+                        .into(previewImageView2);
+            }
+        };
+        compressTask.execute(filePath);
+    }
+
+    /**
+     * This method sets up the POST call query and enqueues it for async up/download.
+     * @param rawImage raw image binary data to be uploaded via POST
      */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    private void dispatchCall(byte[] rawImage) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .client(client)
+                .baseUrl(OCR_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        BingOCRService service = retrofit.create(BingOCRService.class);
+        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),
+                rawImage);
+        // For params:
+        // Map<String, String> params = new HashMap<String, String>();
+        Call<BingResponse> call = service.processImage(requestBody);
+        // Enqueue the method to the call and wait for callback (Asynchronous call)
+        call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp)));
+    }
+
+    // To check for network conditions
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    // To check for network conditions
+    private boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException |InterruptedException e)          { e.printStackTrace(); }
+        return false;
+    }
+
+    /**
+     * This interface works with retrofit to abstract the API calls into
+     * a java interface
+     */
+
+    private interface BingOCRService {
+        // Request method and URL specified in the annotation
+        // Callback for the parsed response is the last parameter
+        @Multipart
+        @POST("./")
+        Call<BingResponse> processImage(@Part("image") RequestBody image,
+                                        @QueryMap Map<String, String> params);
+        @Multipart
+        @POST("./")
+        Call<BingResponse> processImage(@Part("image") RequestBody image);
+    }
+
+    /**
+     * Callback class that implements callback method to be used for when a
+     * response is received from server
+     */
+    private static class OcrCallback implements Callback<BingResponse> {
+        private View mRootView = null;
+
+        OcrCallback(View view){
+            mRootView = view;
+        }
+
+        @Override
+        public void onResponse(Call<BingResponse> call, Response<BingResponse> response) {
+            BingResponse bingResponse = response.body();
+            List<Line> words = bingResponse.getAllLines();
+            DrawableView drawableView = (DrawableView) mRootView
+                    .findViewById(R.id.drawable_view);
+            drawableView.setLines(words);
+            drawableView.invalidate();
+
+            drawableView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.d(LOG_TAG, "TOUCH x: " + event.getX() + " y: ");
+                    event.getY();
+                    return false;
+                }
+            });
+        }
+        @Override
+        public void onFailure(Call<BingResponse> call, Throwable t) {
+            Snackbar.make(mRootView.findViewById(R.id.activity_ocr_exp), R.string.post_fail_text,
+                    Snackbar.LENGTH_SHORT)
+                    .show();
+            Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
+        }
+    }
+
+    /**
+     * This async task is used to compress the image to be sent in the
+     * background thread using ImageUtils.compressImage
+     */
+    private static class CompressAsyncTask extends AsyncTask<String, Void, byte[]> {
+        Context mContext = null;
+        View mRootView = null;
+
+        CompressAsyncTask(Context context, View rootView){
+            mContext = context;
+            mRootView = rootView;
+        }
+
+        @Override
+        protected byte[] doInBackground(String... params) {
+            return ImageUtils.compressImage(params[0]);
+        }
     }
 }
