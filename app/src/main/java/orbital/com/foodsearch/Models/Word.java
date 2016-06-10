@@ -32,6 +32,15 @@ public class Word {
 
     /**
      *
+     * @return the bounds in array form: x, y, width, height
+     */
+    public String[] getBoundsArray() {
+        String original = getBoundingBox();
+        return original.split(",");
+    }
+
+    /**
+     *
      * @return
      * The text
      */

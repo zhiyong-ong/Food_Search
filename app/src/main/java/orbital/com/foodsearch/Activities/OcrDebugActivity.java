@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
@@ -79,8 +80,12 @@ public class OcrDebugActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ocr);
+        setContentView(R.layout.activity_ocr_debug);
         filePath = getIntent().getStringExtra("filePath");
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_dbg);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         TextView textView = (TextView) findViewById(R.id.jsonTextView);
         textView.setMovementMethod(new ScrollingMovementMethod());
@@ -228,10 +233,10 @@ public class OcrDebugActivity extends AppCompatActivity {
      * background thread using ImageUtils.compressImage
      */
     private static class CompressAsyncTask extends AsyncTask<String, Void, byte[]>{
-        protected Context mContext = null;
-        protected View mRootView = null;
+        Context mContext = null;
+        View mRootView = null;
 
-        public CompressAsyncTask(Context context, View rootView){
+        CompressAsyncTask(Context context, View rootView){
             mContext = context;
             mRootView = rootView;
         }
