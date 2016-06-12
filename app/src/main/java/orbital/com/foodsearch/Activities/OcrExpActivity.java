@@ -228,7 +228,6 @@ public class OcrExpActivity extends AppCompatActivity {
                     return false;
                 }
             });
-            Log.e(LOG_TAG, bingResponse.toString());
         }
         @Override
         public void onFailure(Call<BingResponse> call, Throwable t) {
