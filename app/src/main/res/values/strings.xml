@@ -10,6 +10,7 @@
     <string name="exp_start">EXP start</string>
 
     <string name="no_photo_text">Photo was not taken!</string>
+    <string name="no_text_found">No text was found in the photo!</string>
     <string name="mkdir_fail_text">Failed to make directory</string>
     <string name="permission_ungranted">Permission was not granted!</string>
     <string name="internet_error_text">There\'s something wrong with network connection!</string>

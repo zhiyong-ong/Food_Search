@@ -33,7 +33,9 @@
             android:name=".Activities.OcrDebugActivity"
             android:label="@string/title_activity_ocr"
             android:parentActivityName=".Activities.MainActivity" />
-        <activity android:name=".Activities.OcrExpActivity"></activity>
+        <activity android:name=".Activities.OcrExpActivity"
+            android:label="OCR"
+            android:parentActivityName=".Activities.MainActivity"></activity>
     </application>
 
 </manifest>

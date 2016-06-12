@@ -19,18 +19,17 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <orbital.com.foodsearch.DrawableView
+        <orbital.com.foodsearch.Views.DrawableView
             android:id="@+id/drawable_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent"/>
+            android:background="#4F000000" />
 
-        <!--<ProgressBar-->
-            <!--android:id="@+id/progressBar2"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_centerHorizontal="true"-->
-            <!--android:layout_marginTop="37dp"-->
-            <!--android:indeterminate="true" />-->
+        <ProgressBar
+            android:id="@+id/progressBar2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:indeterminate="true" />
     </RelativeLayout>
 </FrameLayout>
