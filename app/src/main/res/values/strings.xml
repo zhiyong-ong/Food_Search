@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">FoodSearch</string>
     <string name="camFrag">camFragment</string>
-    <string name="google_search">Google Search</string>
+    <string name="search">Search</string>
 
+    <string name="title_activity_ocr_exp">OcrExpActivity</string>
     <string name="title_activity_fullscreen">Camera</string>
     <string name="title_activity_google_search">Google search</string>
     <string name="title_activity_ocr">OCR</string>
@@ -13,11 +14,7 @@
     <string name="no_text_found">No text was found in the photo!</string>
     <string name="mkdir_fail_text">Failed to make directory</string>
     <string name="permission_ungranted">Permission was not granted!</string>
-    <string name="internet_error_text">There\'s something wrong with network connection!</string>
+    <string name="internet_error_text">You\'re not online!</string>
     <string name="post_fail_text">POST Call Failed!</string>
     <string name="retry">Retry</string>
-
-    <string name="title_activity_ocr_exp">OcrExpActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

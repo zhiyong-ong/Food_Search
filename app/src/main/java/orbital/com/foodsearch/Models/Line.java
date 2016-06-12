@@ -1,11 +1,18 @@
 package orbital.com.foodsearch.Models;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Line {
+    private final static String LANGUAGE_EN = "en";
+    private final static String LANGUAGE_CNS = "zh-Hans";
+    private final static String LANGUAGE_CNT = "zh-Hant";
+    private final static String LANGUAGE_JA = "ja";
+    private final static String LANGUAGE_KO = "ko";
 
     private String boundingBox;
     private List<Word> words = new ArrayList<Word>();
@@ -64,13 +71,24 @@ public class Line {
         this.additionalProperties.put(name, value);
     }
 
-    public String getText() {
+    public String getText(String language) {
         StringBuilder builder = new StringBuilder();
         List<Word> words = getWords();
-        for (Word word: words) {
-            builder.append(word.getText());
-            builder.append(" ");
+        switch (language) {
+            case LANGUAGE_CNS:case LANGUAGE_CNT:case LANGUAGE_KO:
+            case LANGUAGE_JA:
+                for (Word word: words) {
+                    builder.append(word.getText());
+                }
+                break;
+            default:
+                Log.e("FOODIES", language);
+                for (Word word: words) {
+                    builder.append(word.getText());
+                    builder.append(" ");
+                }
         }
+
         return builder.toString();
     }
 }

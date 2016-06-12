@@ -1,6 +1,8 @@
 package orbital.com.foodsearch.Views;
 
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -69,7 +71,8 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
      * @param lines list of line to be drawn
      * @param angle textAngle as received from bing api
      */
-    public void drawBoxes(View rootView, String imagePath, List<Line> lines, Float angle) {
+    public void drawBoxes(View rootView, String imagePath, List<Line> lines,
+                          Float angle, String lang) {
         if (lines == null || lines.isEmpty()) {
             Snackbar.make(this, R.string.no_text_found, Snackbar.LENGTH_LONG).show();
             return;
@@ -84,7 +87,7 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
         }
         mRootView = rootView;
         mOriginalBitmap = BitmapFactory.decodeFile(imagePath);
-        addLinesForDraw(lines);
+        addLinesForDraw(lines, lang);
         invalidate();
     }
 
@@ -93,7 +96,7 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
      * parameters and then scaling it and setting them as the drawables' bounds.
      * @param lines List of line to convert into drawables
      */
-    private void addLinesForDraw(List<Line> lines) {
+    private void addLinesForDraw(List<Line> lines, String lang) {
         for (Line line : lines) {
             String[] bounds = line.getBoundsArray();
             int x = Integer.parseInt(bounds[0]);
@@ -105,7 +108,7 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
             RectF rectF = new RectF(x, y, x + width, y + height);
             scaleRect(drawRect, rectF);
             mRects.add(drawRect);
-            String text = line.getText();
+            String text = line.getText(lang);
             mLineTexts.add(text);
         }
     }
@@ -152,10 +155,23 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
     public boolean onTouch(View v, MotionEvent event) {
         int x = (int) event.getX();
         int y = (int) event.getY();
+        String searchParam = null;
         for (int i = 0; i < mRects.size(); i++) {
             Rect rect = mRects.get(i);
             if (rect.contains(x, y)){
-                Snackbar.make(v, mLineTexts.get(i), Snackbar.LENGTH_LONG).show();
+                searchParam = mLineTexts.get(i);
+                final String finalSearchParam = searchParam;
+                Snackbar.make(v, searchParam, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.search, new OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                                intent.putExtra(SearchManager.QUERY, finalSearchParam);
+                                getContext().startActivity(intent);
+                            }
+                        })
+                        .show();
+                break;
             }
         }
         return true;

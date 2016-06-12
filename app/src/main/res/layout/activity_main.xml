@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="goSearch"
-            android:text="@string/google_search" />
+            android:text="@string/search" />
 
     </LinearLayout>
 </FrameLayout>
