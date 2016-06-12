@@ -64,4 +64,13 @@ public class Line {
         this.additionalProperties.put(name, value);
     }
 
+    public String getText() {
+        StringBuilder builder = new StringBuilder();
+        List<Word> words = getWords();
+        for (Word word: words) {
+            builder.append(word.getText());
+            builder.append(" ");
+        }
+        return builder.toString();
+    }
 }

@@ -10,7 +10,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -160,10 +159,6 @@ public class OcrExpActivity extends AppCompatActivity {
         call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
     }
 
-    public String getFilePath() {
-        return filePath;
-    }
-
     // To check for network conditions
     private Boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
@@ -220,9 +215,9 @@ public class OcrExpActivity extends AppCompatActivity {
             List<Line> lines = bingResponse.getAllLines();
             mDrawableView = (DrawableView) mRootView
                     .findViewById(R.id.drawable_view);
+            mDrawableView.setOnTouchListener(mDrawableView );
             mDrawableView.drawBoxes(mRootView, mFilePath, lines,
                     new Float(bingResponse.getTextAngle()));
-            mDrawableView.setOnTouchListener(new BoxOnTouchListener());
             mDrawableView.setBackgroundColor(Color.TRANSPARENT);
             ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);
@@ -255,21 +250,6 @@ public class OcrExpActivity extends AppCompatActivity {
         @Override
         protected byte[] doInBackground(String... params) {
             return ImageUtils.compressImage(params[0]);
-        }
-    }
-
-    /**
-     * On touch listener for drawableView to keep track of which box is
-     * touched and to respond to it.
-     */
-    private static class BoxOnTouchListener implements View.OnTouchListener{
-        DrawableView mDrawableView = null;
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            DrawableView drawableView = (DrawableView) v;
-            float x = event.getX();
-            float y = event.getY();
-            return true;
         }
     }
 }
