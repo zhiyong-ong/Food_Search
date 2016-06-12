@@ -1,6 +1,7 @@
 package orbital.com.foodsearch.Activities;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
@@ -25,11 +27,11 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import orbital.com.foodsearch.DrawableView;
 import orbital.com.foodsearch.Helpers.ImageUtils;
 import orbital.com.foodsearch.Models.BingResponse;
 import orbital.com.foodsearch.Models.Line;
 import orbital.com.foodsearch.R;
+import orbital.com.foodsearch.Views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -92,9 +94,9 @@ public class OcrExpActivity extends AppCompatActivity {
 
         ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
         Picasso.with(this).load("file://" + filePath)
-                .placeholder(R.color.black_overlay)
+                //.placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
-                .resize(imgView.getMaxWidth(),0)
+                .resize(64,0)
                 .into(imgView);
         startConnect();
     }
@@ -205,6 +207,7 @@ public class OcrExpActivity extends AppCompatActivity {
     private static class OcrCallback implements Callback<BingResponse> {
         private View mRootView = null;
         private String mFilePath = null;
+        private DrawableView mDrawableView = null;
 
         OcrCallback(View rootView, String filePath){
             mRootView = rootView;
@@ -215,22 +218,20 @@ public class OcrExpActivity extends AppCompatActivity {
         public void onResponse(Call<BingResponse> call, Response<BingResponse> response) {
             BingResponse bingResponse = response.body();
             List<Line> lines = bingResponse.getAllLines();
-            DrawableView drawableView = (DrawableView) mRootView
+            mDrawableView = (DrawableView) mRootView
                     .findViewById(R.id.drawable_view);
-            drawableView.setLinesForDraw(mRootView, mFilePath, lines,
+            mDrawableView.drawBoxes(mRootView, mFilePath, lines,
                     new Float(bingResponse.getTextAngle()));
-            drawableView.invalidate();
-            drawableView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    Log.d(LOG_TAG, "TOUCH x: " + event.getX() + " y: ");
-                    event.getY();
-                    return false;
-                }
-            });
+            mDrawableView.setOnTouchListener(new BoxOnTouchListener());
+            mDrawableView.setBackgroundColor(Color.TRANSPARENT);
+            ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar2);
+            progressBar.setVisibility(View.GONE);
         }
         @Override
         public void onFailure(Call<BingResponse> call, Throwable t) {
+            mDrawableView.setBackgroundColor(Color.TRANSPARENT);
+            ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar2);
+            progressBar.setVisibility(View.GONE);
             Snackbar.make(mRootView.findViewById(R.id.activity_ocr_exp), R.string.post_fail_text,
                     Snackbar.LENGTH_SHORT)
                     .show();
@@ -242,7 +243,7 @@ public class OcrExpActivity extends AppCompatActivity {
      * This async task is used to compress the image to be sent in the
      * background thread using ImageUtils.compressImage
      */
-    private static class CompressAsyncTask extends AsyncTask<String, Void, byte[]> {
+    private static class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {
         Context mContext = null;
         View mRootView = null;
 
@@ -254,6 +255,21 @@ public class OcrExpActivity extends AppCompatActivity {
         @Override
         protected byte[] doInBackground(String... params) {
             return ImageUtils.compressImage(params[0]);
+        }
+    }
+
+    /**
+     * On touch listener for drawableView to keep track of which box is
+     * touched and to respond to it.
+     */
+    private static class BoxOnTouchListener implements View.OnTouchListener{
+        DrawableView mDrawableView = null;
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            DrawableView drawableView = (DrawableView) v;
+            float x = event.getX();
+            float y = event.getY();
+            return true;
         }
     }
 }

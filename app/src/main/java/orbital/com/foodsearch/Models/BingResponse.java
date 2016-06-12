@@ -37,7 +37,11 @@ public class BingResponse {
      * The textAngle
      */
     public Double getTextAngle() {
-        return textAngle;
+        if(textAngle == null) {
+            return 0.0;
+        } else {
+            return textAngle;
+        }
     }
 
     /**
