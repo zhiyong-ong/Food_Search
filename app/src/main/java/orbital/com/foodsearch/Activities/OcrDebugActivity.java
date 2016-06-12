@@ -42,6 +42,7 @@ public class OcrDebugActivity extends AppCompatActivity {
     private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
     private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
 
+
     private final Interceptor interceptor = new Interceptor() {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -180,7 +181,7 @@ public class OcrDebugActivity extends AppCompatActivity {
 
     /**
      * This interface works with retrofit to abstract the API calls into
-     * a java interface
+     * a java interface. Note the annotations.
       */
 
     private interface BingOCRService {
