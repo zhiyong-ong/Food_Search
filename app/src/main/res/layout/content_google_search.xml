@@ -12,28 +12,42 @@
     tools:context="orbital.com.foodsearch.Activities.GoogleSearchActivity"
     tools:showIn="@layout/activity_google_search">
 
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/editText"
-        android:layout_marginTop="20dp"
-        android:id="@+id/textView"
-        android:layout_alignParentBottom="true"
-        android:layout_alignStart="@+id/editText"
-        android:layout_alignEnd="@+id/editText" />
-
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAlignment="center"
         android:background="@android:drawable/editbox_background"
-        android:text="Tap Here"
+        android:hint="Food... pls"
         android:ems="10"
-
         android:layout_marginTop="77dp"
-        android:clickable="true"
         android:id="@+id/editText"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editText"
+        android:layout_marginTop="20dp"
+        android:layout_alignStart="@+id/editText"
+        android:layout_alignEnd="@+id/editText"
+        android:id="@+id/imgView"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView"
+        android:layout_below="@+id/imgView"
+        android:layout_alignStart="@+id/editText"
+        android:layout_alignEnd="@+id/editText" />
+
+    <Button
+        android:text="click"
+        android:textSize="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/editText"
+        android:layout_alignParentEnd="true"
+        android:id="@+id/button"
+        android:layout_toEndOf="@+id/editText"
+        android:layout_above="@+id/imgView" />
 </RelativeLayout>
