@@ -95,7 +95,7 @@ public class OcrExpActivity extends AppCompatActivity {
         Picasso.with(this).load("file://" + filePath)
                 //.placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
-                .resize(64,0)
+                .resize(30, 44)
                 .into(imgView);
         startConnect();
     }
@@ -105,7 +105,7 @@ public class OcrExpActivity extends AppCompatActivity {
             bingConnect();
         } else {
             Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr_exp),
-                    R.string.internet_error_text, Snackbar.LENGTH_SHORT);
+                    R.string.internet_error_text, Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.retry, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -130,7 +130,7 @@ public class OcrExpActivity extends AppCompatActivity {
                 // After call is dispatched, load compress image into preview
                 ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
                 Picasso.with(mContext).load("file://" + filePath)
-                        .placeholder(previewImageView2.getDrawable())
+                        .noPlaceholder()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .resize(previewImageView2.getWidth(), previewImageView2.getHeight())
                         .into(previewImageView2);
@@ -207,28 +207,29 @@ public class OcrExpActivity extends AppCompatActivity {
         OcrCallback(View rootView, String filePath){
             mRootView = rootView;
             mFilePath = filePath;
+            mDrawableView = (DrawableView) rootView.findViewById(R.id.drawable_view);
         }
 
         @Override
         public void onResponse(Call<BingResponse> call, Response<BingResponse> response) {
             BingResponse bingResponse = response.body();
             List<Line> lines = bingResponse.getAllLines();
-            mDrawableView = (DrawableView) mRootView
-                    .findViewById(R.id.drawable_view);
             mDrawableView.setOnTouchListener(mDrawableView );
             mDrawableView.drawBoxes(mRootView, mFilePath, lines,
-                    new Float(bingResponse.getTextAngle()));
+                    bingResponse.getTextAngle().floatValue(),
+                    bingResponse.getLanguage());
             mDrawableView.setBackgroundColor(Color.TRANSPARENT);
             ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);
         }
+
         @Override
         public void onFailure(Call<BingResponse> call, Throwable t) {
             mDrawableView.setBackgroundColor(Color.TRANSPARENT);
             ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);
             Snackbar.make(mRootView.findViewById(R.id.activity_ocr_exp), R.string.post_fail_text,
-                    Snackbar.LENGTH_SHORT)
+                    Snackbar.LENGTH_LONG)
                     .show();
             Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
         }

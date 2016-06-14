@@ -23,7 +23,7 @@
             android:id="@+id/drawable_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#4F000000" />
+            android:background="#AF000000" />
 
         <ProgressBar
             android:id="@+id/progressBar2"
