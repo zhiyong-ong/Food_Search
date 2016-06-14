@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.Interceptor;
@@ -90,17 +89,18 @@ public class GoogleSearchActivity extends AppCompatActivity {
                             .client(httpClient.build())
                             .build();
                     BingImageSearchAPI imgAPI = retrofit.create(BingImageSearchAPI.class);
-                    Call<List<BingImageSearch>> call = imgAPI.getParams(data);
-                    call.enqueue(new Callback<List<BingImageSearch>>() {
+                    Call<BingImageSearch> call = imgAPI.getParams(data);
+                    call.enqueue(new Callback<BingImageSearch>() {
                         @Override
-                        public void onResponse(Call<List<BingImageSearch>> call, Response<List<BingImageSearch>> response) {
+                        public void onResponse(Call<BingImageSearch> call, Response<BingImageSearch> response) {
                             Log.e(LOG_TAG, response.body().toString());
                             final TextView textView = (TextView) findViewById(R.id.textView);
-                            textView.setText(response.body().toString());
+                            textView.setText(response.body().getValue().get(0).getContentUrl());
+
                         }
 
                         @Override
-                        public void onFailure(Call<List<BingImageSearch>> call, Throwable t) {
+                        public void onFailure(Call<BingImageSearch> call, Throwable t) {
                             final TextView textView = (TextView) findViewById(R.id.textView);
                             textView.setText("Something went wrong: " + t.getMessage());
                             Log.e(LOG_TAG, call.toString());
@@ -115,7 +115,7 @@ public class GoogleSearchActivity extends AppCompatActivity {
     private interface BingImageSearchAPI {
 
         @GET("search")
-        Call<List<BingImageSearch>> getParams(
+        Call<BingImageSearch> getParams(
                 @QueryMap Map<String, String> params
         );
 
