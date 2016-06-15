@@ -1,25 +1,17 @@
 package orbital.com.foodsearch.Models;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by zhiyong on 13/6/2016.
  */
 
 public class InsightsSourcesSummary {
-
-    @SerializedName("shoppingSourcesCount")
-    @Expose
     private Integer shoppingSourcesCount;
-    @SerializedName("recipeSourcesCount")
-    @Expose
     private Integer recipeSourcesCount;
 
     /**
      *
      * @return
-     * The shoppingSourcesCount
+     *     The shoppingSourcesCount
      */
     public Integer getShoppingSourcesCount() {
         return shoppingSourcesCount;
@@ -28,7 +20,7 @@ public class InsightsSourcesSummary {
     /**
      *
      * @param shoppingSourcesCount
-     * The shoppingSourcesCount
+     *     The shoppingSourcesCount
      */
     public void setShoppingSourcesCount(Integer shoppingSourcesCount) {
         this.shoppingSourcesCount = shoppingSourcesCount;
@@ -37,7 +29,7 @@ public class InsightsSourcesSummary {
     /**
      *
      * @return
-     * The recipeSourcesCount
+     *     The recipeSourcesCount
      */
     public Integer getRecipeSourcesCount() {
         return recipeSourcesCount;
@@ -46,14 +38,9 @@ public class InsightsSourcesSummary {
     /**
      *
      * @param recipeSourcesCount
-     * The recipeSourcesCount
+     *     The recipeSourcesCount
      */
     public void setRecipeSourcesCount(Integer recipeSourcesCount) {
         this.recipeSourcesCount = recipeSourcesCount;
     }
-
-
-
-
-
 }

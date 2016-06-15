@@ -1,10 +1,10 @@
 package orbital.com.foodsearch.Models;
 
 /**
- * Created by zhiyong on 13/6/2016.
+ * Created by Abel on 6/15/2016.
  */
 
-public class QueryExpansion {
+public class Suggestion {
     private String text;
     private String displayText;
     private String webSearchUrl;
@@ -100,4 +100,5 @@ public class QueryExpansion {
     public void setThumbnail(Thumbnail thumbnail) {
         this.thumbnail = thumbnail;
     }
+
 }

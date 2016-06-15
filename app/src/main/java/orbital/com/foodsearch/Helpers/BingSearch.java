@@ -43,6 +43,18 @@ public class BingSearch {
     private Context context = null;
     private ImageView img = null;
     private TextView txt = null;
+    public BingSearch(String queryTxt, String count, String offset, String markets,String safeSearch,
+                      Context context, ImageView img, TextView txt) {
+        this.queryTxt = queryTxt;
+        this.count = count;
+        this.offset = offset;
+        this.markets = markets;
+        this.safeSearch = safeSearch;
+        this.context = context;
+        this.img = img;
+        this.txt = txt;
+    }
+
     public String getQueryTxt() {
         return queryTxt;
     }
@@ -61,18 +73,6 @@ public class BingSearch {
 
     public String getSafeSearch() {
         return safeSearch;
-    }
-
-    public BingSearch(String queryTxt, String count, String offset, String markets,String safeSearch,
-                      Context context, ImageView img, TextView txt) {
-        this.queryTxt = queryTxt;
-        this.count = count;
-        this.offset = offset;
-        this.markets = markets;
-        this.safeSearch = safeSearch;
-        this.context = context;
-        this.img = img;
-        this.txt = txt;
     }
 
     public ArrayList<String[]> getImage() {
@@ -114,7 +114,7 @@ public class BingSearch {
             public void onResponse(Call<BingImageSearch> call, Response<BingImageSearch> response) {
                 Log.e(LOG_TAG, response.body().toString());
                 for(int i = 0; i < Integer.parseInt(count); i++) {
-                    String[] name = {response.body().getValue().get(i).getContentUrl(), response.body().getValue().get(i).getName()};
+                    String[] name = {response.body().getImageValues().get(i).getContentUrl(), response.body().getImageValues().get(i).getName()};
                     results.add(name);
                 }
 

@@ -4,7 +4,7 @@
     android:id="@+id/activity_ocr"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="orbital.com.foodsearch.Activities.OcrDebugActivity">
+    tools:mContext="orbital.com.foodsearch.Activities.OcrDebugActivity">
 
     <include android:id="@+id/toolbar_dbg"
         layout="@layout/toolbar_layout"/>

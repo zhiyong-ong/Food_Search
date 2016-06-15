@@ -1,5 +1,6 @@
 package orbital.com.foodsearch.Views;
 
+import android.animation.ObjectAnimator;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +13,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -28,17 +30,24 @@ import orbital.com.foodsearch.R;
  * a transparent background so as to overlay over another view.
  */
 public class DrawableView extends ImageView implements View.OnTouchListener{
+    private View mRootView = null;
+
     private List<Rect> mRects = null;
     private List<String> mLineTexts = null;
-    private View mRootView = null;
+    private int selectedIndex = -1;
+
     private Bitmap mOriginalBitmap = null;
-    private Float mAngle = 0.f;
     private Matrix mMatrix = new Matrix();
+    private Float mAngle = 0.f;
+
+    private Paint greenPaint = null;
+    private Paint redPaint = null;
 
     public DrawableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRects = new ArrayList<Rect>();
         mLineTexts = new ArrayList<String>();
+        setupPaints();
     }
 
     /**
@@ -50,15 +59,18 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
      */
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        // To draw all the rects
         if (mRects != null && !mRects.isEmpty()) {
-            Paint paint = new Paint();
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(Color.GREEN);
-            paint.setStrokeWidth(3);
-            for (Rect rect : mRects) {
+            canvas.drawColor(Color.TRANSPARENT);
+            for (int i = 0; i < mRects.size(); i++) {
+                Rect rect = mRects.get(i);
                 canvas.save();
                 canvas.rotate(mAngle, rect.centerX(), rect.centerY());
-                canvas.drawRect(rect, paint);
+                if (i == selectedIndex) {
+                    canvas.drawRect(rect, redPaint);
+                } else {
+                    canvas.drawRect(rect, greenPaint);
+                }
                 canvas.restore();
             }
         }
@@ -137,43 +149,49 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
                 (float)mOriginalBitmap.getHeight();
     }
 
-    private int scaleX(int x) {
-        DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
-        float scaleFactorX = (float)drawableView.getWidth()
-                / (float)mOriginalBitmap.getWidth();
-        return (int) (scaleFactorX * (float)x);
-    }
-
-    private int scaleY(int y) {
-        DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
-        float scaleFactorY = (float)drawableView.getHeight()
-                / (float) mOriginalBitmap.getHeight();
-        return (int) (scaleFactorY * (float)y);
-    }
-
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         int x = (int) event.getX();
         int y = (int) event.getY();
-        String searchParam = null;
         for (int i = 0; i < mRects.size(); i++) {
             Rect rect = mRects.get(i);
             if (rect.contains(x, y)){
-                searchParam = mLineTexts.get(i);
-                final String finalSearchParam = searchParam;
-                Snackbar.make(v, searchParam, Snackbar.LENGTH_LONG)
-                        .setAction(R.string.search, new OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                                intent.putExtra(SearchManager.QUERY, finalSearchParam);
-                                getContext().startActivity(intent);
-                            }
-                        })
-                        .show();
+                selectRect(rect, i);
                 break;
             }
         }
         return true;
+    }
+
+    private void selectRect(Rect rect, int i){
+        String searchParam = mLineTexts.get(i);
+        final String finalSearchParam = searchParam;
+        Snackbar.make(this, searchParam, Snackbar.LENGTH_LONG)
+                .setActionTextColor(Color.CYAN)
+                .setAction(R.string.search, new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                        intent.putExtra(SearchManager.QUERY, finalSearchParam);
+                        getContext().startActivity(intent);
+                    }
+                })
+                .show();
+        selectedIndex = i;
+        invalidate();
+        RecyclerView recyclerView = (RecyclerView)mRootView.findViewById(R.id.recycler_view);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(recyclerView,
+                View.TRANSLATION_Y, 0);
+        anim.setDuration(1000);
+        anim.start();
+    }
+
+    private void setupPaints() {
+        greenPaint = new Paint();
+        greenPaint.setStyle(Paint.Style.STROKE);
+        greenPaint.setColor(Color.GREEN);
+        greenPaint.setStrokeWidth(3);
+        redPaint = new Paint(greenPaint);
+        redPaint.setColor(Color.RED);
     }
 }
