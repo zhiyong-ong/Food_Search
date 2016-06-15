@@ -121,6 +121,8 @@ public class BingSearch {
                 Picasso.with(context)
                         .load(results.get(0)[0])
                         .into(img);
+                Log.e(LOG_TAG, results.get(0)[0]);
+                Log.e(LOG_TAG, results.get(0)[1]);
                 txt.setText(results.get(0)[1]);
             }
 
@@ -140,6 +142,8 @@ public class BingSearch {
                 @QueryMap Map<String, String> params
         );
     }
+
+
 
 
 }
