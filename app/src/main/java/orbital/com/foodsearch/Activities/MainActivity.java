@@ -41,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         if (photoFileUri != null) {
             outState.putString("savedUri", photoFileUri.toString());
         }
+        super.onSaveInstanceState(outState);
     }
 
     @Override

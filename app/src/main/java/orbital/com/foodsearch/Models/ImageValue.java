@@ -1,67 +1,31 @@
 package orbital.com.foodsearch.Models;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by zhiyong on 13/6/2016.
  */
 
-public class Value {
-
-    @SerializedName("name")
-    @Expose
+public class ImageValue {
     private String name;
-    @SerializedName("webSearchUrl")
-    @Expose
     private String webSearchUrl;
-    @SerializedName("thumbnailUrl")
-    @Expose
     private String thumbnailUrl;
-    @SerializedName("datePublished")
-    @Expose
     private String datePublished;
-    @SerializedName("contentUrl")
-    @Expose
     private String contentUrl;
-    @SerializedName("hostPageUrl")
-    @Expose
     private String hostPageUrl;
-    @SerializedName("contentSize")
-    @Expose
     private String contentSize;
-    @SerializedName("encodingFormat")
-    @Expose
     private String encodingFormat;
-    @SerializedName("hostPageDisplayUrl")
-    @Expose
     private String hostPageDisplayUrl;
-    @SerializedName("width")
-    @Expose
     private Integer width;
-    @SerializedName("height")
-    @Expose
     private Integer height;
-    @SerializedName("thumbnail")
-    @Expose
     private Thumbnail thumbnail;
-    @SerializedName("imageInsightsToken")
-    @Expose
     private String imageInsightsToken;
-    @SerializedName("insightsSourcesSummary")
-    @Expose
     private InsightsSourcesSummary insightsSourcesSummary;
-    @SerializedName("imageId")
-    @Expose
     private String imageId;
-    @SerializedName("accentColor")
-    @Expose
     private String accentColor;
 
     /**
      *
      * @return
-     * The name
+     *     The name
      */
     public String getName() {
         return name;
@@ -70,7 +34,7 @@ public class Value {
     /**
      *
      * @param name
-     * The name
+     *     The name
      */
     public void setName(String name) {
         this.name = name;
@@ -79,7 +43,7 @@ public class Value {
     /**
      *
      * @return
-     * The webSearchUrl
+     *     The webSearchUrl
      */
     public String getWebSearchUrl() {
         return webSearchUrl;
@@ -88,7 +52,7 @@ public class Value {
     /**
      *
      * @param webSearchUrl
-     * The webSearchUrl
+     *     The webSearchUrl
      */
     public void setWebSearchUrl(String webSearchUrl) {
         this.webSearchUrl = webSearchUrl;
@@ -97,7 +61,7 @@ public class Value {
     /**
      *
      * @return
-     * The thumbnailUrl
+     *     The thumbnailUrl
      */
     public String getThumbnailUrl() {
         return thumbnailUrl;
@@ -106,7 +70,7 @@ public class Value {
     /**
      *
      * @param thumbnailUrl
-     * The thumbnailUrl
+     *     The thumbnailUrl
      */
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
@@ -115,7 +79,7 @@ public class Value {
     /**
      *
      * @return
-     * The datePublished
+     *     The datePublished
      */
     public String getDatePublished() {
         return datePublished;
@@ -124,7 +88,7 @@ public class Value {
     /**
      *
      * @param datePublished
-     * The datePublished
+     *     The datePublished
      */
     public void setDatePublished(String datePublished) {
         this.datePublished = datePublished;
@@ -133,7 +97,7 @@ public class Value {
     /**
      *
      * @return
-     * The contentUrl
+     *     The contentUrl
      */
     public String getContentUrl() {
         return contentUrl;
@@ -142,7 +106,7 @@ public class Value {
     /**
      *
      * @param contentUrl
-     * The contentUrl
+     *     The contentUrl
      */
     public void setContentUrl(String contentUrl) {
         this.contentUrl = contentUrl;
@@ -151,7 +115,7 @@ public class Value {
     /**
      *
      * @return
-     * The hostPageUrl
+     *     The hostPageUrl
      */
     public String getHostPageUrl() {
         return hostPageUrl;
@@ -160,7 +124,7 @@ public class Value {
     /**
      *
      * @param hostPageUrl
-     * The hostPageUrl
+     *     The hostPageUrl
      */
     public void setHostPageUrl(String hostPageUrl) {
         this.hostPageUrl = hostPageUrl;
@@ -169,7 +133,7 @@ public class Value {
     /**
      *
      * @return
-     * The contentSize
+     *     The contentSize
      */
     public String getContentSize() {
         return contentSize;
@@ -178,7 +142,7 @@ public class Value {
     /**
      *
      * @param contentSize
-     * The contentSize
+     *     The contentSize
      */
     public void setContentSize(String contentSize) {
         this.contentSize = contentSize;
@@ -187,7 +151,7 @@ public class Value {
     /**
      *
      * @return
-     * The encodingFormat
+     *     The encodingFormat
      */
     public String getEncodingFormat() {
         return encodingFormat;
@@ -196,7 +160,7 @@ public class Value {
     /**
      *
      * @param encodingFormat
-     * The encodingFormat
+     *     The encodingFormat
      */
     public void setEncodingFormat(String encodingFormat) {
         this.encodingFormat = encodingFormat;
@@ -205,7 +169,7 @@ public class Value {
     /**
      *
      * @return
-     * The hostPageDisplayUrl
+     *     The hostPageDisplayUrl
      */
     public String getHostPageDisplayUrl() {
         return hostPageDisplayUrl;
@@ -214,7 +178,7 @@ public class Value {
     /**
      *
      * @param hostPageDisplayUrl
-     * The hostPageDisplayUrl
+     *     The hostPageDisplayUrl
      */
     public void setHostPageDisplayUrl(String hostPageDisplayUrl) {
         this.hostPageDisplayUrl = hostPageDisplayUrl;
@@ -223,7 +187,7 @@ public class Value {
     /**
      *
      * @return
-     * The width
+     *     The width
      */
     public Integer getWidth() {
         return width;
@@ -232,7 +196,7 @@ public class Value {
     /**
      *
      * @param width
-     * The width
+     *     The width
      */
     public void setWidth(Integer width) {
         this.width = width;
@@ -241,7 +205,7 @@ public class Value {
     /**
      *
      * @return
-     * The height
+     *     The height
      */
     public Integer getHeight() {
         return height;
@@ -250,7 +214,7 @@ public class Value {
     /**
      *
      * @param height
-     * The height
+     *     The height
      */
     public void setHeight(Integer height) {
         this.height = height;
@@ -259,7 +223,7 @@ public class Value {
     /**
      *
      * @return
-     * The thumbnail
+     *     The thumbnail
      */
     public Thumbnail getThumbnail() {
         return thumbnail;
@@ -268,7 +232,7 @@ public class Value {
     /**
      *
      * @param thumbnail
-     * The thumbnail
+     *     The thumbnail
      */
     public void setThumbnail(Thumbnail thumbnail) {
         this.thumbnail = thumbnail;
@@ -277,7 +241,7 @@ public class Value {
     /**
      *
      * @return
-     * The imageInsightsToken
+     *     The imageInsightsToken
      */
     public String getImageInsightsToken() {
         return imageInsightsToken;
@@ -286,7 +250,7 @@ public class Value {
     /**
      *
      * @param imageInsightsToken
-     * The imageInsightsToken
+     *     The imageInsightsToken
      */
     public void setImageInsightsToken(String imageInsightsToken) {
         this.imageInsightsToken = imageInsightsToken;
@@ -295,7 +259,7 @@ public class Value {
     /**
      *
      * @return
-     * The insightsSourcesSummary
+     *     The insightsSourcesSummary
      */
     public InsightsSourcesSummary getInsightsSourcesSummary() {
         return insightsSourcesSummary;
@@ -304,7 +268,7 @@ public class Value {
     /**
      *
      * @param insightsSourcesSummary
-     * The insightsSourcesSummary
+     *     The insightsSourcesSummary
      */
     public void setInsightsSourcesSummary(InsightsSourcesSummary insightsSourcesSummary) {
         this.insightsSourcesSummary = insightsSourcesSummary;
@@ -313,7 +277,7 @@ public class Value {
     /**
      *
      * @return
-     * The imageId
+     *     The imageId
      */
     public String getImageId() {
         return imageId;
@@ -322,7 +286,7 @@ public class Value {
     /**
      *
      * @param imageId
-     * The imageId
+     *     The imageId
      */
     public void setImageId(String imageId) {
         this.imageId = imageId;
@@ -331,7 +295,7 @@ public class Value {
     /**
      *
      * @return
-     * The accentColor
+     *     The accentColor
      */
     public String getAccentColor() {
         return accentColor;
@@ -340,7 +304,7 @@ public class Value {
     /**
      *
      * @param accentColor
-     * The accentColor
+     *     The accentColor
      */
     public void setAccentColor(String accentColor) {
         this.accentColor = accentColor;

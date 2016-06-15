@@ -8,9 +8,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -18,6 +21,8 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -26,8 +31,10 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import orbital.com.foodsearch.Adapters.BingImageAdapter;
 import orbital.com.foodsearch.Helpers.ImageUtils;
-import orbital.com.foodsearch.Models.BingResponse;
+import orbital.com.foodsearch.Models.BingOcrResponse;
+import orbital.com.foodsearch.Models.ImageValue;
 import orbital.com.foodsearch.Models.Line;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Views.DrawableView;
@@ -41,7 +48,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.QueryMap;
 
-public class OcrExpActivity extends AppCompatActivity {
+public class OcrExpActivity extends AppCompatActivity{
     private static final String LOG_TAG = "FOODIES";
     private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
     private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
@@ -63,14 +70,16 @@ public class OcrExpActivity extends AppCompatActivity {
     private final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
     private final OkHttpClient client = clientBuilder.addInterceptor(interceptor)
             .build();
+
     private String filePath = null;
+    private List<ImageValue> mImageValues = null;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
         if (filePath != null) {
             outState.putString("savedFilePath", filePath);
         }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -85,8 +94,9 @@ public class OcrExpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr_exp);
-        filePath = getIntent().getStringExtra("filePath");
-
+        if (filePath == null) {
+            filePath = getIntent().getStringExtra("filePath");
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_exp);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -98,6 +108,36 @@ public class OcrExpActivity extends AppCompatActivity {
                 .resize(30, 44)
                 .into(imgView);
         startConnect();
+        initializeRecycler();
+    }
+
+    private void initializeRecycler() {
+        final View parentView = findViewById(R.id.preview_container);
+        final RecyclerView rvImages = (RecyclerView) findViewById(R.id.recycler_view);
+        ViewTreeObserver vto = rvImages.getViewTreeObserver();
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener(){
+            @Override
+            public boolean onPreDraw() {
+                rvImages.getViewTreeObserver().removeOnPreDrawListener(this);
+                rvImages.setTranslationY(parentView.getHeight());
+                return true;
+            }
+        });
+
+        ImageValue test1 = new ImageValue();
+        test1.setContentUrl("http://www.telegraph.co.uk/content/dam/science/2016/03/14/cat_3240574b-large_trans++pJliwavx4coWFCaEkEsb3kvxIt-lGGWCWqwLa_RXJU8.jpg");
+        test1.setName("Cat");
+        ImageValue test2 = new ImageValue();
+        test2.setContentUrl("https://i.ytimg.com/vi/mW3S0u8bj58/maxresdefault.jpg");
+        test2.setName("Cat 2");
+        mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
+
+        ImageView cardImageView = (ImageView)findViewById(R.id.card_image);
+        BingImageAdapter adapter = new BingImageAdapter(this, mImageValues);
+        rvImages.setAdapter(adapter);
+        LinearLayoutManager layoutMgr = new LinearLayoutManager(this);
+        layoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
+        rvImages.setLayoutManager(layoutMgr);
     }
 
     private void startConnect() {
@@ -154,7 +194,7 @@ public class OcrExpActivity extends AppCompatActivity {
                 rawImage);
         // For params:
         // Map<String, String> params = new HashMap<String, String>();
-        Call<BingResponse> call = service.processImage(requestBody);
+        Call<BingOcrResponse> call = service.processImage(requestBody);
         // Enqueue the method to the call and wait for callback (Asynchronous call)
         call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
     }
@@ -188,18 +228,18 @@ public class OcrExpActivity extends AppCompatActivity {
         // Callback for the parsed response is the last parameter
         @Multipart
         @POST("./")
-        Call<BingResponse> processImage(@Part("image") RequestBody image,
-                                        @QueryMap Map<String, String> params);
+        Call<BingOcrResponse> processImage(@Part("image") RequestBody image,
+                                           @QueryMap Map<String, String> params);
         @Multipart
         @POST("./")
-        Call<BingResponse> processImage(@Part("image") RequestBody image);
+        Call<BingOcrResponse> processImage(@Part("image") RequestBody image);
     }
 
     /**
      * Callback class that implements callback method to be used for when a
      * response is received from server
      */
-    private static class OcrCallback implements Callback<BingResponse> {
+    private static class OcrCallback implements Callback<BingOcrResponse> {
         private View mRootView = null;
         private String mFilePath = null;
         private DrawableView mDrawableView = null;
@@ -211,20 +251,20 @@ public class OcrExpActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onResponse(Call<BingResponse> call, Response<BingResponse> response) {
-            BingResponse bingResponse = response.body();
-            List<Line> lines = bingResponse.getAllLines();
+        public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
+            BingOcrResponse bingOcrResponse = response.body();
+            List<Line> lines = bingOcrResponse.getAllLines();
             mDrawableView.setOnTouchListener(mDrawableView );
             mDrawableView.drawBoxes(mRootView, mFilePath, lines,
-                    bingResponse.getTextAngle().floatValue(),
-                    bingResponse.getLanguage());
+                    bingOcrResponse.getTextAngle().floatValue(),
+                    bingOcrResponse.getLanguage());
             mDrawableView.setBackgroundColor(Color.TRANSPARENT);
             ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);
         }
 
         @Override
-        public void onFailure(Call<BingResponse> call, Throwable t) {
+        public void onFailure(Call<BingOcrResponse> call, Throwable t) {
             mDrawableView.setBackgroundColor(Color.TRANSPARENT);
             ProgressBar progressBar = (ProgressBar) mRootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);

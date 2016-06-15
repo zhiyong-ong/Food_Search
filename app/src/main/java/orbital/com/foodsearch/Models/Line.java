@@ -1,7 +1,5 @@
 package orbital.com.foodsearch.Models;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -82,9 +80,12 @@ public class Line {
                 }
                 break;
             default:
-                Log.e("FOODIES", language);
                 for (Word word: words) {
-                    builder.append(word.getText());
+                    String text = word.getText();
+                    if (text.charAt(0) == ('$')) {
+                        break;
+                    }
+                    builder.append(text);
                     builder.append(" ");
                 }
         }

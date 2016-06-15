@@ -9,45 +9,45 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="orbital.com.foodsearch.Activities.GoogleSearchActivity"
+    tools:mContext="orbital.com.foodsearch.Activities.GoogleSearchActivity"
     tools:showIn="@layout/activity_google_search">
 
     <EditText
+        android:id="@+id/editText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:background="@android:drawable/editbox_background"
-        android:hint="Food... pls"
-        android:ems="10"
-        android:layout_marginTop="77dp"
-        android:id="@+id/editText"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="77dp"
+        android:background="@android:drawable/editbox_background"
+        android:ems="10"
+        android:hint="Food... pls"
+        android:textAlignment="center" />
 
     <ImageView
+        android:id="@+id/imgView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText"
-        android:layout_marginTop="20dp"
-        android:layout_alignStart="@+id/editText"
         android:layout_alignEnd="@+id/editText"
-        android:id="@+id/imgView"/>
+        android:layout_alignStart="@+id/editText"
+        android:layout_below="@+id/editText"
+        android:layout_marginTop="20dp"/>
     <TextView
+        android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/textView"
-        android:layout_below="@+id/imgView"
+        android:layout_alignEnd="@+id/editText"
         android:layout_alignStart="@+id/editText"
-        android:layout_alignEnd="@+id/editText" />
+        android:layout_below="@+id/imgView" />
 
     <Button
-        android:text="click"
-        android:textSize="10dp"
+        android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/editText"
+        android:layout_above="@+id/imgView"
         android:layout_alignParentEnd="true"
-        android:id="@+id/button"
+        android:layout_alignTop="@+id/editText"
         android:layout_toEndOf="@+id/editText"
-        android:layout_above="@+id/imgView" />
+        android:text="click"
+        android:textSize="10dp" />
 </RelativeLayout>

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BingResponse {
+public class BingOcrResponse {
 
     private String language;
     private Double textAngle;

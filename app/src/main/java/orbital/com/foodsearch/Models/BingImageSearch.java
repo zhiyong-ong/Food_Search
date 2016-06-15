@@ -1,6 +1,5 @@
 package orbital.com.foodsearch.Models;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
@@ -11,29 +10,25 @@ import java.util.List;
  */
 
 public class BingImageSearch {
-    @SerializedName("_type")
-    @Expose
     private String type;
-    @SerializedName("instrumentation")
-    @Expose
     private Instrumentation instrumentation;
-    @SerializedName("webSearchUrl")
-    @Expose
+    private String readLink;
     private String webSearchUrl;
-    @SerializedName("totalEstimatedMatches")
-    @Expose
     private Integer totalEstimatedMatches;
+
     @SerializedName("value")
-    @Expose
-    private List<Value> value = new ArrayList<Value>();
-    @SerializedName("queryExpansions")
-    @Expose
+    private List<ImageValue> imageValues = new ArrayList<ImageValue>();
+
     private List<QueryExpansion> queryExpansions = new ArrayList<QueryExpansion>();
+    private Integer nextOffsetAddCount;
+    private List<PivotSuggestion> pivotSuggestions = new ArrayList<PivotSuggestion>();
+    private Boolean displayShoppingSourcesBadges;
+    private Boolean displayRecipeSourcesBadges;
 
     /**
      *
      * @return
-     * The type
+     *     The type
      */
     public String getType() {
         return type;
@@ -42,7 +37,7 @@ public class BingImageSearch {
     /**
      *
      * @param type
-     * The _type
+     *     The _type
      */
     public void setType(String type) {
         this.type = type;
@@ -51,7 +46,7 @@ public class BingImageSearch {
     /**
      *
      * @return
-     * The instrumentation
+     *     The instrumentation
      */
     public Instrumentation getInstrumentation() {
         return instrumentation;
@@ -60,7 +55,7 @@ public class BingImageSearch {
     /**
      *
      * @param instrumentation
-     * The instrumentation
+     *     The instrumentation
      */
     public void setInstrumentation(Instrumentation instrumentation) {
         this.instrumentation = instrumentation;
@@ -69,7 +64,25 @@ public class BingImageSearch {
     /**
      *
      * @return
-     * The webSearchUrl
+     *     The readLink
+     */
+    public String getReadLink() {
+        return readLink;
+    }
+
+    /**
+     *
+     * @param readLink
+     *     The readLink
+     */
+    public void setReadLink(String readLink) {
+        this.readLink = readLink;
+    }
+
+    /**
+     *
+     * @return
+     *     The webSearchUrl
      */
     public String getWebSearchUrl() {
         return webSearchUrl;
@@ -78,7 +91,7 @@ public class BingImageSearch {
     /**
      *
      * @param webSearchUrl
-     * The webSearchUrl
+     *     The webSearchUrl
      */
     public void setWebSearchUrl(String webSearchUrl) {
         this.webSearchUrl = webSearchUrl;
@@ -87,7 +100,7 @@ public class BingImageSearch {
     /**
      *
      * @return
-     * The totalEstimatedMatches
+     *     The totalEstimatedMatches
      */
     public Integer getTotalEstimatedMatches() {
         return totalEstimatedMatches;
@@ -96,7 +109,7 @@ public class BingImageSearch {
     /**
      *
      * @param totalEstimatedMatches
-     * The totalEstimatedMatches
+     *     The totalEstimatedMatches
      */
     public void setTotalEstimatedMatches(Integer totalEstimatedMatches) {
         this.totalEstimatedMatches = totalEstimatedMatches;
@@ -105,25 +118,25 @@ public class BingImageSearch {
     /**
      *
      * @return
-     * The value
+     *     The imageValue
      */
-    public List<Value> getValue() {
-        return value;
+    public List<ImageValue> getImageValues() {
+        return imageValues;
     }
 
     /**
      *
-     * @param value
-     * The value
+     * @param imageValue
+     *     The imageValue
      */
-    public void setValue(List<Value> value) {
-        this.value = value;
+    public void setImageValues(List<ImageValue> imageValue) {
+        this.imageValues = imageValue;
     }
 
     /**
      *
      * @return
-     * The queryExpansions
+     *     The queryExpansions
      */
     public List<QueryExpansion> getQueryExpansions() {
         return queryExpansions;
@@ -132,10 +145,81 @@ public class BingImageSearch {
     /**
      *
      * @param queryExpansions
-     * The queryExpansions
+     *     The queryExpansions
      */
     public void setQueryExpansions(List<QueryExpansion> queryExpansions) {
         this.queryExpansions = queryExpansions;
     }
 
+    /**
+     *
+     * @return
+     *     The nextOffsetAddCount
+     */
+    public Integer getNextOffsetAddCount() {
+        return nextOffsetAddCount;
+    }
+
+    /**
+     *
+     * @param nextOffsetAddCount
+     *     The nextOffsetAddCount
+     */
+    public void setNextOffsetAddCount(Integer nextOffsetAddCount) {
+        this.nextOffsetAddCount = nextOffsetAddCount;
+    }
+
+    /**
+     *
+     * @return
+     *     The pivotSuggestions
+     */
+    public List<PivotSuggestion> getPivotSuggestions() {
+        return pivotSuggestions;
+    }
+
+    /**
+     *
+     * @param pivotSuggestions
+     *     The pivotSuggestions
+     */
+    public void setPivotSuggestions(List<PivotSuggestion> pivotSuggestions) {
+        this.pivotSuggestions = pivotSuggestions;
+    }
+
+    /**
+     *
+     * @return
+     *     The displayShoppingSourcesBadges
+     */
+    public Boolean getDisplayShoppingSourcesBadges() {
+        return displayShoppingSourcesBadges;
+    }
+
+    /**
+     *
+     * @param displayShoppingSourcesBadges
+     *     The displayShoppingSourcesBadges
+     */
+    public void setDisplayShoppingSourcesBadges(Boolean displayShoppingSourcesBadges) {
+        this.displayShoppingSourcesBadges = displayShoppingSourcesBadges;
+    }
+
+    /**
+     *
+     * @return
+     *     The displayRecipeSourcesBadges
+     */
+    public Boolean getDisplayRecipeSourcesBadges() {
+        return displayRecipeSourcesBadges;
+    }
+
+    /**
+     *
+     * @param displayRecipeSourcesBadges
+     *     The displayRecipeSourcesBadges
+     */
+    public void setDisplayRecipeSourcesBadges(Boolean displayRecipeSourcesBadges) {
+        this.displayRecipeSourcesBadges = displayRecipeSourcesBadges;
+    }
 }
