@@ -254,7 +254,7 @@ public class OcrExpActivity extends AppCompatActivity{
         public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
             BingOcrResponse bingOcrResponse = response.body();
             List<Line> lines = bingOcrResponse.getAllLines();
-            mDrawableView.setOnTouchListener(mDrawableView );
+            mDrawableView.setOnTouchListener(mDrawableView);
             mDrawableView.drawBoxes(mRootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());

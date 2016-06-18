@@ -22,8 +22,11 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
+import orbital.com.foodsearch.Helpers.BingSearch;
+import orbital.com.foodsearch.Models.BingImageSearch;
 import orbital.com.foodsearch.Models.Line;
 import orbital.com.foodsearch.R;
+import retrofit2.Call;
 
 /**
  * Extended ImageView to draw the bounding boxes. Overrides onDraw method and it has
@@ -43,8 +46,17 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
     private Paint greenPaint = null;
     private Paint redPaint = null;
 
+    //query params for bing search
+    private final String count = "10";
+    private final String offset = "0";
+    private final String markets = "en-us";
+    private final String safeSearch = "Moderate";
+    private static final String LOG_TAG = "FOODIES";
+    private Context context = null;
+
     public DrawableView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
         mRects = new ArrayList<Rect>();
         mLineTexts = new ArrayList<String>();
         setupPaints();
@@ -171,10 +183,39 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
                 .setAction(R.string.search, new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        BingSearch bingImg  = new BingSearch(finalSearchParam, count, offset, markets, safeSearch);
+                        Call<BingImageSearch> call = bingImg.getImage();
+                        /*call.enqueue(new Callback<BingImageSearch>() {
+                             @Override
+                             public void onResponse(Call<BingImageSearch> call, Response<BingImageSearch> response) {
+                                 //get arraylist to store the results
+                                 final ArrayList<String[]> results = new ArrayList<>();
+                                 Log.e(LOG_TAG, response.body().toString());
+
+                                 for (int i = 0; i < Integer.parseInt(count); i++) {
+                                     String[] name = {response.body().getImageValues().get(i).getContentUrl(),
+                                             response.body().getImageValues().get(i).getName()};
+                                     results.add(name);
+                                 }
+
+                                 Picasso.with(context)
+                                         .load(results.get(0)[0])
+                                         .into(imgView);
+                                 Log.e(LOG_TAG, results.get(0)[0]);
+                                 Log.e(LOG_TAG, results.get(0)[1]);
+                                 txt.setText(results.get(0)[1]);
+                             }
+                            @Override
+                            public void onFailure(Call<BingImageSearch> call, Throwable t) {
+                                Log.e(LOG_TAG, call.toString());
+                                txt.setText(t.getMessage());
+                            }
+                                     });
+                                     */
                         Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
                         intent.putExtra(SearchManager.QUERY, finalSearchParam);
                         getContext().startActivity(intent);
-                    }
+                        }
                 })
                 .show();
         selectedIndex = i;
