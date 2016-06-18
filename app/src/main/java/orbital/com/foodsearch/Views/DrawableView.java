@@ -1,9 +1,6 @@
 package orbital.com.foodsearch.Views;
 
-import android.animation.ObjectAnimator;
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,9 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -29,11 +24,12 @@ import orbital.com.foodsearch.R;
  * Extended ImageView to draw the bounding boxes. Overrides onDraw method and it has
  * a transparent background so as to overlay over another view.
  */
-public class DrawableView extends ImageView implements View.OnTouchListener{
+public class DrawableView extends ImageView{
     private View mRootView = null;
 
     private List<Rect> mRects = null;
     private List<String> mLineTexts = null;
+
     private int selectedIndex = -1;
 
     private Bitmap mOriginalBitmap = null;
@@ -149,43 +145,6 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
                 (float)mOriginalBitmap.getHeight();
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        int x = (int) event.getX();
-        int y = (int) event.getY();
-        for (int i = 0; i < mRects.size(); i++) {
-            Rect rect = mRects.get(i);
-            if (rect.contains(x, y)){
-                selectRect(rect, i);
-                break;
-            }
-        }
-        return true;
-    }
-
-    private void selectRect(Rect rect, int i){
-        String searchParam = mLineTexts.get(i);
-        final String finalSearchParam = searchParam;
-        Snackbar.make(this, searchParam, Snackbar.LENGTH_LONG)
-                .setActionTextColor(Color.CYAN)
-                .setAction(R.string.search, new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                        intent.putExtra(SearchManager.QUERY, finalSearchParam);
-                        getContext().startActivity(intent);
-                    }
-                })
-                .show();
-        selectedIndex = i;
-        invalidate();
-        RecyclerView recyclerView = (RecyclerView)mRootView.findViewById(R.id.recycler_view);
-        ObjectAnimator anim = ObjectAnimator.ofFloat(recyclerView,
-                View.TRANSLATION_Y, 0);
-        anim.setDuration(1000);
-        anim.start();
-    }
-
     private void setupPaints() {
         greenPaint = new Paint();
         greenPaint.setStyle(Paint.Style.STROKE);
@@ -193,5 +152,19 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
         greenPaint.setStrokeWidth(3);
         redPaint = new Paint(greenPaint);
         redPaint.setColor(Color.RED);
+    }
+
+
+
+    public void selectIndex(int selectedIndex) {
+        this.selectedIndex = selectedIndex;
+    }
+
+    public List<Rect> getmRects() {
+        return mRects;
+    }
+
+    public List<String> getmLineTexts() {
+        return mLineTexts;
     }
 }

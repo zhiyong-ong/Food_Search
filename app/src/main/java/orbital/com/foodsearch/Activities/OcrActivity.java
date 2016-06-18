@@ -1,9 +1,11 @@
 package orbital.com.foodsearch.Activities;
 
+import android.animation.ObjectAnimator;
+import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -12,6 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -20,19 +23,14 @@ import android.widget.ProgressBar;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
-import okhttp3.Interceptor;
-import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
+import orbital.com.foodsearch.Helpers.BingOcr;
 import orbital.com.foodsearch.Helpers.ImageUtils;
+import orbital.com.foodsearch.Helpers.NetworkUtils;
 import orbital.com.foodsearch.Models.BingOcrResponse;
 import orbital.com.foodsearch.Models.ImageValue;
 import orbital.com.foodsearch.Models.Line;
@@ -41,35 +39,9 @@ import orbital.com.foodsearch.Views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.Multipart;
-import retrofit2.http.POST;
-import retrofit2.http.Part;
-import retrofit2.http.QueryMap;
 
-public class OcrExpActivity extends AppCompatActivity{
+public class OcrActivity extends AppCompatActivity{
     private static final String LOG_TAG = "FOODIES";
-    private final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
-    private final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
-
-    private final Interceptor interceptor = new Interceptor() {
-        @Override
-        public okhttp3.Response intercept(Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            if (originalRequest.body() == null || originalRequest.header("Content-Type") != null
-                    || originalRequest.header("Ocp-Apim-Subscription-Key")!= null) {
-                return chain.proceed(originalRequest);
-            }
-            return chain.proceed(originalRequest
-                    .newBuilder().addHeader("Ocp-Apim-Subscription-Key", API_KEY)
-                    .addHeader("Content-Type", "multipart/form-data")
-                    .build());
-        }
-    };
-    private final OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder();
-    private final OkHttpClient client = clientBuilder.addInterceptor(interceptor)
-            .build();
 
     private String filePath = null;
     private List<ImageValue> mImageValues = null;
@@ -107,8 +79,14 @@ public class OcrExpActivity extends AppCompatActivity{
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
                 .resize(30, 44)
                 .into(imgView);
-        startConnect();
+        startOcrService();
+        initializeDrawView();
         initializeRecycler();
+    }
+
+    private void initializeDrawView() {
+        final DrawableView drawableView = (DrawableView)findViewById(R.id.drawable_view);
+        drawableView.setOnTouchListener(new DrawableTouchListener(this, findViewById(R.id.activity_ocr_exp)));
     }
 
     private void initializeRecycler() {
@@ -140,16 +118,16 @@ public class OcrExpActivity extends AppCompatActivity{
         rvImages.setLayoutManager(layoutMgr);
     }
 
-    private void startConnect() {
-        if (isNetworkAvailable() && isOnline()) {
-            bingConnect();
+    private void startOcrService() {
+        if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
+            bingOcrConnect();
         } else {
             Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr_exp),
                     R.string.internet_error_text, Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.retry, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startConnect();
+                    startOcrService();
                 }
             });
             snackbar.show();
@@ -157,16 +135,17 @@ public class OcrExpActivity extends AppCompatActivity{
     }
 
     /**
-     * Method that uses RetroFit library to perform a url connection query
-     * to the bing API server
+     * Method that compresses the image before sending it to BingOcrService
      * */
-    private void bingConnect() {
+    private void bingOcrConnect() {
         View root = findViewById(R.id.activity_ocr_exp);
         CompressAsyncTask compressTask = new CompressAsyncTask(this, root){
             @Override
-            protected void onPostExecute(byte[] result) {
+            protected void onPostExecute(byte[] compressedImage) {
                 // When compressTask is done, invoke dispatchCall for POST call
-                dispatchCall(result);
+                Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
+                // Enqueue the method to the call and wait for callback (Asynchronous call)
+                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
                 // After call is dispatched, load compress image into preview
                 ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
                 Picasso.with(mContext).load("file://" + filePath)
@@ -179,72 +158,67 @@ public class OcrExpActivity extends AppCompatActivity{
         compressTask.execute(filePath);
     }
 
-    /**
-     * This method sets up the POST call query and enqueues it for async up/download.
-     * @param rawImage raw image binary data to be uploaded via POST
-     */
-    private void dispatchCall(byte[] rawImage) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .client(client)
-                .baseUrl(OCR_BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        BingOCRService service = retrofit.create(BingOCRService.class);
-        RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),
-                rawImage);
-        // For params:
-        // Map<String, String> params = new HashMap<String, String>();
-        Call<BingOcrResponse> call = service.processImage(requestBody);
-        // Enqueue the method to the call and wait for callback (Asynchronous call)
-        call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
-    }
+    private static class DrawableTouchListener implements View.OnTouchListener {
+        private Context context;
+        private View rootView;
+        private DrawableView mDrawableView = null;
 
-    // To check for network conditions
-    private Boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
-    }
+        public DrawableTouchListener(Context context, View rootView) {
+            this.context = context;
+            this.rootView = rootView;
+        }
 
-    // To check for network conditions
-    private boolean isOnline() {
-        Runtime runtime = Runtime.getRuntime();
-        try {
-            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
-            int     exitValue = ipProcess.waitFor();
-            return (exitValue == 0);
-        } catch (IOException |InterruptedException e)          { e.printStackTrace(); }
-        return false;
-    }
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            mDrawableView = (DrawableView) v;
+            List<Rect> rects = mDrawableView.getmRects();
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+            for (int i = 0; i < rects.size(); i++) {
+                Rect rect = rects.get(i);
+                if (rect.contains(x, y)){
+                    selectRect(rect, i);
+                    break;
+                }
+            }
+            return true;
+        }
 
-    /**
-     * This interface works with retrofit to abstract the API calls into
-     * a java interface
-     */
-
-    private interface BingOCRService {
-        // Request method and URL specified in the annotation
-        // Callback for the parsed response is the last parameter
-        @Multipart
-        @POST("./")
-        Call<BingOcrResponse> processImage(@Part("image") RequestBody image,
-                                           @QueryMap Map<String, String> params);
-        @Multipart
-        @POST("./")
-        Call<BingOcrResponse> processImage(@Part("image") RequestBody image);
+        private void selectRect(Rect rect, int i){
+            final String searchParam = mDrawableView.getmLineTexts().get(i);
+            Snackbar.make(mDrawableView, searchParam, Snackbar.LENGTH_LONG)
+                    .setActionTextColor(Color.CYAN)
+                    .setAction(R.string.search, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+                            intent.putExtra(SearchManager.QUERY, searchParam);
+                            context.startActivity(intent);
+                        }
+                    })
+                    .show();
+            mDrawableView.selectIndex(i);
+            mDrawableView.invalidate();
+            RecyclerView recyclerView = (RecyclerView)rootView.findViewById(R.id.recycler_view);
+            // TODO: Move this to OcrActivity and do loading progress animations and do adapter.notifyDataSetChanged
+            // TODO: scrollToPosition(0)
+            ObjectAnimator anim = ObjectAnimator.ofFloat(recyclerView,
+                    View.TRANSLATION_Y, 0);
+            anim.setDuration(650);
+            anim.start();
+        }
     }
 
     /**
      * Callback class that implements callback method to be used for when a
      * response is received from server
-     */
+     * */
     private static class OcrCallback implements Callback<BingOcrResponse> {
         private View mRootView = null;
         private String mFilePath = null;
         private DrawableView mDrawableView = null;
 
-        OcrCallback(View rootView, String filePath){
+        private OcrCallback(View rootView, String filePath){
             mRootView = rootView;
             mFilePath = filePath;
             mDrawableView = (DrawableView) rootView.findViewById(R.id.drawable_view);
@@ -254,7 +228,6 @@ public class OcrExpActivity extends AppCompatActivity{
         public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
             BingOcrResponse bingOcrResponse = response.body();
             List<Line> lines = bingOcrResponse.getAllLines();
-            mDrawableView.setOnTouchListener(mDrawableView );
             mDrawableView.drawBoxes(mRootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
@@ -280,10 +253,10 @@ public class OcrExpActivity extends AppCompatActivity{
      * background thread using ImageUtils.compressImage
      */
     private static class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {
-        Context mContext = null;
-        View mRootView = null;
+        protected Context mContext = null;
+        protected View mRootView = null;
 
-        CompressAsyncTask(Context context, View rootView){
+        protected CompressAsyncTask(Context context, View rootView){
             mContext = context;
             mRootView = rootView;
         }
