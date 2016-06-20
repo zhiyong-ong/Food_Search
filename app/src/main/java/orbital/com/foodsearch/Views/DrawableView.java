@@ -1,9 +1,6 @@
 package orbital.com.foodsearch.Views;
 
-import android.animation.ObjectAnimator;
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,9 +10,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.design.widget.Snackbar;
-import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -32,11 +27,12 @@ import retrofit2.Call;
  * Extended ImageView to draw the bounding boxes. Overrides onDraw method and it has
  * a transparent background so as to overlay over another view.
  */
-public class DrawableView extends ImageView implements View.OnTouchListener{
+public class DrawableView extends ImageView{
     private View mRootView = null;
 
     private List<Rect> mRects = null;
     private List<String> mLineTexts = null;
+
     private int selectedIndex = -1;
 
     private Bitmap mOriginalBitmap = null;
@@ -234,5 +230,19 @@ public class DrawableView extends ImageView implements View.OnTouchListener{
         greenPaint.setStrokeWidth(3);
         redPaint = new Paint(greenPaint);
         redPaint.setColor(Color.RED);
+    }
+
+
+
+    public void selectIndex(int selectedIndex) {
+        this.selectedIndex = selectedIndex;
+    }
+
+    public List<Rect> getmRects() {
+        return mRects;
+    }
+
+    public List<String> getmLineTexts() {
+        return mLineTexts;
     }
 }

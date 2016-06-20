@@ -5,7 +5,7 @@
     android:id="@+id/activity_ocr_exp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:mContext="orbital.com.foodsearch.Activities.OcrExpActivity">
+    tools:mContext="orbital.com.foodsearch.Activities.OcrActivity">
 
     <include android:id="@+id/toolbar_exp"
         layout="@layout/toolbar_layout"/>
@@ -36,10 +36,10 @@
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
             android:layout_centerInParent="true"
             android:orientation="horizontal"
-            app:layout_heightPercent="80%"
-            app:layout_widthPercent="80%"/>
+            app:layout_heightPercent="80%"/>
 
     </android.support.percent.PercentRelativeLayout>
 </FrameLayout>

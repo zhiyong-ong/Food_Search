@@ -58,22 +58,9 @@ public class BingImageAdapter
         String hostUrl = imageValue.getHostPageUrl();
 
         // Set image using image url
-        final ImageView cardImageView = holder.imageView;
+        ImageView cardImageView = holder.imageView;
         ViewTreeObserver vto = cardImageView.getViewTreeObserver();
-        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener(){
-            @Override
-            public boolean onPreDraw() {
-                cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-                Picasso.with(mContext).load(imageUrl)
-                        .memoryPolicy(MemoryPolicy.NO_CACHE)
-                        .centerCrop()
-                        .resize(cardImageView.getMeasuredWidth(),
-                                cardImageView.getMeasuredHeight())
-                        .transform(new ScrimTransformation(mContext, cardImageView))
-                        .into(cardImageView);
-                return true;
-            }
-        });
+        vto.addOnPreDrawListener(new PreDrawListener(mContext, cardImageView, imageUrl));
 
         // Set title using the name
         TextView cardTitle = holder.titleTextView;
@@ -85,16 +72,39 @@ public class BingImageAdapter
         return mImageValues.size();
     }
 
+    public static class PreDrawListener implements ViewTreeObserver.OnPreDrawListener{
+        private Context mContext = null;
+        private ImageView cardImageView = null;
+        private String url = null;
+
+        public PreDrawListener(Context context, ImageView cardImageView, String url) {
+            mContext = context;
+            this.cardImageView = cardImageView;
+            this.url = url;
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+            Picasso.with(mContext).load(url)
+                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .centerCrop()
+                    .resize(cardImageView.getWidth(),
+                            cardImageView.getHeight())
+                    .transform(new ScrimTransformation(mContext, cardImageView))
+                    .into(cardImageView);
+            return true;
+        }
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private ImageView imageView;
         private TextView titleTextView;
-        private View scrimView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.card_image);
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
-            scrimView = itemView.findViewById(R.id.scrim_view);
         }
     }
 }
