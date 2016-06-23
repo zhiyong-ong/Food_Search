@@ -31,11 +31,11 @@ public class BingSearch {
     private static final String LOG_TAG = "FOODIES";
 
     //sample data
-    private String queryTxt = "chicken rice";
-    private String count = "10";
-    private String offset = "0";
-    private String markets = "en-us";
-    private String safeSearch = "Moderate";
+    private String queryTxt = "";
+    private String count = "";
+    private String offset = "";
+    private String markets = "";
+    private String safeSearch = "";
     private Context context = null;
     private ImageView img = null;
     private TextView txt = null;

@@ -45,10 +45,11 @@ public class OcrActivity extends AppCompatActivity{
     private String filePath = null;
     private List<ImageValue> mImageValues = null;
 
+    private static String Lang = "";
     //query params for bing search
     public final String count = "5";
     public final String offset = "0";
-    public final String markets = "en-us";
+    public final String markets = "";
     public final String safeSearch = "Moderate";
     public Context context = null;
 
@@ -113,8 +114,10 @@ public class OcrActivity extends AppCompatActivity{
         mImageValues = new ArrayList<>();
         for(int i = 0; i < content.size(); i++) {
             ImageValue img = new ImageValue();
-            img.setContentUrl(content.get(i)[0]);
-            img.setName(content.get(i)[1]);
+            img.setThumbnailUrl(content.get(i)[0]);
+            img.setContentUrl(content.get(i)[1]);
+            img.setHostPageUrl(content.get(i)[2]);
+            img.setName(content.get(i)[3]);
             mImageValues.add(img);
         }
 
@@ -202,7 +205,8 @@ public class OcrActivity extends AppCompatActivity{
                             Log.e(LOG_TAG, "Search String: " + searchParam);
                             BingSearch bingImg = new BingSearch(searchParam, count, offset, markets, safeSearch);
                             Call<BingImageSearch> call = bingImg.getImage();
-                            //get arraylist to store the results. first elem is content url. second elem is name
+                            //get arraylist to store the results. first elem is thumbnail url
+                            // second elem is content url. third elem is hostpageurl. fourth elem is name
                             final ArrayList<String[]> results = new ArrayList<>();
                             call.enqueue(new Callback<BingImageSearch>() {
                                 @Override
@@ -210,6 +214,8 @@ public class OcrActivity extends AppCompatActivity{
                                     Log.e(LOG_TAG, response.body().toString());
                                     for (int i = 0; i < response.body().getImageValues().size(); i++) {
                                         String[] name = {response.body().getImageValues().get(i).getThumbnailUrl(),
+                                                response.body().getImageValues().get(i).getContentUrl(),
+                                                response.body().getImageValues().get(i).getHostPageUrl(),
                                                 response.body().getImageValues().get(i).getName()};
                                         results.add(name);
                                     }
@@ -252,6 +258,8 @@ public class OcrActivity extends AppCompatActivity{
         public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
             BingOcrResponse bingOcrResponse = response.body();
             List<Line> lines = bingOcrResponse.getAllLines();
+            Lang = bingOcrResponse.getLanguage();
+            Log.e(LOG_TAG, "Language is: " + Lang);
             mDrawableView.drawBoxes(mRootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
