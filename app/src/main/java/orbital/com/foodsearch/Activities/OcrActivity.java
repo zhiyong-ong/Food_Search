@@ -1,9 +1,7 @@
 package orbital.com.foodsearch.Activities;
 
 import android.animation.ObjectAnimator;
-import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.AsyncTask;
@@ -24,13 +22,14 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
 import orbital.com.foodsearch.Helpers.BingOcr;
+import orbital.com.foodsearch.Helpers.BingSearch;
 import orbital.com.foodsearch.Helpers.ImageUtils;
 import orbital.com.foodsearch.Helpers.NetworkUtils;
+import orbital.com.foodsearch.Models.BingImageSearch;
 import orbital.com.foodsearch.Models.BingOcrResponse;
 import orbital.com.foodsearch.Models.ImageValue;
 import orbital.com.foodsearch.Models.Line;
@@ -45,6 +44,13 @@ public class OcrActivity extends AppCompatActivity{
 
     private String filePath = null;
     private List<ImageValue> mImageValues = null;
+
+    //query params for bing search
+    public final String count = "5";
+    public final String offset = "0";
+    public final String markets = "en-us";
+    public final String safeSearch = "Moderate";
+    public Context context = null;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -81,7 +87,6 @@ public class OcrActivity extends AppCompatActivity{
                 .into(imgView);
         startOcrService();
         initializeDrawView();
-        initializeRecycler();
     }
 
     private void initializeDrawView() {
@@ -89,9 +94,13 @@ public class OcrActivity extends AppCompatActivity{
         drawableView.setOnTouchListener(new DrawableTouchListener(this, findViewById(R.id.activity_ocr_exp)));
     }
 
-    private void initializeRecycler() {
+    public void initializeRecycler(ArrayList<String[]> content) {
         final View parentView = findViewById(R.id.preview_container);
         final RecyclerView rvImages = (RecyclerView) findViewById(R.id.recycler_view);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(rvImages,
+                View.TRANSLATION_Y, 0);
+        anim.setDuration(650);
+        anim.start();
         ViewTreeObserver vto = rvImages.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener(){
             @Override
@@ -101,14 +110,13 @@ public class OcrActivity extends AppCompatActivity{
                 return true;
             }
         });
-
-        ImageValue test1 = new ImageValue();
-        test1.setContentUrl("http://www.telegraph.co.uk/content/dam/science/2016/03/14/cat_3240574b-large_trans++pJliwavx4coWFCaEkEsb3kvxIt-lGGWCWqwLa_RXJU8.jpg");
-        test1.setName("Cat");
-        ImageValue test2 = new ImageValue();
-        test2.setContentUrl("https://i.ytimg.com/vi/mW3S0u8bj58/maxresdefault.jpg");
-        test2.setName("Cat 2");
-        mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
+        mImageValues = new ArrayList<>();
+        for(int i = 0; i < content.size(); i++) {
+            ImageValue img = new ImageValue();
+            img.setContentUrl(content.get(i)[0]);
+            img.setName(content.get(i)[1]);
+            mImageValues.add(img);
+        }
 
         ImageView cardImageView = (ImageView)findViewById(R.id.card_image);
         BingImageAdapter adapter = new BingImageAdapter(this, mImageValues);
@@ -158,7 +166,7 @@ public class OcrActivity extends AppCompatActivity{
         compressTask.execute(filePath);
     }
 
-    private static class DrawableTouchListener implements View.OnTouchListener {
+    private class DrawableTouchListener implements View.OnTouchListener {
         private Context context;
         private View rootView;
         private DrawableView mDrawableView = null;
@@ -191,21 +199,37 @@ public class OcrActivity extends AppCompatActivity{
                     .setAction(R.string.search, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
-                            intent.putExtra(SearchManager.QUERY, searchParam);
-                            context.startActivity(intent);
+                            Log.e(LOG_TAG, "Search String: " + searchParam);
+                            BingSearch bingImg = new BingSearch(searchParam, count, offset, markets, safeSearch);
+                            Call<BingImageSearch> call = bingImg.getImage();
+                            //get arraylist to store the results. first elem is content url. second elem is name
+                            final ArrayList<String[]> results = new ArrayList<>();
+                            call.enqueue(new Callback<BingImageSearch>() {
+                                @Override
+                                public void onResponse(Call<BingImageSearch> call, Response<BingImageSearch> response) {
+                                    Log.e(LOG_TAG, response.body().toString());
+                                    for (int i = 0; i < response.body().getImageValues().size(); i++) {
+                                        String[] name = {response.body().getImageValues().get(i).getThumbnailUrl(),
+                                                response.body().getImageValues().get(i).getName()};
+                                        results.add(name);
+                                    }
+                                    initializeRecycler(results);
+                                }
+
+                                @Override
+                                public void onFailure(Call<BingImageSearch> call, Throwable t) {
+                                    Log.e(LOG_TAG, call.toString());
+                                    results.add(new String[]{t.toString(), null});
+                                    initializeRecycler(results);
+                                }
+                            });
                         }
-                    })
-                    .show();
-            mDrawableView.selectIndex(i);
-            mDrawableView.invalidate();
-            RecyclerView recyclerView = (RecyclerView)rootView.findViewById(R.id.recycler_view);
+                    }).show();
+
+//            mDrawableView.selectIndex(i);
+//            mDrawableView.invalidate();
             // TODO: Move this to OcrActivity and do loading progress animations and do adapter.notifyDataSetChanged
             // TODO: scrollToPosition(0)
-            ObjectAnimator anim = ObjectAnimator.ofFloat(recyclerView,
-                    View.TRANSLATION_Y, 0);
-            anim.setDuration(650);
-            anim.start();
         }
     }
 
