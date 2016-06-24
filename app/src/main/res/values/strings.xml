@@ -17,4 +17,7 @@
     <string name="internet_error_text">You\'re not online!</string>
     <string name="post_fail_text">POST Call Failed!</string>
     <string name="retry">Retry</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

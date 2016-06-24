@@ -6,33 +6,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import orbital.com.foodsearch.Adapters.BingImageAdapter;
+import orbital.com.foodsearch.Fragments.SearchResultsFragment;
 import orbital.com.foodsearch.Helpers.BingOcr;
 import orbital.com.foodsearch.Helpers.ImageUtils;
 import orbital.com.foodsearch.Helpers.NetworkUtils;
 import orbital.com.foodsearch.Models.BingOcrResponse;
-import orbital.com.foodsearch.Models.ImageValue;
 import orbital.com.foodsearch.Models.Line;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Views.DrawableView;
@@ -40,11 +38,10 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class OcrActivity extends AppCompatActivity{
+public class OcrActivity extends AppCompatActivity implements SearchResultsFragment.OnFragmentInteractionListener{
     private static final String LOG_TAG = "FOODIES";
 
     private String filePath = null;
-    private List<ImageValue> mImageValues = null;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -81,41 +78,29 @@ public class OcrActivity extends AppCompatActivity{
                 .into(imgView);
         startOcrService();
         initializeDrawView();
-        initializeRecycler();
+        setupRecContainer();
+    }
+
+    private void setupRecContainer() {
+        final DrawableView drawableView = (DrawableView) findViewById(R.id.drawable_view);
+        final FrameLayout recyclerContainer = (FrameLayout) findViewById(R.id.rec_frag_container);
+        ViewTreeObserver vto = recyclerContainer.getViewTreeObserver();
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener(){
+            @Override
+            public boolean onPreDraw() {
+                recyclerContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+                recyclerContainer.setTranslationY(drawableView.getHeight());
+                android.support.v4.app.FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.replace(R.id.rec_frag_container, new SearchResultsFragment());
+                ft.commit();
+                return true;
+            }
+        });
     }
 
     private void initializeDrawView() {
         final DrawableView drawableView = (DrawableView)findViewById(R.id.drawable_view);
         drawableView.setOnTouchListener(new DrawableTouchListener(this, findViewById(R.id.activity_ocr_exp)));
-    }
-
-    private void initializeRecycler() {
-        final View parentView = findViewById(R.id.preview_container);
-        final RecyclerView rvImages = (RecyclerView) findViewById(R.id.recycler_view);
-        ViewTreeObserver vto = rvImages.getViewTreeObserver();
-        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener(){
-            @Override
-            public boolean onPreDraw() {
-                rvImages.getViewTreeObserver().removeOnPreDrawListener(this);
-                rvImages.setTranslationY(parentView.getHeight());
-                return true;
-            }
-        });
-
-        ImageValue test1 = new ImageValue();
-        test1.setContentUrl("http://www.telegraph.co.uk/content/dam/science/2016/03/14/cat_3240574b-large_trans++pJliwavx4coWFCaEkEsb3kvxIt-lGGWCWqwLa_RXJU8.jpg");
-        test1.setName("Cat");
-        ImageValue test2 = new ImageValue();
-        test2.setContentUrl("https://i.ytimg.com/vi/mW3S0u8bj58/maxresdefault.jpg");
-        test2.setName("Cat 2");
-        mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
-
-        ImageView cardImageView = (ImageView)findViewById(R.id.card_image);
-        BingImageAdapter adapter = new BingImageAdapter(this, mImageValues);
-        rvImages.setAdapter(adapter);
-        LinearLayoutManager layoutMgr = new LinearLayoutManager(this);
-        layoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
-        rvImages.setLayoutManager(layoutMgr);
     }
 
     private void startOcrService() {
@@ -158,6 +143,11 @@ public class OcrActivity extends AppCompatActivity{
         compressTask.execute(filePath);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
     private static class DrawableTouchListener implements View.OnTouchListener {
         private Context context;
         private View rootView;
@@ -170,6 +160,7 @@ public class OcrActivity extends AppCompatActivity{
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            FrameLayout container = (FrameLayout) rootView.findViewById(R.id.rec_frag_container);
             mDrawableView = (DrawableView) v;
             List<Rect> rects = mDrawableView.getmRects();
             int x = (int) event.getX();
@@ -177,14 +168,19 @@ public class OcrActivity extends AppCompatActivity{
             for (int i = 0; i < rects.size(); i++) {
                 Rect rect = rects.get(i);
                 if (rect.contains(x, y)){
-                    selectRect(rect, i);
+                    selectRect(i);
                     break;
+                } else if (container.getBottom() < v.getHeight()) {
+                    ObjectAnimator anim = ObjectAnimator.ofFloat(container,
+                            View.TRANSLATION_Y, v.getHeight());
+                    anim.setDuration(600);
+                    anim.start();
                 }
             }
             return true;
         }
 
-        private void selectRect(Rect rect, int i){
+        private void selectRect(int i){
             final String searchParam = mDrawableView.getmLineTexts().get(i);
             Snackbar.make(mDrawableView, searchParam, Snackbar.LENGTH_LONG)
                     .setActionTextColor(Color.CYAN)
@@ -200,11 +196,12 @@ public class OcrActivity extends AppCompatActivity{
             mDrawableView.selectIndex(i);
             mDrawableView.invalidate();
             RecyclerView recyclerView = (RecyclerView)rootView.findViewById(R.id.recycler_view);
-            // TODO: Move this to OcrActivity and do loading progress animations and do adapter.notifyDataSetChanged
-            // TODO: scrollToPosition(0)
-            ObjectAnimator anim = ObjectAnimator.ofFloat(recyclerView,
+            FrameLayout container = (FrameLayout) rootView.findViewById(R.id.rec_frag_container);
+            // TODO: Do loading progress animations and do adapter.notifyDataSetChanged
+            recyclerView.scrollToPosition(0);
+            ObjectAnimator anim = ObjectAnimator.ofFloat(container,
                     View.TRANSLATION_Y, 0);
-            anim.setDuration(650);
+            anim.setDuration(600);
             anim.start();
         }
     }
