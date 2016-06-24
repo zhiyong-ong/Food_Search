@@ -60,11 +60,12 @@ public class BingImageAdapter
         // Set image using image url
         ImageView cardImageView = holder.imageView;
         ViewTreeObserver vto = cardImageView.getViewTreeObserver();
-        vto.addOnPreDrawListener(new PreDrawListener(mContext, cardImageView, imageUrl));
+        vto.addOnPreDrawListener(new PreDrawListener(mContext, cardImageView, thumbUrl));
 
         // Set title using the name
-        TextView cardTitle = holder.titleTextView;
-        cardTitle.setText(title);
+        holder.titleTextView.setText(title);
+        holder.contentURLView.setText(imageUrl);
+        holder.hostPageView.setText(hostUrl);
     }
 
     @Override
@@ -100,11 +101,15 @@ public class BingImageAdapter
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private ImageView imageView;
         private TextView titleTextView;
+        private TextView hostPageView;
+        private TextView contentURLView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.card_image);
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
+            hostPageView = (TextView) itemView.findViewById(R.id.card_hostpage);
+            contentURLView = (TextView)itemView.findViewById(R.id.card_contentURL);
         }
     }
 }

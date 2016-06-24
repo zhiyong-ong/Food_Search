@@ -39,6 +39,8 @@ public class DrawableView extends ImageView{
     private Paint greenPaint = null;
     private Paint redPaint = null;
 
+
+
     public DrawableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRects = new ArrayList<Rect>();

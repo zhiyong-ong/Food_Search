@@ -9,7 +9,7 @@ import java.util.List;
  * Created by zhiyong on 11/6/2016.
  */
 
-public class BingImageSearch {
+public class BingSearchResponse {
     private String type;
     private Instrumentation instrumentation;
     private String readLink;
