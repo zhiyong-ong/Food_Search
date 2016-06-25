@@ -53,7 +53,7 @@ public class BingImageAdapter
     public void onBindViewHolder(ViewHolder holder, int position) {
         ImageValue imageValue = mImageValues.get(position);
         String title = imageValue.getName();
-        final String imageUrl = imageValue.getContentUrl();
+        String imageUrl = imageValue.getContentUrl();
         String thumbUrl = imageValue.getThumbnailUrl();
         String hostUrl = imageValue.getHostPageUrl();
 

@@ -222,7 +222,7 @@ public class OcrDebugActivity extends AppCompatActivity {
         }
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
-            Snackbar.make(mRootView.findViewById(R.id.activity_ocr), R.string.post_fail_text,
+            Snackbar.make(mRootView.findViewById(R.id.activity_ocr), R.string.ocr_call_fail,
                     Snackbar.LENGTH_SHORT)
                     .show();
             Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());

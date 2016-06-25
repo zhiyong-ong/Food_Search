@@ -82,9 +82,7 @@ public class Line {
             default:
                 for (Word word: words) {
                     String text = word.getText();
-                    if (text.charAt(0) == ('$')) {
-                        break;
-                    }
+
                     builder.append(text);
                     builder.append(" ");
                 }

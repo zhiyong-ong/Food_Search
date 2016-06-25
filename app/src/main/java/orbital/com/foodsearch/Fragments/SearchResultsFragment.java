@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,8 +28,9 @@ import orbital.com.foodsearch.R;
  * create an instance of this fragment.
  */
 public class SearchResultsFragment extends Fragment {
-    private static final String ARG_PARAM1 = "param1";
-    private List<ImageValue> mImageValues = null;
+    private final String SAVED_IMAGE_VALUES = "savedImageValues";
+    private ArrayList<ImageValue> mImageValues = null;
+    private BingImageAdapter mAdapter = null;
     private String searchParam;
 
     private OnFragmentInteractionListener mListener;
@@ -48,19 +48,25 @@ public class SearchResultsFragment extends Fragment {
      */
     public static SearchResultsFragment newInstance(String searchParam) {
         SearchResultsFragment fragment = new SearchResultsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, searchParam);
-        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            searchParam = getArguments().getString(ARG_PARAM1);
+        if (savedInstanceState != null) {
+            //mImageValues = savedInstanceState.getParcelableArrayList(SAVED_IMAGE_VALUES);
         }
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+//        if () {
+//            outState.putParcelableArrayList(SAVED_IMAGE_VALUES, mImageValues);
+//        }
+        super.onSaveInstanceState(outState);
+    }
+
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
@@ -68,20 +74,29 @@ public class SearchResultsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
+    /**
+     * This method is used to update the recyclerView with new image values
+     * @param newImageValues new Image values to be displayed in recyclerView
+     */
+    public void updateRecycler(List<ImageValue> newImageValues) {
+        mImageValues.clear();
+        mImageValues.addAll(newImageValues);
+        mAdapter.notifyDataSetChanged();
+    }
+
     private void initializeRecycler() {
         RecyclerView rvImages = (RecyclerView) getView().findViewById(R.id.recycler_view);
 
         ImageValue test1 = new ImageValue();
-        test1.setContentUrl("http://www.telegraph.co.uk/content/dam/science/2016/03/14/cat_3240574b-large_trans++pJliwavx4coWFCaEkEsb3kvxIt-lGGWCWqwLa_RXJU8.jpg");
+        test1.setThumbnailUrl("http://s1.dmcdn.net/UkwzE.jpg");
         test1.setName("Cat");
         ImageValue test2 = new ImageValue();
-        test2.setContentUrl("https://i.ytimg.com/vi/mW3S0u8bj58/maxresdefault.jpg");
+        test2.setThumbnailUrl("https://i.ytimg.com/vi/mW3S0u8bj58/maxresdefault.jpg");
         test2.setName("Cat 2");
         mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
 
-        ImageView cardImageView = (ImageView)getView().findViewById(R.id.card_image);
-        BingImageAdapter adapter = new BingImageAdapter(getActivity(), mImageValues);
-        rvImages.setAdapter(adapter);
+        mAdapter = new BingImageAdapter(getActivity(), mImageValues);
+        rvImages.setAdapter(mAdapter);
         LinearLayoutManager layoutMgr = new LinearLayoutManager(getActivity());
         layoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
         rvImages.setLayoutManager(layoutMgr);

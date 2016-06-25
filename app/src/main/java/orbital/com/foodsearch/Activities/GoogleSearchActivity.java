@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import orbital.com.foodsearch.Helpers.BingSearch;
-import orbital.com.foodsearch.Models.BingImageSearch;
+import orbital.com.foodsearch.Models.BingSearchResponse;
 import orbital.com.foodsearch.R;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,14 +26,13 @@ public class GoogleSearchActivity extends AppCompatActivity {
     private static final String OCP_APIM_KEY = "e801fac4192d4741976e816b93bdcb48";
     private static final String BING_IMAGE_URL = "https://bingapis.azure-api.net/api/v5/images/";
     private static final String LOG_TAG = "FOODIES";
-    Context context = this;
-
     //sample data
     private final String queryTxt = "chicken rice";
     private final String count = "10";
     private final String offset = "0";
     private final String markets = "en-us";
     private final String safeSearch = "Moderate";
+    Context context = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +48,12 @@ public class GoogleSearchActivity extends AppCompatActivity {
                 String input = edt.getText().toString();
                 final ImageView imgView = (ImageView) findViewById(R.id.imgView);
                 final TextView txt = (TextView) findViewById(R.id.textView);
-                BingSearch bingImg = new BingSearch(input, count, offset, markets, safeSearch);
+                BingSearch bingImg = new BingSearch(input);
                 //get call from the helper class
-                Call<BingImageSearch> call = bingImg.getImage();
-                call.enqueue(new Callback<BingImageSearch>() {
+                Call<BingSearchResponse> call = bingImg.buildCall();
+                call.enqueue(new Callback<BingSearchResponse>() {
                     @Override
-                    public void onResponse(Call<BingImageSearch> call, Response<BingImageSearch> response) {
+                    public void onResponse(Call<BingSearchResponse> call, Response<BingSearchResponse> response) {
                         //get arraylist to store the results
                         final ArrayList<String[]> results = new ArrayList<>();
                         Log.e(LOG_TAG, response.body().toString());
@@ -74,7 +73,7 @@ public class GoogleSearchActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<BingImageSearch> call, Throwable t) {
+                    public void onFailure(Call<BingSearchResponse> call, Throwable t) {
                         Log.e(LOG_TAG, call.toString());
                         txt.setText(t.getMessage());
                     }

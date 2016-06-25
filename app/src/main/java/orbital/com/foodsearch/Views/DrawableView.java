@@ -101,6 +101,11 @@ public class DrawableView extends ImageView{
         invalidate();
     }
 
+    public void updateBoxes(int selectedIndex) {
+        this.selectedIndex = selectedIndex;
+        this.invalidate();
+    }
+
     /**
      * This private method adds the drawables in the list by parsing the boundary
      * parameters and then scaling it and setting them as the drawables' bounds.

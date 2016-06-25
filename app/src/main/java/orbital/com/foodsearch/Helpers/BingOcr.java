@@ -54,19 +54,19 @@ public class BingOcr {
                 .baseUrl(OCR_BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
-        OcrService service = retrofit.create(OcrService.class);
+        OcrAPI ocrAPI = retrofit.create(OcrAPI.class);
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),
                 rawImage);
         // For params:
         // Map<String, String> params = new HashMap<String, String>();
-        return service.processImage(requestBody);
+        return ocrAPI.processImage(requestBody);
     }
 
     /**
      * This interface works with retrofit to abstract the API calls into
      * a java interface
      */
-    private interface OcrService {
+    private interface OcrAPI {
         // Request method and URL specified in the annotation
         // Callback for the parsed response is the last parameter
         @Multipart
