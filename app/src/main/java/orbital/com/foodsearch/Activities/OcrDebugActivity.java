@@ -93,7 +93,6 @@ public class OcrDebugActivity extends AppCompatActivity {
 
         ImageView imgView = (ImageView) findViewById(R.id.previewImageView);
         Picasso.with(this).load("file://" + filePath)
-                .placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
                 .resize(imgView.getMaxWidth(),0)
                 .into(imgView);
