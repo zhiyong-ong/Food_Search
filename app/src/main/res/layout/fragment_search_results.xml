@@ -5,11 +5,12 @@
     android:layout_height="match_parent"
     tools:context="orbital.com.foodsearch.Fragments.SearchResultsFragment">
 
-    <android.support.v7.widget.RecyclerView
+    <orbital.com.foodsearch.Views.SnappyRecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#00000000"
-        android:orientation="horizontal"/>
+        android:orientation="horizontal"
+        android:scrollbars="horizontal"/>
 
 </FrameLayout>

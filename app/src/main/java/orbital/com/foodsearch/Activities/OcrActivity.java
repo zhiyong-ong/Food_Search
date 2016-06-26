@@ -168,6 +168,20 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
     }
 
+    @Override
+    public void onBackPressed() {
+        if (findViewById(R.id.rec_frag_container).getTranslationY() != 0) {
+            super.onBackPressed();
+        } else {
+            containerSlideDown();
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
     private void brightenOverlay(final FrameLayout drawableOverlay){
         ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
                 Color.parseColor("#7F000000"),
@@ -198,9 +212,24 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         darkenAnim.start();
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
+    private void containerSlideDown() {
+        FrameLayout resultsContainer = (FrameLayout)findViewById(R.id.rec_frag_container);
+        ObjectAnimator containerAnimation = ObjectAnimator.ofFloat(resultsContainer,
+                View.TRANSLATION_Y, containerTransY);
+        containerAnimation.addListener(new AnimListener(findViewById(R.id.activity_ocr_exp)));
+        containerAnimation.setDuration(400);
+        if (resultsContainer.getTranslationY() != containerTransY){
+            brightenOverlay((FrameLayout)findViewById(R.id.drawable_overlay));
+        }
+        containerAnimation.start();
+    }
 
+    private void containerSlideUp() {
+        FrameLayout resultsContainer = (FrameLayout) findViewById(R.id.rec_frag_container);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(resultsContainer,
+                View.TRANSLATION_Y, 0);
+        anim.setDuration(600);
+        anim.start();
     }
 
     private class DrawableTouchListener implements View.OnTouchListener {
@@ -239,6 +268,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             Snackbar.make(mDrawableView, searchParam, Snackbar.LENGTH_INDEFINITE)
                     .setActionTextColor(Color.CYAN)
                     .setAction(R.string.search, new View.OnClickListener() {
+                        // called when search is clicked
                         @Override
                         public void onClick(View v) {
                             darkenOverlay((FrameLayout)rootView.findViewById(R.id.drawable_overlay));
@@ -248,18 +278,6 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                         }
                     })
                     .show();
-        }
-
-        private void containerSlideDown() {
-            FrameLayout resultsContainer = (FrameLayout)rootView.findViewById(R.id.rec_frag_container);
-            ObjectAnimator containerAnimation = ObjectAnimator.ofFloat(resultsContainer,
-                    View.TRANSLATION_Y, containerTransY);
-            containerAnimation.addListener(new AnimListener(rootView));
-            containerAnimation.setDuration(400);
-            if (resultsContainer.getTranslationY() != containerTransY){
-                brightenOverlay((FrameLayout)rootView.findViewById(R.id.drawable_overlay));
-            }
-            containerAnimation.start();
         }
     }
 
@@ -281,6 +299,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             List<ImageValue> imageValues = searchResponse.getImageValues();
 
+            // TODO: improve loading progress animations
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);
             if (!imageValues.isEmpty()) {
@@ -288,7 +307,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 containerSlideUp();
             } else {
                 FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                drawableOverlay.setBackgroundColor(Color.TRANSPARENT);
+                brightenOverlay(drawableOverlay);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
         }
@@ -299,15 +318,6 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.image_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
-        }
-
-        private void containerSlideUp() {
-            FrameLayout resultsContainer = (FrameLayout) rootView.findViewById(R.id.rec_frag_container);
-            // TODO: improve loading progress animations
-            ObjectAnimator anim = ObjectAnimator.ofFloat(resultsContainer,
-                    View.TRANSLATION_Y, 0);
-            anim.setDuration(600);
-            anim.start();
         }
     }
 
@@ -369,13 +379,14 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         }
     }
 
+    /**
+     * Listener to set boolean value for animating so that we can track it
+     */
     private class AnimListener implements Animator.AnimatorListener{
         View rootView = null;
-        FrameLayout blackhole = null;
 
         AnimListener(View rootView) {
             this.rootView = rootView;
-            blackhole = (FrameLayout)rootView.findViewById(R.id.drawable_overlay);
         }
 
         @Override

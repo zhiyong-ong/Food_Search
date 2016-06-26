@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +18,7 @@ import java.util.List;
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
 import orbital.com.foodsearch.Models.ImageValue;
 import orbital.com.foodsearch.R;
+import orbital.com.foodsearch.Views.SnappyRecyclerView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -88,13 +88,13 @@ public class SearchResultsFragment extends Fragment {
         mImageValues.addAll(newImageValues);
         mAdapter.notifyDataSetChanged();
 
-        RecyclerView recyclerView = (RecyclerView) getView().findViewById(
+        SnappyRecyclerView recyclerView = (SnappyRecyclerView) getView().findViewById(
                 R.id.recycler_view);
         recyclerView.scrollToPosition(0);
     }
 
     private void initializeRecycler() {
-        RecyclerView rvImages = (RecyclerView) getView().findViewById(R.id.recycler_view);
+        SnappyRecyclerView rvImages = (SnappyRecyclerView) getView().findViewById(R.id.recycler_view);
         // mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
         mImageValues = new ArrayList<>();
 
@@ -102,6 +102,7 @@ public class SearchResultsFragment extends Fragment {
         rvImages.setAdapter(mAdapter);
         LinearLayoutManager layoutMgr = new LinearLayoutManager(getActivity());
         layoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
+        rvImages.setHasFixedSize(true);
         rvImages.setLayoutManager(layoutMgr);
     }
 
