@@ -39,8 +39,6 @@ public class DrawableView extends ImageView{
     private Paint greenPaint = null;
     private Paint redPaint = null;
 
-
-
     public DrawableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRects = new ArrayList<Rect>();
@@ -101,7 +99,7 @@ public class DrawableView extends ImageView{
         invalidate();
     }
 
-    public void updateBoxes(int selectedIndex) {
+    public void updateSelection(int selectedIndex) {
         this.selectedIndex = selectedIndex;
         this.invalidate();
     }

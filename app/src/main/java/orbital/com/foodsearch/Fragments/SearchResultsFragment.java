@@ -11,8 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
@@ -54,16 +55,20 @@ public class SearchResultsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null) {
-            //mImageValues = savedInstanceState.getParcelableArrayList(SAVED_IMAGE_VALUES);
+        if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_IMAGE_VALUES)) {
+            Gson gson = new Gson();
+            mImageValues = gson.fromJson(
+                    savedInstanceState.getString(SAVED_IMAGE_VALUES),
+                    ArrayList.class);
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-//        if () {
-//            outState.putParcelableArrayList(SAVED_IMAGE_VALUES, mImageValues);
-//        }
+      if (mImageValues != null) {
+          Gson gson = new Gson();
+          outState.putString(SAVED_IMAGE_VALUES, gson.toJson(mImageValues));
+      }
         super.onSaveInstanceState(outState);
     }
 
@@ -82,18 +87,16 @@ public class SearchResultsFragment extends Fragment {
         mImageValues.clear();
         mImageValues.addAll(newImageValues);
         mAdapter.notifyDataSetChanged();
+
+        RecyclerView recyclerView = (RecyclerView) getView().findViewById(
+                R.id.recycler_view);
+        recyclerView.scrollToPosition(0);
     }
 
     private void initializeRecycler() {
         RecyclerView rvImages = (RecyclerView) getView().findViewById(R.id.recycler_view);
-
-        ImageValue test1 = new ImageValue();
-        test1.setThumbnailUrl("http://s1.dmcdn.net/UkwzE.jpg");
-        test1.setName("Cat");
-        ImageValue test2 = new ImageValue();
-        test2.setThumbnailUrl("https://i.ytimg.com/vi/mW3S0u8bj58/maxresdefault.jpg");
-        test2.setName("Cat 2");
-        mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
+        // mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
+        mImageValues = new ArrayList<>();
 
         mAdapter = new BingImageAdapter(getActivity(), mImageValues);
         rvImages.setAdapter(mAdapter);

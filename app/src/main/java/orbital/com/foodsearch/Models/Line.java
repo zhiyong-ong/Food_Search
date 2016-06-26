@@ -72,22 +72,31 @@ public class Line {
     public String getText(String language) {
         StringBuilder builder = new StringBuilder();
         List<Word> words = getWords();
+        String offset = null;
         switch (language) {
-            case LANGUAGE_CNS:case LANGUAGE_CNT:case LANGUAGE_KO:
+            case LANGUAGE_CNS:
+            case LANGUAGE_CNT:
+            case LANGUAGE_KO:
             case LANGUAGE_JA:
-                for (Word word: words) {
-                    builder.append(word.getText());
-                }
+                offset = "";
                 break;
             default:
-                for (Word word: words) {
-                    String text = word.getText();
-
-                    builder.append(text);
-                    builder.append(" ");
-                }
+                offset = " ";
         }
-
+        for (Word word: words) {
+            String text = word.getText();
+            if (!containsSymbols(text)) {
+                builder.append(text);
+                builder.append(offset);
+            } else {
+                builder.append(text.replaceAll("[\\$-\\.,•]", ""));
+            }
+        }
         return builder.toString();
+    }
+
+    private boolean containsSymbols(String text) {
+        return text.contains("$") || text.contains("-") || text.contains(".")
+                || text.contains("•") || text.contains(",");
     }
 }

@@ -26,9 +26,10 @@ public class MainActivity extends AppCompatActivity {
     private static final int EXP_CAMERA_PERMISSION_REQUEST_CODE = 2;
     private static final int OCR_CAMERA_INTENT_REQUEST_CODE = 100;
     private static final int EXP_CAMERA_INTENT_REQUEST_CODE = 200;
+    private static final String SAVED_URI = "savedUri";
 
     private final String LOG_TAG = "FOODIES";
-    private final String photoFileName = "photo.jpg";
+    private final String PHOTO_FILE_NAME = "photo.jpg";
 
     private Uri photoFileUri = null;
 
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (photoFileUri != null) {
-            outState.putString("savedUri", photoFileUri.toString());
+            outState.putString(SAVED_URI, photoFileUri.toString());
         }
         super.onSaveInstanceState(outState);
     }
@@ -50,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.containsKey("savedUri")) {
-            photoFileUri = Uri.parse(savedInstanceState.getString("savedUri"));
+        if (savedInstanceState.containsKey(SAVED_URI)) {
+            photoFileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
         }
     }
 
@@ -166,6 +167,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         photoFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
-                + File.separator + photoFileName));
+                + File.separator + PHOTO_FILE_NAME));
     }
 }

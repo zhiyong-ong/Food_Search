@@ -4,7 +4,7 @@ package orbital.com.foodsearch.Models;
  * Created by zhiyong on 13/6/2016.
  */
 
-public class ImageValue {
+public class ImageValue{
     private String name;
     private String webSearchUrl;
     private String thumbnailUrl;

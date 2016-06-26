@@ -9,7 +9,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -88,7 +87,6 @@ public class BingImageAdapter
         public boolean onPreDraw() {
             cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
             Picasso.with(mContext).load(url)
-                    .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .centerCrop()
                     .resize(cardImageView.getWidth(),
                             cardImageView.getHeight())

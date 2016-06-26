@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_ocr_exp"
     android:layout_width="match_parent"
@@ -26,6 +27,13 @@
             android:layout_height="match_parent"
             android:background="#BF000000" />
 
+        <FrameLayout
+            android:id="@+id/drawable_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#00000000"
+            android:clickable="false"/>
+
         <ProgressBar
             android:id="@+id/progressBar2"
             android:layout_width="wrap_content"
@@ -36,8 +44,8 @@
         <FrameLayout
             android:id="@+id/rec_frag_container"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="30dp"/>
+            android:layout_centerInParent="true"
+            app:layout_heightPercent="75%"/>
 
     </android.support.percent.PercentRelativeLayout>
 </FrameLayout>

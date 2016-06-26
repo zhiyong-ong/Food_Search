@@ -10,15 +10,15 @@
     <string name="ocr_start">OCR start</string>
     <string name="exp_start">EXP start</string>
 
-    <string name="no_photo_text">Photo was not taken!</string>
-    <string name="no_text_found">No text was found in the photo!</string>
+    <!--String values for error messages in snackbars-->
+    <string name="no_photo_text">Photo was not taken</string>
+    <string name="no_text_found">No text was found in the photo</string>
+    <string name="no_image_found">Couldn\'t find any image</string>
     <string name="mkdir_fail_text">Failed to make directory</string>
-    <string name="permission_ungranted">Permission was not granted!</string>
-    <string name="internet_error_text">You\'re not online!</string>
-    <string name="ocr_call_fail">OCR Call Failed!</string>
-    <string name="image_search_fail">Image Search Call Failed!</string>
+    <string name="permission_ungranted">Permission was not granted</string>
+    <string name="internet_error_text">You\'re not online</string>
+    <string name="ocr_call_fail">OCR Call Failed</string>
+    <string name="image_search_fail">Image Search Call Failed</string>
     <string name="retry">Retry</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
