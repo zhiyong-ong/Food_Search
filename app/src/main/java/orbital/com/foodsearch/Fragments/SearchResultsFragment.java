@@ -13,10 +13,9 @@ import android.view.ViewGroup;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
-import orbital.com.foodsearch.Models.ImageValue;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Views.SnappyRecyclerView;
 
@@ -82,9 +81,9 @@ public class SearchResultsFragment extends Fragment {
      * This method is used to update the recyclerView with new image values
      * @param newImageValues new Image values to be displayed in recyclerView
      */
-    public void updateRecycler(List<ImageValue> newImageValues) {
+    public void updateRecycler(ImageValue newImageValues) {
         mImageValues.clear();
-        mImageValues.addAll(newImageValues);
+        mImageValues.add(newImageValues);
         mAdapter.notifyDataSetChanged();
 
         SnappyRecyclerView recyclerView = (SnappyRecyclerView) getView().findViewById(
@@ -92,6 +91,10 @@ public class SearchResultsFragment extends Fragment {
         recyclerView.scrollToPosition(0);
     }
 
+    public void clearRecycler() {
+        mImageValues.clear();
+        mAdapter.notifyDataSetChanged();
+    }
     private void initializeRecycler() {
         SnappyRecyclerView rvImages = (SnappyRecyclerView) getView().findViewById(R.id.recycler_view);
         // mImageValues = new ArrayList<>(Arrays.asList(test1, test2));

@@ -1,20 +1,30 @@
-package orbital.com.foodsearch.Models;
+package orbital.com.foodsearch.Models.ImageInsightsPOJO;
+
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 
 /**
- * Created by zhiyong on 13/6/2016.
+ * Created by zhiyong on 27/6/2016.
  */
 
-public class QueryExpansion {
+public class RelatedSearch {
+    @SerializedName("text")
+    @Expose
     private String text;
+    @SerializedName("displayText")
+    @Expose
     private String displayText;
+    @SerializedName("webSearchUrl")
+    @Expose
     private String webSearchUrl;
-    private String searchLink;
-    private Thumbnail thumbnail;
+    @SerializedName("webSearchUrlPingSuffix")
+    @Expose
+    private String webSearchUrlPingSuffix;
 
     /**
      *
      * @return
-     *     The text
+     * The text
      */
     public String getText() {
         return text;
@@ -23,7 +33,7 @@ public class QueryExpansion {
     /**
      *
      * @param text
-     *     The text
+     * The text
      */
     public void setText(String text) {
         this.text = text;
@@ -32,7 +42,7 @@ public class QueryExpansion {
     /**
      *
      * @return
-     *     The displayText
+     * The displayText
      */
     public String getDisplayText() {
         return displayText;
@@ -41,7 +51,7 @@ public class QueryExpansion {
     /**
      *
      * @param displayText
-     *     The displayText
+     * The displayText
      */
     public void setDisplayText(String displayText) {
         this.displayText = displayText;
@@ -50,7 +60,7 @@ public class QueryExpansion {
     /**
      *
      * @return
-     *     The webSearchUrl
+     * The webSearchUrl
      */
     public String getWebSearchUrl() {
         return webSearchUrl;
@@ -59,7 +69,7 @@ public class QueryExpansion {
     /**
      *
      * @param webSearchUrl
-     *     The webSearchUrl
+     * The webSearchUrl
      */
     public void setWebSearchUrl(String webSearchUrl) {
         this.webSearchUrl = webSearchUrl;
@@ -68,36 +78,19 @@ public class QueryExpansion {
     /**
      *
      * @return
-     *     The searchLink
+     * The webSearchUrlPingSuffix
      */
-    public String getSearchLink() {
-        return searchLink;
+    public String getWebSearchUrlPingSuffix() {
+        return webSearchUrlPingSuffix;
     }
 
     /**
      *
-     * @param searchLink
-     *     The searchLink
+     * @param webSearchUrlPingSuffix
+     * The webSearchUrlPingSuffix
      */
-    public void setSearchLink(String searchLink) {
-        this.searchLink = searchLink;
+    public void setWebSearchUrlPingSuffix(String webSearchUrlPingSuffix) {
+        this.webSearchUrlPingSuffix = webSearchUrlPingSuffix;
     }
 
-    /**
-     *
-     * @return
-     *     The thumbnail
-     */
-    public Thumbnail getThumbnail() {
-        return thumbnail;
-    }
-
-    /**
-     *
-     * @param thumbnail
-     *     The thumbnail
-     */
-    public void setThumbnail(Thumbnail thumbnail) {
-        this.thumbnail = thumbnail;
-    }
 }

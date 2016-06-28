@@ -15,7 +15,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import orbital.com.foodsearch.Helpers.BingSearch;
-import orbital.com.foodsearch.Models.BingSearchResponse;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
 import orbital.com.foodsearch.R;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,10 +50,10 @@ public class GoogleSearchActivity extends AppCompatActivity {
                 final TextView txt = (TextView) findViewById(R.id.textView);
                 BingSearch bingImg = new BingSearch(input);
                 //get call from the helper class
-                Call<BingSearchResponse> call = bingImg.buildCall();
-                call.enqueue(new Callback<BingSearchResponse>() {
+                Call<ImageSearchResponse> call = bingImg.buildCall();
+                call.enqueue(new Callback<ImageSearchResponse>() {
                     @Override
-                    public void onResponse(Call<BingSearchResponse> call, Response<BingSearchResponse> response) {
+                    public void onResponse(Call<ImageSearchResponse> call, Response<ImageSearchResponse> response) {
                         //get arraylist to store the results
                         final ArrayList<String[]> results = new ArrayList<>();
                         Log.e(LOG_TAG, response.body().toString());
@@ -73,7 +73,7 @@ public class GoogleSearchActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onFailure(Call<BingSearchResponse> call, Throwable t) {
+                    public void onFailure(Call<ImageSearchResponse> call, Throwable t) {
                         Log.e(LOG_TAG, call.toString());
                         txt.setText(t.getMessage());
                     }

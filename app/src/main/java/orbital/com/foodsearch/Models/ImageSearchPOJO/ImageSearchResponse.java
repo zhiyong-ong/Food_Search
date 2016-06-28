@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Models;
+package orbital.com.foodsearch.Models.ImageSearchPOJO;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -9,7 +9,7 @@ import java.util.List;
  * Created by zhiyong on 11/6/2016.
  */
 
-public class BingSearchResponse {
+public class ImageSearchResponse {
     private String type;
     private Instrumentation instrumentation;
     private String readLink;
