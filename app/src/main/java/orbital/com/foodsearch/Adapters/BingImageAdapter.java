@@ -13,7 +13,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import orbital.com.foodsearch.Models.ImageValue;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.ScrimTransformation;
 
@@ -51,10 +51,11 @@ public class BingImageAdapter
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ImageValue imageValue = mImageValues.get(position);
-        String title = imageValue.getName();
+        String title = imageValue.getRepresentativeQuery();
         String imageUrl = imageValue.getContentUrl();
         String thumbUrl = imageValue.getThumbnailUrl();
         String hostUrl = imageValue.getHostPageUrl();
+        String desc = imageValue.getImageCaption();
 
         // Set image using image url
         ImageView cardImageView = holder.imageView;
@@ -65,6 +66,7 @@ public class BingImageAdapter
         holder.titleTextView.setText(title);
         holder.contentURLView.setText(imageUrl);
         holder.hostPageView.setText(hostUrl);
+        holder.descView.setText(desc);
     }
 
     @Override
@@ -101,6 +103,7 @@ public class BingImageAdapter
         private TextView titleTextView;
         private TextView hostPageView;
         private TextView contentURLView;
+        private TextView descView;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -108,6 +111,7 @@ public class BingImageAdapter
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
             hostPageView = (TextView) itemView.findViewById(R.id.card_hostpage);
             contentURLView = (TextView)itemView.findViewById(R.id.card_contentURL);
+            descView = (TextView) itemView.findViewById(R.id.card_description);
         }
     }
 }

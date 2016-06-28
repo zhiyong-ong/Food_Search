@@ -30,11 +30,13 @@ import java.util.List;
 import orbital.com.foodsearch.Fragments.SearchResultsFragment;
 import orbital.com.foodsearch.Helpers.BingOcr;
 import orbital.com.foodsearch.Helpers.BingSearch;
+import orbital.com.foodsearch.Helpers.ImageInsights;
 import orbital.com.foodsearch.Helpers.ImageUtils;
 import orbital.com.foodsearch.Helpers.NetworkUtils;
 import orbital.com.foodsearch.Models.BingOcrResponse;
-import orbital.com.foodsearch.Models.BingSearchResponse;
-import orbital.com.foodsearch.Models.ImageValue;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.Models.Line;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Views.DrawableView;
@@ -157,17 +159,6 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         compressTask.execute(filePath);
     }
 
-    /**
-     * This method creates a search call based on the input param and enqueues it
-     * @param searchParam parameter string to be searched for
-     */
-    private void enqueueSearch(String searchParam) {
-        Log.e(LOG_TAG, "Search String: " + searchParam);
-        BingSearch bingImg = new BingSearch(searchParam);
-        Call<BingSearchResponse> call = bingImg.buildCall();
-        call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
-    }
-
     @Override
     public void onBackPressed() {
         if (findViewById(R.id.rec_frag_container).getTranslationY() != 0) {
@@ -282,9 +273,9 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     }
 
     /**
-     * Callback class for BingImageSearch, handling of POST responses is done here
+     * Callback class for ImageSearchResponse, handling of POST responses is done here
      */
-    private class ImageSearchCallback implements Callback<BingSearchResponse>{
+    private class ImageSearchCallback implements Callback<ImageSearchResponse>{
         private View rootView = null;
         private FragmentManager fm = null;
 
@@ -294,16 +285,49 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         }
 
         @Override
-        public void onResponse(Call<BingSearchResponse> call, Response<BingSearchResponse> response) {
-            BingSearchResponse searchResponse = response.body();
-            SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+        public void onResponse(Call<ImageSearchResponse> call, Response<ImageSearchResponse> response) {
+            ImageSearchResponse searchResponse = response.body();
             List<ImageValue> imageValues = searchResponse.getImageValues();
+            enqueueImageInsightSearch(imageValues);
+        }
 
+        @Override
+        public void onFailure(Call<ImageSearchResponse> call, Throwable t) {
+            Log.e(LOG_TAG, t.getMessage());
+            Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.image_search_fail,
+                    Snackbar.LENGTH_LONG)
+                    .show();
+        }
+    }
+
+    /**
+     * Callback class for ImageInsightCallback.
+     * ContentURL is passed here too.
+     */
+    private class ImageInsightCallback implements Callback<ImageInsightsResponse> {
+        private View rootView = null;
+        private FragmentManager fm = null;
+        private ImageValue imageValue = null;
+
+        public ImageInsightCallback(View rootView, FragmentManager fm, ImageValue imageValue){
+            this.rootView = rootView;
+            this.fm = fm;
+            this.imageValue = imageValue;
+        }
+
+        @Override
+        public void onResponse(Call<ImageInsightsResponse> call, Response<ImageInsightsResponse> response) {
+            ImageInsightsResponse searchResponse = response.body();
+            SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            String imageDesc = searchResponse.getBestRepresentativeQuery().getDisplayText();
+            String imageCaption = searchResponse.getImageCaption().getCaption();
+            imageValue.setRepresentativeQuery(imageDesc);
+            imageValue.setImageCaption(imageCaption);
             // TODO: improve loading progress animations
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);
-            if (!imageValues.isEmpty()) {
-                searchFragment.updateRecycler(imageValues);
+            if (imageValue != null) {
+                searchFragment.updateRecycler(imageValue);
                 containerSlideUp();
             } else {
                 FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
@@ -313,7 +337,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         }
 
         @Override
-        public void onFailure(Call<BingSearchResponse> call, Throwable t) {
+        public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
             Log.e(LOG_TAG, t.getMessage());
             Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.image_search_fail,
                     Snackbar.LENGTH_LONG)
@@ -321,6 +345,30 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         }
     }
 
+    /**
+     * This method creates a search call based on the input param and enqueues it
+     * @param searchParam parameter string to be searched for
+     */
+    private void enqueueSearch(String searchParam) {
+        Log.e(LOG_TAG, "Search String: " + searchParam);
+        BingSearch bingImg = new BingSearch(searchParam);
+        Call<ImageSearchResponse> call = bingImg.buildCall();
+        call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
+    }
+
+
+    /**
+     * This method creates a imageinsight search call based on the input param and enqueues it
+     * @param imgVals parameter string to be searched for
+     * Multiple calls.
+     */
+    private void enqueueImageInsightSearch(List<ImageValue> imgVals) {
+        for(int i = 0; i < imgVals.size(); i++) {
+            ImageInsights bingImg = new ImageInsights(imgVals.get(i).getImageInsightsToken(), "");
+            Call<ImageInsightsResponse> call = bingImg.buildCall();
+            call.enqueue(new ImageInsightCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER, imgVals.get(i)));
+        }
+    }
     /**
      * Callback class that implements callback method to be used for when a
      * response is received from server

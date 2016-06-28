@@ -9,55 +9,41 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
-import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.QueryMap;
 
 /**
- * Created by zhiyong on 15/6/2016.
- * returns a call when buildCall method is used. call can be enqueued. asynchronous is automatic
+ * Created by zhiyong on 27/6/2016.
  */
 
-public class BingSearch {
+public class ImageInsights {
     private static final String OCP_APIM_KEY = "e801fac4192d4741976e816b93bdcb48";
     private static final String BING_IMAGE_URL = "https://bingapis.azure-api.net/api/v5/images/";
     private static final String LOG_TAG = "FOODIES";
 
-    //sample data
-    private String queryTxt = null;
-    private String count = "1";
-    private String offset = "0";
-    private String markets = "en-us";
-    private String safeSearch = "Moderate";
 
-    public BingSearch(String queryTxt) {
-        this.queryTxt = queryTxt;
+    //init params
+    private String insights = null;
+    private String modulesRequested = null;
+
+    public ImageInsights(String queryTxt, String modulesRequested) {
+        this.insights = queryTxt;
+        this.modulesRequested = modulesRequested;
     }
 
     public String getQueryTxt() {
-        return queryTxt;
+        return insights;
     }
 
-    public String getCount() {
-        return count;
+    public String getModulesRequested() {
+        return modulesRequested;
     }
 
-    public String getOffset() {
-        return offset;
-    }
-
-    public String getMarkets() {
-        return markets;
-    }
-
-    public String getSafeSearch() {
-        return safeSearch;
-    }
-
-    public Call<ImageSearchResponse> buildCall() {
+    public Call<ImageInsightsResponse> buildCall() {
 
         final ArrayList<String[]> results = new ArrayList<>();
         //setting up logging messages regarding headers
@@ -77,11 +63,9 @@ public class BingSearch {
 
         // For adding in the parameters
         Map<String, String> data = new HashMap<>();
-        data.put("safeSearch", safeSearch);
-        data.put("mkt", markets);
-        data.put("offset", offset);
-        data.put("count", count);
-        data.put("q", queryTxt);
+
+        data.put("insightsToken", insights);
+        data.put("modulesRequested", modulesRequested);
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(BING_IMAGE_URL)
@@ -89,19 +73,15 @@ public class BingSearch {
                 .client(httpClient.build())
                 .build();
         //get the pojos filled up
-        BingSearch.BingImageSearchAPI imgAPI = retrofit.create(BingSearch.BingImageSearchAPI.class);
-        Call<ImageSearchResponse> call = imgAPI.getParams(data);
+        ImageInsights.BingImageInsightsAPI imgAPI = retrofit.create(ImageInsights.BingImageInsightsAPI.class);
+        Call<ImageInsightsResponse> call = imgAPI.getParams(data);
         return call;
     }
 
-    private interface BingImageSearchAPI {
-        @GET("search")
-        Call<ImageSearchResponse> getParams(
+    private interface BingImageInsightsAPI {
+        @POST("search")
+        Call<ImageInsightsResponse> getParams(
                 @QueryMap Map<String, String> params
         );
     }
-
-
-
-
 }

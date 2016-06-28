@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Models;
+package orbital.com.foodsearch.Models.ImageSearchPOJO;
 
 /**
  * Created by zhiyong on 13/6/2016.
