@@ -149,8 +149,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
                 Picasso.with(mContext).load("file://" + filePath)
                         .noPlaceholder()
+                        .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
-                        .resize(previewImageView2.getWidth(), previewImageView2.getHeight())
                         .into(previewImageView2);
             }
         };
@@ -217,7 +217,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         ObjectAnimator containerAnimation = ObjectAnimator.ofFloat(resultsContainer,
                 View.TRANSLATION_Y, containerTransY);
         containerAnimation.addListener(new AnimListener(findViewById(R.id.activity_ocr_exp)));
-        containerAnimation.setDuration(400);
+        containerAnimation.setDuration(300);
         if (resultsContainer.getTranslationY() != containerTransY){
             brightenOverlay((FrameLayout)findViewById(R.id.drawable_overlay));
         }
@@ -298,7 +298,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             BingSearchResponse searchResponse = response.body();
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             List<ImageValue> imageValues = searchResponse.getImageValues();
-
+            // TODO: Load subsequent calls for insights token here
             // TODO: improve loading progress animations
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
             progressBar.setVisibility(View.GONE);

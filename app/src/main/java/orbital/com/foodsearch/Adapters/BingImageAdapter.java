@@ -5,7 +5,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -58,8 +57,11 @@ public class BingImageAdapter
 
         // Set image using image url
         ImageView cardImageView = holder.imageView;
-        ViewTreeObserver vto = cardImageView.getViewTreeObserver();
-        vto.addOnPreDrawListener(new PreDrawListener(mContext, cardImageView, thumbUrl));
+        Picasso.with(mContext).load(imageValue.getThumbnailUrl())
+                .fit()
+                .centerCrop()
+                .transform(new ScrimTransformation(mContext, cardImageView))
+                .into(cardImageView);
 
         // Set title using the name
         holder.titleTextView.setText(title);
@@ -72,29 +74,30 @@ public class BingImageAdapter
         return mImageValues.size();
     }
 
-    public static class PreDrawListener implements ViewTreeObserver.OnPreDrawListener{
-        private Context mContext = null;
-        private ImageView cardImageView = null;
-        private String url = null;
-
-        public PreDrawListener(Context context, ImageView cardImageView, String url) {
-            mContext = context;
-            this.cardImageView = cardImageView;
-            this.url = url;
-        }
-
-        @Override
-        public boolean onPreDraw() {
-            cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-            Picasso.with(mContext).load(url)
-                    .centerCrop()
-                    .resize(cardImageView.getWidth(),
-                            cardImageView.getHeight())
-                    .transform(new ScrimTransformation(mContext, cardImageView))
-                    .into(cardImageView);
-            return true;
-        }
-    }
+//    private class PreDrawListener implements ViewTreeObserver.OnPreDrawListener{
+//        private Context mContext = null;
+//        private ImageView cardImageView = null;
+//        private ImageValue imageValue = null;
+//        private ShapeDrawable shapeDrawable = null;
+//
+//        PreDrawListener(Context context, ImageView cardImageView, ImageValue imageValue) {
+//            mContext = context;
+//            this.cardImageView = cardImageView;
+//            this.imageValue = imageValue;
+//        }
+//
+//        @Override
+//        public boolean onPreDraw() {
+//            cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+//            Picasso.with(mContext).load(imageValue.getThumbnailUrl())
+//                    .centerCrop()
+//                    .resize(cardImageView.getWidth(),
+//                            cardImageView.getHeight())
+//                    .transform(new ScrimTransformation(mContext, cardImageView))
+//                    .into(cardImageView);
+//            return true;
+//        }
+//    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private ImageView imageView;

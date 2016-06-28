@@ -14,14 +14,14 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/cam_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:onClick="startOcr"
-            android:text="@string/ocr_start"/>
+        <!--<Button-->
+            <!--android:id="@+id/cam_button"-->
+            <!--style="@style/Widget.AppCompat.Button.Colored"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginTop="@dimen/activity_vertical_margin"-->
+            <!--android:onClick="startOcr"-->
+            <!--android:text="@string/ocr_start"/>-->
 
         <Button
             android:id="@+id/ocr_button"
@@ -29,15 +29,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="startExp"
-            android:text="@string/exp_start"/>
+            android:text="@string/ocr_start"/>
 
-        <Button
-            android:id="@+id/search_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="goSearch"
-            android:text="@string/search"/>
+        <!--<Button-->
+            <!--android:id="@+id/search_button"-->
+            <!--style="@style/Widget.AppCompat.Button.Colored"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="goSearch"-->
+            <!--android:text="@string/search"/>-->
 
     </LinearLayout>
 </FrameLayout>

@@ -32,7 +32,6 @@ public class SearchResultsFragment extends Fragment {
     private final String SAVED_IMAGE_VALUES = "savedImageValues";
     private ArrayList<ImageValue> mImageValues = null;
     private BingImageAdapter mAdapter = null;
-    private String searchParam;
 
     private OnFragmentInteractionListener mListener;
 
@@ -96,7 +95,7 @@ public class SearchResultsFragment extends Fragment {
     private void initializeRecycler() {
         SnappyRecyclerView rvImages = (SnappyRecyclerView) getView().findViewById(R.id.recycler_view);
         // mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
-        mImageValues = new ArrayList<>();
+        mImageValues = new ArrayList<>(5);
 
         mAdapter = new BingImageAdapter(getActivity(), mImageValues);
         rvImages.setAdapter(mAdapter);

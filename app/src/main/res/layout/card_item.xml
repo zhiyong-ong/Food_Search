@@ -6,7 +6,7 @@
     android:layout_marginEnd="18dp"
     android:layout_marginStart="18dp"
     android:background="#00000000"
-    app:cardCornerRadius="10dp"
+    app:cardCornerRadius="16dp"
     app:cardElevation="4dp">
 
     <android.support.percent.PercentRelativeLayout
