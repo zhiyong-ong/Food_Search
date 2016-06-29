@@ -288,6 +288,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         public void onResponse(Call<ImageSearchResponse> call, Response<ImageSearchResponse> response) {
             ImageSearchResponse searchResponse = response.body();
             List<ImageValue> imageValues = searchResponse.getImageValues();
+            SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            searchFragment.clearRecycler();
             enqueueImageInsightSearch(imageValues);
         }
 
@@ -319,8 +321,20 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         public void onResponse(Call<ImageInsightsResponse> call, Response<ImageInsightsResponse> response) {
             ImageInsightsResponse searchResponse = response.body();
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            String imageDesc = searchResponse.getBestRepresentativeQuery().getDisplayText();
-            String imageCaption = searchResponse.getImageCaption().getCaption();
+            String imageCaption = null;
+            String imageDesc = null;
+            if(searchResponse.getImageCaption() == null) {
+                imageCaption = " ";
+            }
+            else {
+                imageCaption = searchResponse.getImageCaption().getCaption();
+            }
+            if(searchResponse.getBestRepresentativeQuery() == null) {
+                imageDesc = imageValue.getName();
+            }
+            else {
+                imageDesc = searchResponse.getBestRepresentativeQuery().getDisplayText();
+            }
             imageValue.setRepresentativeQuery(imageDesc);
             imageValue.setImageCaption(imageCaption);
             // TODO: improve loading progress animations
@@ -334,6 +348,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 brightenOverlay(drawableOverlay);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
+
         }
 
         @Override
