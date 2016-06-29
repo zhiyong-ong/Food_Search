@@ -21,17 +21,16 @@ import retrofit2.http.QueryMap;
  */
 
 public class ImageInsights {
-    private static final String OCP_APIM_KEY = "e801fac4192d4741976e816b93bdcb48";
+    private static final String OCP_APIM_KEY = "df4bfc35ad584f8c856052cb46f213dd";
     private static final String BING_IMAGE_URL = "https://bingapis.azure-api.net/api/v5/images/";
     private static final String LOG_TAG = "FOODIES";
-
 
     //init params
     private String insights = null;
     private String modulesRequested = null;
 
-    public ImageInsights(String queryTxt, String modulesRequested) {
-        this.insights = queryTxt;
+    public ImageInsights(String insights, String modulesRequested) {
+        this.insights = insights;
         this.modulesRequested = modulesRequested;
     }
 

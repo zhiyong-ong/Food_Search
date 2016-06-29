@@ -1,25 +1,14 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by zhiyong on 27/6/2016.
  */
 
 public class BestRepresentativeQuery {
 
-    @SerializedName("text")
-    @Expose
     private String text;
-    @SerializedName("displayText")
-    @Expose
     private String displayText;
-    @SerializedName("webSearchUrl")
-    @Expose
     private String webSearchUrl;
-    @SerializedName("webSearchUrlPingSuffix")
-    @Expose
     private String webSearchUrlPingSuffix;
 
     /**

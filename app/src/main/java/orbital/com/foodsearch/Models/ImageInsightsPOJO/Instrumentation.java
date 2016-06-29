@@ -1,19 +1,12 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by zhiyong on 27/6/2016.
  */
 
 public class Instrumentation {
 
-    @SerializedName("pingUrlBase")
-    @Expose
     private String pingUrlBase;
-    @SerializedName("pageLoadPingUrl")
-    @Expose
     private String pageLoadPingUrl;
 
     /**

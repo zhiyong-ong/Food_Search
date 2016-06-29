@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Models;
+package orbital.com.foodsearch.Models.OcrPOJO;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,9 +88,9 @@ public class Line {
         for (Word word: words) {
             String text = word.getText();
             if (!eastAsian) {
-                builder.append(text.replaceAll("[/W]", ""));
+                builder.append(text.replaceAll("[^A-Za-z]", ""));
             } else {
-                builder.append(text);
+                builder.append(text.replaceAll("[\\.,\\$0-9]", ""));
             }
             builder.append(offset);
         }

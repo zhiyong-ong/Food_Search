@@ -1,8 +1,5 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,33 +17,14 @@ import orbital.com.foodsearch.Models.ImageSearchPOJO.Instrumentation;
 
 public class ImageInsightsResponse {
 
-
-    @SerializedName("_type")
-    @Expose
     private String type;
-    @SerializedName("instrumentation")
-    @Expose
     private Instrumentation instrumentation;
-    @SerializedName("bestRepresentativeQuery")
-    @Expose
     private BestRepresentativeQuery bestRepresentativeQuery;
-    @SerializedName("imageCaption")
-    @Expose
     private ImageCaption imageCaption;
-    @SerializedName("pagesIncluding")
-    @Expose
     private List<PagesIncluding> pagesIncluding = new ArrayList<PagesIncluding>();
-    @SerializedName("relatedCollections")
-    @Expose
     private List<RelatedCollection> relatedCollections = new ArrayList<RelatedCollection>();
-    @SerializedName("shoppingSources")
-    @Expose
     private ShoppingSources shoppingSources;
-    @SerializedName("relatedSearches")
-    @Expose
-    private List<RelatedSearch_> relatedSearches = new ArrayList<RelatedSearch_>();
-    @SerializedName("imageInsightsToken")
-    @Expose
+    private List<RelatedSearch> relatedSearches = new ArrayList<RelatedSearch>();
     private String imageInsightsToken;
 
     /**
@@ -180,7 +158,7 @@ public class ImageInsightsResponse {
      * @return
      * The relatedSearches
      */
-    public List<RelatedSearch_> getRelatedSearches() {
+    public List<RelatedSearch> getRelatedSearches() {
         return relatedSearches;
     }
 
@@ -189,7 +167,7 @@ public class ImageInsightsResponse {
      * @param relatedSearches
      * The relatedSearches
      */
-    public void setRelatedSearches(List<RelatedSearch_> relatedSearches) {
+    public void setRelatedSearches(List<RelatedSearch> relatedSearches) {
         this.relatedSearches = relatedSearches;
     }
 

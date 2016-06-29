@@ -8,7 +8,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import orbital.com.foodsearch.Models.BingOcrResponse;
+import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

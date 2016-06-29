@@ -42,7 +42,7 @@
             android:indeterminate="true" />
 
         <FrameLayout
-            android:id="@+id/rec_frag_container"
+            android:id="@+id/search_frag_container"
             android:layout_width="match_parent"
             android:layout_centerInParent="true"
             app:layout_heightPercent="75%"/>

@@ -1,5 +1,9 @@
 package orbital.com.foodsearch.Models.ImageSearchPOJO;
 
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.BestRepresentativeQuery;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageCaption;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
+
 /**
  * Created by zhiyong on 13/6/2016.
  */
@@ -21,8 +25,11 @@ public class ImageValue{
     private InsightsSourcesSummary insightsSourcesSummary;
     private String imageId;
     private String accentColor;
-    private String representativeQuery;
-    private String imageCaption;
+    private BestRepresentativeQuery representativeQuery;
+    private ImageCaption imageCaption;
+
+    private ImageInsightsResponse insightsResponse;
+
     /**
      *
      * @return
@@ -311,20 +318,35 @@ public class ImageValue{
         this.accentColor = accentColor;
     }
 
-    public String getRepresentativeQuery() {
-        return representativeQuery;
+    public BestRepresentativeQuery getRepresentativeQuery() {
+        if (insightsResponse != null) {
+            return getInsightsResponse().getBestRepresentativeQuery();
+        } else {
+            return null;
+        }
     }
 
-    public void setRepresentativeQuery(String representativeQuery) {
+    public void setRepresentativeQuery(BestRepresentativeQuery representativeQuery) {
         this.representativeQuery = representativeQuery;
     }
 
-    public String getImageCaption() {
-        return imageCaption;
+    public ImageCaption getImageCaption() {
+        if (insightsResponse != null) {
+            return getInsightsResponse().getImageCaption();
+        } else {
+            return null;
+        }
     }
 
-    public void setImageCaption(String imageCaption) {
+    public void setImageCaption(ImageCaption imageCaption) {
         this.imageCaption = imageCaption;
     }
 
+    public ImageInsightsResponse getInsightsResponse() {
+        return insightsResponse;
+    }
+
+    public void setInsightsResponse(ImageInsightsResponse insightsResponse) {
+        this.insightsResponse = insightsResponse;
+    }
 }

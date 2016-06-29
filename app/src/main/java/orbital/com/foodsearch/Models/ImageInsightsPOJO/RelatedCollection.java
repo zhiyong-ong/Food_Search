@@ -1,37 +1,18 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by zhiyong on 27/6/2016.
  */
 
 public class RelatedCollection {
 
-    @SerializedName("name")
-    @Expose
     private String name;
-    @SerializedName("url")
-    @Expose
     private String url;
-    @SerializedName("description")
-    @Expose
     private String description;
-    @SerializedName("thumbnailUrl")
-    @Expose
     private String thumbnailUrl;
-    @SerializedName("creator")
-    @Expose
     private Creator creator;
-    @SerializedName("source")
-    @Expose
     private String source;
-    @SerializedName("imagesCount")
-    @Expose
     private int imagesCount;
-    @SerializedName("followersCount")
-    @Expose
     private int followersCount;
 
     /**

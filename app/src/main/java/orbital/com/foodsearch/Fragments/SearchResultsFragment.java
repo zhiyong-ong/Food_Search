@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
@@ -77,24 +78,6 @@ public class SearchResultsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    /**
-     * This method is used to update the recyclerView with new image values
-     * @param newImageValues new Image values to be displayed in recyclerView
-     */
-    public void updateRecycler(ImageValue newImageValues) {
-        mImageValues.clear();
-        mImageValues.add(newImageValues);
-        mAdapter.notifyDataSetChanged();
-
-        SnappyRecyclerView recyclerView = (SnappyRecyclerView) getView().findViewById(
-                R.id.recycler_view);
-        recyclerView.scrollToPosition(0);
-    }
-
-    public void clearRecycler() {
-        mImageValues.clear();
-        mAdapter.notifyDataSetChanged();
-    }
     private void initializeRecycler() {
         SnappyRecyclerView rvImages = (SnappyRecyclerView) getView().findViewById(R.id.recycler_view);
         // mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
@@ -113,6 +96,23 @@ public class SearchResultsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_search_results, container, false);
+    }
+
+    /**
+     * This method is used to update the recyclerView with new image values
+     * @param newImageValues new Image values to be displayed in recyclerView
+     */
+    public void updateRecyclerList(List<ImageValue> newImageValues) {
+        mImageValues.clear();
+        mImageValues.addAll(newImageValues);
+
+        SnappyRecyclerView recyclerView = (SnappyRecyclerView) getView().findViewById(
+                R.id.recycler_view);
+        recyclerView.scrollToPosition(0);
+    }
+
+    public void finalizeRecycler() {
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override

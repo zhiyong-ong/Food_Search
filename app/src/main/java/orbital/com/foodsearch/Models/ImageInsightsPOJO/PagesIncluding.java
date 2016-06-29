@@ -1,8 +1,5 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 import orbital.com.foodsearch.Models.ImageSearchPOJO.Thumbnail;
 
 /**
@@ -11,50 +8,20 @@ import orbital.com.foodsearch.Models.ImageSearchPOJO.Thumbnail;
 
 public class PagesIncluding {
 
-    @SerializedName("imageId")
-    @Expose
     private String imageId;
-    @SerializedName("name")
-    @Expose
     private String name;
-    @SerializedName("webSearchUrl")
-    @Expose
     private String webSearchUrl;
-    @SerializedName("webSearchUrlPingSuffix")
-    @Expose
     private String webSearchUrlPingSuffix;
-    @SerializedName("thumbnailUrl")
-    @Expose
     private String thumbnailUrl;
-    @SerializedName("contentUrl")
-    @Expose
     private String contentUrl;
-    @SerializedName("hostPageUrl")
-    @Expose
     private String hostPageUrl;
-    @SerializedName("hostPageUrlPingSuffix")
-    @Expose
     private String hostPageUrlPingSuffix;
-    @SerializedName("contentSize")
-    @Expose
     private String contentSize;
-    @SerializedName("encodingFormat")
-    @Expose
     private String encodingFormat;
-    @SerializedName("hostPageDisplayUrl")
-    @Expose
     private String hostPageDisplayUrl;
-    @SerializedName("width")
-    @Expose
     private int width;
-    @SerializedName("height")
-    @Expose
     private int height;
-    @SerializedName("thumbnail")
-    @Expose
     private Thumbnail thumbnail;
-    @SerializedName("imageInsightsToken")
-    @Expose
     private String imageInsightsToken;
 
     /**

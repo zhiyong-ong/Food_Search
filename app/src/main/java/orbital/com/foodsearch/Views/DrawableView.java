@@ -17,7 +17,7 @@ import android.widget.ImageView;
 import java.util.ArrayList;
 import java.util.List;
 
-import orbital.com.foodsearch.Models.Line;
+import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
 
 /**

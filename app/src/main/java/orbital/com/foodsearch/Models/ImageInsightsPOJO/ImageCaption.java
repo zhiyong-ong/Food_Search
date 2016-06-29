@@ -1,8 +1,5 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +9,8 @@ import java.util.List;
 
 public class ImageCaption {
 
-    @SerializedName("caption")
-    @Expose
     private String caption;
-    @SerializedName("dataSourceUrl")
-    @Expose
     private String dataSourceUrl;
-    @SerializedName("relatedSearches")
-    @Expose
     private List<RelatedSearch> relatedSearches = new ArrayList<RelatedSearch>();
 
     /**

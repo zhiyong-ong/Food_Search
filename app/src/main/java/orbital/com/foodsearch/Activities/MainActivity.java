@@ -28,8 +28,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int EXP_CAMERA_INTENT_REQUEST_CODE = 200;
     private static final String SAVED_URI = "savedUri";
 
-    private final String LOG_TAG = "FOODIES";
-    private final String PHOTO_FILE_NAME = "photo.jpg";
+    private static final String LOG_TAG = "FOODIES";
+    private static final String PHOTO_FILE_NAME = "photo.jpg";
+    private static final String DEBUG_FILE_NAME = "debug.jpg";
 
     private Uri photoFileUri = null;
 
@@ -62,14 +63,11 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     @TargetApi(Build.VERSION_CODES.M)
-    public void startOcr(View view) {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA},
-                    OCR_CAMERA_PERMISSION_REQUEST_CODE);
-        } else {
-            dispatchCameraIntent(OCR_CAMERA_INTENT_REQUEST_CODE);
-        }
+    public void startDebug(View view) {
+        Intent intent = new Intent(this, OcrActivity.class);
+        generateDebugUri();
+        intent.putExtra("filePath", photoFileUri.getPath());
+        startActivity(intent);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -168,5 +166,21 @@ public class MainActivity extends AppCompatActivity {
         }
         photoFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
                 + File.separator + PHOTO_FILE_NAME));
+    }
+
+    /**
+     * This method generates the Uri and saves it as the member variable
+     */
+    private void generateDebugUri() {
+        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                , "FoodSearch");
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
+            }
+        }
+        photoFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
+                + File.separator + DEBUG_FILE_NAME));
     }
 }
