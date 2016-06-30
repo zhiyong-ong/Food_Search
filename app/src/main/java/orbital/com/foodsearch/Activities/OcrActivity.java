@@ -31,8 +31,8 @@ import orbital.com.foodsearch.Fragments.SearchResultsFragment;
 import orbital.com.foodsearch.Helpers.BingOcr;
 import orbital.com.foodsearch.Helpers.BingSearch;
 import orbital.com.foodsearch.Helpers.ImageInsights;
-import orbital.com.foodsearch.Helpers.ImageUtils;
-import orbital.com.foodsearch.Helpers.NetworkUtils;
+import orbital.com.foodsearch.Utils.ImageUtils;
+import orbital.com.foodsearch.Utils.NetworkUtils;
 import orbital.com.foodsearch.Models.BingOcrResponse;
 import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
@@ -159,16 +159,6 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         compressTask.execute(filePath);
     }
 
-    /**
-     * This method creates a search call based on the input param and enqueues it
-     * @param searchParam parameter string to be searched for
-     */
-    private void enqueueSearch(String searchParam) {
-        Log.e(LOG_TAG, "Search String: " + searchParam);
-        BingSearch bingImg = new BingSearch(searchParam);
-        Call<BingSearchResponse> call = bingImg.buildCall();
-        call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
-    }
 
     @Override
     public void onBackPressed() {
