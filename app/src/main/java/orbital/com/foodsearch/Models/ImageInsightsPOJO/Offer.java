@@ -1,21 +1,13 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Created by zhiyong on 27/6/2016.
  */
 
 public class Offer {
-    @SerializedName("url")
-    @Expose
+
     private String url;
-    @SerializedName("seller")
-    @Expose
     private Seller seller;
-    @SerializedName("availability")
-    @Expose
     private String availability;
 
     /**

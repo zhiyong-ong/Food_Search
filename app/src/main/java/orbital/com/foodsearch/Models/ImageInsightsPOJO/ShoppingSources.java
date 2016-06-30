@@ -1,8 +1,5 @@
 package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +8,7 @@ import java.util.List;
  */
 
 public class ShoppingSources {
-    @SerializedName("offers")
-    @Expose
+
     private List<Offer> offers = new ArrayList<Offer>();
 
     /**

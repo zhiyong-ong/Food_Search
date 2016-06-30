@@ -151,12 +151,23 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
                 Picasso.with(mContext).load("file://" + filePath)
                         .noPlaceholder()
+                        .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
-                        .resize(previewImageView2.getWidth(), previewImageView2.getHeight())
                         .into(previewImageView2);
             }
         };
         compressTask.execute(filePath);
+    }
+
+    /**
+     * This method creates a search call based on the input param and enqueues it
+     * @param searchParam parameter string to be searched for
+     */
+    private void enqueueSearch(String searchParam) {
+        Log.e(LOG_TAG, "Search String: " + searchParam);
+        BingSearch bingImg = new BingSearch(searchParam);
+        Call<BingSearchResponse> call = bingImg.buildCall();
+        call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
     }
 
     @Override
@@ -208,7 +219,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         ObjectAnimator containerAnimation = ObjectAnimator.ofFloat(resultsContainer,
                 View.TRANSLATION_Y, containerTransY);
         containerAnimation.addListener(new AnimListener(findViewById(R.id.activity_ocr_exp)));
-        containerAnimation.setDuration(400);
+        containerAnimation.setDuration(300);
         if (resultsContainer.getTranslationY() != containerTransY){
             brightenOverlay((FrameLayout)findViewById(R.id.drawable_overlay));
         }

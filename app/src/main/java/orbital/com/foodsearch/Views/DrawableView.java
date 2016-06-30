@@ -154,12 +154,10 @@ public class DrawableView extends ImageView{
         greenPaint = new Paint();
         greenPaint.setStyle(Paint.Style.STROKE);
         greenPaint.setColor(Color.GREEN);
-        greenPaint.setStrokeWidth(3);
+        greenPaint.setStrokeWidth(4);
         redPaint = new Paint(greenPaint);
         redPaint.setColor(Color.RED);
     }
-
-
 
     public void selectIndex(int selectedIndex) {
         this.selectedIndex = selectedIndex;

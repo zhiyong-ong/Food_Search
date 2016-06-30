@@ -73,30 +73,27 @@ public class Line {
         StringBuilder builder = new StringBuilder();
         List<Word> words = getWords();
         String offset = null;
+        boolean eastAsian = false;
         switch (language) {
             case LANGUAGE_CNS:
             case LANGUAGE_CNT:
             case LANGUAGE_KO:
             case LANGUAGE_JA:
                 offset = "";
+                eastAsian = true;
                 break;
             default:
                 offset = " ";
         }
         for (Word word: words) {
             String text = word.getText();
-            if (!containsSymbols(text)) {
-                builder.append(text);
-                builder.append(offset);
+            if (!eastAsian) {
+                builder.append(text.replaceAll("[/W]", ""));
             } else {
-                builder.append(text.replaceAll("[\\$-\\.,•]", ""));
+                builder.append(text);
             }
+            builder.append(offset);
         }
         return builder.toString();
-    }
-
-    private boolean containsSymbols(String text) {
-        return text.contains("$") || text.contains("-") || text.contains(".")
-                || text.contains("•") || text.contains(",");
     }
 }
