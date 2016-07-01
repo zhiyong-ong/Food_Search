@@ -2,6 +2,8 @@ package orbital.com.foodsearch.Adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 import orbital.com.foodsearch.Models.ImageInsightsPOJO.BestRepresentativeQuery;
@@ -52,19 +56,19 @@ public class BingImageAdapter
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ImageValue imageValue = mImageValues.get(position);
-        String imageUrl = imageValue.getContentUrl();
+        String contentUrl = imageValue.getContentUrl();
         String thumbUrl = imageValue.getThumbnailUrl();
         String hostUrl = imageValue.getHostPageUrl();
 
         BestRepresentativeQuery brq = imageValue.getRepresentativeQuery();
         ImageCaption imageCaption = imageValue.getImageCaption();
         String title = imageValue.getName();
-        String desc = imageValue.getContentUrl();
+        String desc = title;
         if (brq != null && imageCaption != null) {
-            title = imageValue.getRepresentativeQuery().getText();
-            desc = imageValue.getImageCaption().getCaption();
+            title = brq.getText();
+            desc = imageCaption.getCaption();
+            hostUrl = imageCaption.getDataSourceUrl();
         }
-
         // Set image using image url
         ImageView cardImageView = holder.imageView;
         Picasso.with(mContext).load(thumbUrl)
@@ -75,8 +79,31 @@ public class BingImageAdapter
 
         // Set title using the name
         holder.titleTextView.setText(title);
-        holder.hostPageView.setText(hostUrl);
         holder.descView.setText(desc);
+        setTextViewUrl(holder.hostUrlView, hostUrl);
+    }
+
+    /**
+     * This method formats the URL such that only the host domain is showed
+     * but still links to the hostUrl
+     * @param textView Viewholder holding the textview
+     * @param hostUrl URL to be linked to and formatted
+     */
+    private void setTextViewUrl(TextView textView, String hostUrl) {
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        StringBuilder sb = new StringBuilder();
+        sb.append("<a href=\"");
+        sb.append(hostUrl);
+        sb.append("\">");
+        URL url = null;
+        try {
+            url = new URL(hostUrl);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+        sb.append(url.getHost());
+        sb.append("</a>");
+        textView.setText(Html.fromHtml(sb.toString()));
     }
 
     @Override
@@ -112,14 +139,14 @@ public class BingImageAdapter
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private ImageView imageView;
         private TextView titleTextView;
-        private TextView hostPageView;
+        private TextView hostUrlView;
         private TextView descView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.card_image);
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
-            hostPageView = (TextView) itemView.findViewById(R.id.card_hostpage);
+            hostUrlView = (TextView) itemView.findViewById(R.id.card_hostpage);
             descView = (TextView) itemView.findViewById(R.id.card_description);
         }
     }

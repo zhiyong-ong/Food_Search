@@ -17,7 +17,7 @@ import orbital.com.foodsearch.R;
 public class AnimUtils {
     public static void brightenOverlay(final FrameLayout drawableOverlay){
         ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
-                Color.parseColor("#8F000000"),
+                Color.parseColor("#9F000000"),
                 Color.TRANSPARENT);
         darkenAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
@@ -33,7 +33,7 @@ public class AnimUtils {
     public static void darkenOverlay(final FrameLayout drawableOverlay){
         ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
                 Color.TRANSPARENT,
-                Color.parseColor("#8F000000"));
+                Color.parseColor("#9F000000"));
         darkenAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
