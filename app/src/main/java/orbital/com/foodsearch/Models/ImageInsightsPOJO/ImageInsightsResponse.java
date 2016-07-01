@@ -18,19 +18,13 @@ import orbital.com.foodsearch.Models.ImageSearchPOJO.Instrumentation;
 public class ImageInsightsResponse {
 
     private String type;
-
     private Instrumentation instrumentation;
-
     private BestRepresentativeQuery bestRepresentativeQuery;
-
     private ImageCaption imageCaption;
-
     private List<PagesIncluding> pagesIncluding = new ArrayList<PagesIncluding>();
-
     private List<RelatedCollection> relatedCollections = new ArrayList<RelatedCollection>();
-
     private ShoppingSources shoppingSources;
-
+    private List<RelatedSearch> relatedSearches = new ArrayList<RelatedSearch>();
     private String imageInsightsToken;
 
     /**
@@ -157,6 +151,24 @@ public class ImageInsightsResponse {
      */
     public void setShoppingSources(ShoppingSources shoppingSources) {
         this.shoppingSources = shoppingSources;
+    }
+
+    /**
+     *
+     * @return
+     * The relatedSearches
+     */
+    public List<RelatedSearch> getRelatedSearches() {
+        return relatedSearches;
+    }
+
+    /**
+     *
+     * @param relatedSearches
+     * The relatedSearches
+     */
+    public void setRelatedSearches(List<RelatedSearch> relatedSearches) {
+        this.relatedSearches = relatedSearches;
     }
 
     /**

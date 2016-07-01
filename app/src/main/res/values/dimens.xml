@@ -7,6 +7,7 @@
     <dimen name="headline_font_size">24sp</dimen>
     <dimen name="title_font_size">20sp</dimen>
     <dimen name="subhead_font_size">16sp</dimen>
+    <dimen name="url_font_size">14sp</dimen>
 
     <dimen name="card_image_height">280dp</dimen>
 </resources>

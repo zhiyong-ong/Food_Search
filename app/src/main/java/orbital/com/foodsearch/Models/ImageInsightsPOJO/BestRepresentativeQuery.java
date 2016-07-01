@@ -6,13 +6,9 @@ package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
 public class BestRepresentativeQuery {
 
-
     private String text;
-
     private String displayText;
-
     private String webSearchUrl;
-
     private String webSearchUrlPingSuffix;
 
     /**

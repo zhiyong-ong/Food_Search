@@ -10,9 +10,7 @@ import java.util.List;
 public class ImageCaption {
 
     private String caption;
-
     private String dataSourceUrl;
-
     private List<RelatedSearch> relatedSearches = new ArrayList<RelatedSearch>();
 
     /**

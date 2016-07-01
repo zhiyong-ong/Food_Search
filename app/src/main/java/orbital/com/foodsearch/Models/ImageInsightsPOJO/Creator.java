@@ -7,9 +7,7 @@ package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 public class Creator {
 
     private String type;
-
     private String name;
-
     private String url;
 
     /**

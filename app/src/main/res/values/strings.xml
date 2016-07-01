@@ -8,7 +8,7 @@
     <string name="title_activity_google_search">Google search</string>
     <string name="title_activity_ocr">OCR</string>
     <string name="ocr_start">OCR start</string>
-    <string name="exp_start">EXP start</string>
+    <string name="debug_start">DEBUG</string>
 
     <!--String values for error messages in snackbars-->
     <string name="no_photo_text">Photo was not taken</string>
@@ -19,6 +19,7 @@
     <string name="internet_error_text">You\'re not online</string>
     <string name="ocr_call_fail">OCR Call Failed</string>
     <string name="image_search_fail">Image Search Call Failed</string>
+    <string name="insights_search_fail">Insights call failed!</string>
     <string name="retry">Retry</string>
 
 </resources>

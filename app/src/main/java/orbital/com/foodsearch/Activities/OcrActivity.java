@@ -1,9 +1,6 @@
 package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
-import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
@@ -25,20 +22,22 @@ import android.widget.ProgressBar;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
 import java.util.List;
 
 import orbital.com.foodsearch.Fragments.SearchResultsFragment;
 import orbital.com.foodsearch.Helpers.BingOcr;
 import orbital.com.foodsearch.Helpers.BingSearch;
 import orbital.com.foodsearch.Helpers.ImageInsights;
-import orbital.com.foodsearch.Utils.ImageUtils;
-import orbital.com.foodsearch.Utils.NetworkUtils;
-import orbital.com.foodsearch.Models.BingOcrResponse;
 import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
-import orbital.com.foodsearch.Models.Line;
+import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
+import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
+import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.ImageUtils;
+import orbital.com.foodsearch.Utils.NetworkUtils;
 import orbital.com.foodsearch.Views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -52,9 +51,10 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
 
     private boolean animating = false;
+    private int containerTransY;
+
     private String filePath = null;
     private List<ImageValue> mImageValues = null;
-    private int containerTransY;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -91,12 +91,12 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 .into(imgView);
         startOcrService();
         initializeDrawView();
-        setupRecContainer();
+        setupSearchContainer();
     }
 
-    private void setupRecContainer() {
+    private void setupSearchContainer() {
         final View rootView = findViewById(R.id.activity_ocr_exp);
-        final FrameLayout recyclerContainer = (FrameLayout) findViewById(R.id.rec_frag_container);
+        final FrameLayout recyclerContainer = (FrameLayout) findViewById(R.id.search_frag_container);
         ViewTreeObserver vto = recyclerContainer.getViewTreeObserver();
         // To move recyclerContainer out of the screen
         // Done using onPreDrawListener so as to get the correct measured height
@@ -107,7 +107,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 containerTransY = rootView.getHeight();
                 recyclerContainer.setTranslationY(containerTransY);
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
-                ft.replace(R.id.rec_frag_container, new SearchResultsFragment(), SEARCH_FRAGMENT_TAG);
+                ft.replace(R.id.search_frag_container, new SearchResultsFragment(), SEARCH_FRAGMENT_TAG);
                 ft.commit();
                 return true;
             }
@@ -159,14 +159,20 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         compressTask.execute(filePath);
     }
 
-
     @Override
     public void onBackPressed() {
-        if (findViewById(R.id.rec_frag_container).getTranslationY() != 0) {
+        if (findViewById(R.id.search_frag_container).getTranslationY() != 0) {
             super.onBackPressed();
         } else {
-            containerSlideDown();
+            closeSearch(findViewById(R.id.activity_ocr_exp));
         }
+    }
+
+    public void closeSearch(View view) {
+        View rootView = findViewById(R.id.activity_ocr_exp);
+        AnimUtils.containerSlideDown(rootView,
+                new AnimListener(rootView),
+                containerTransY);
     }
 
     @Override
@@ -174,54 +180,75 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
 
     }
 
-    private void brightenOverlay(final FrameLayout drawableOverlay){
-        ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
-                Color.parseColor("#7F000000"),
-                Color.TRANSPARENT);
-        darkenAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                drawableOverlay.setBackgroundColor((Integer) valueAnimator.getAnimatedValue());
-            }
-        });
-
-        darkenAnim.setDuration(400);
-        darkenAnim.start();
+    /**
+     * This method creates a search call based on the input param and enqueues it
+     * @param searchParam parameter string to be searched for
+     */
+    private void enqueueSearch(String searchParam) {
+        Log.e(LOG_TAG, "Search String: " + searchParam);
+        BingSearch bingImg = new BingSearch(searchParam);
+        Call<ImageSearchResponse> call = bingImg.buildCall();
+        call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
     }
 
-    private void darkenOverlay(final FrameLayout drawableOverlay){
-        ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
-                Color.TRANSPARENT,
-                Color.parseColor("#7F000000"));
-        darkenAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                drawableOverlay.setBackgroundColor((Integer) valueAnimator.getAnimatedValue());
-            }
-        });
-
-        darkenAnim.setDuration(400);
-        darkenAnim.start();
-    }
-
-    private void containerSlideDown() {
-        FrameLayout resultsContainer = (FrameLayout)findViewById(R.id.rec_frag_container);
-        ObjectAnimator containerAnimation = ObjectAnimator.ofFloat(resultsContainer,
-                View.TRANSLATION_Y, containerTransY);
-        containerAnimation.addListener(new AnimListener(findViewById(R.id.activity_ocr_exp)));
-        containerAnimation.setDuration(300);
-        if (resultsContainer.getTranslationY() != containerTransY){
-            brightenOverlay((FrameLayout)findViewById(R.id.drawable_overlay));
+    /**
+     * This method creates a imageinsight search call based on the input imageValues list and enqueues it
+     * @param imageValues image values list to be used as param for insightsToken call
+     * Multiple calls.
+     */
+    private void enqueueImageInsightSearch(List<ImageValue> imageValues) {
+        for (ImageValue imageValue : imageValues) {
+            ImageInsights imageInsights = new ImageInsights(imageValue.getImageInsightsToken(), "");
+            Call<ImageInsightsResponse> call = imageInsights.buildCall();
+            call.enqueue(new ImageInsightCallback(findViewById(R.id.activity_ocr_exp),
+                    FRAGMENT_MANAGER,
+                    imageValue));
         }
-        containerAnimation.start();
     }
 
-    private void containerSlideUp() {
-        FrameLayout resultsContainer = (FrameLayout) findViewById(R.id.rec_frag_container);
-        ObjectAnimator anim = ObjectAnimator.ofFloat(resultsContainer,
-                View.TRANSLATION_Y, 0);
-        anim.setDuration(600);
-        anim.start();
+    /**
+     * Callback class for ImageInsightCallback.
+     */
+    private static class ImageInsightCallback implements Callback<ImageInsightsResponse> {
+        private static volatile int count = 0;
+        private View rootView = null;
+        private FragmentManager fm = null;
+        private ImageValue imageValue = null;
+
+        public ImageInsightCallback(View rootView, FragmentManager fm, ImageValue imageValue){
+            this.rootView = rootView;
+            this.fm = fm;
+            this.imageValue = imageValue;
+        }
+
+        @Override
+        public void onResponse(Call<ImageInsightsResponse> call, Response<ImageInsightsResponse> response) {
+            ImageInsightsResponse insightsResponse = response.body();
+            imageValue.setInsightsResponse(insightsResponse);
+            count++;
+            if (count < 5) {
+                return;
+            }
+            count = 0;
+            SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            searchFragment.finalizeRecycler();
+            // TODO: improve loading progress animations
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+            progressBar.setVisibility(View.GONE);
+            AnimUtils.containerSlideUp(rootView);
+        }
+
+        @Override
+        public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
+            if (count < 5) {
+                count++;
+                return;
+            }
+            Log.e(LOG_TAG, t.getMessage());
+            Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.insights_search_fail,
+                    Snackbar.LENGTH_LONG)
+                    .show();
+        }
     }
 
     private class DrawableTouchListener implements View.OnTouchListener {
@@ -237,7 +264,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (!animating) {
-                containerSlideDown();
+                closeSearch(v);
             }
             mDrawableView = (DrawableView) v;
             List<Rect> rects = mDrawableView.getmRects();
@@ -263,7 +290,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                         // called when search is clicked
                         @Override
                         public void onClick(View v) {
-                            darkenOverlay((FrameLayout)rootView.findViewById(R.id.drawable_overlay));
+                            AnimUtils.darkenOverlay((FrameLayout)rootView.findViewById(R.id.drawable_overlay));
                             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
                             progressBar.setVisibility(View.VISIBLE);
                             enqueueSearch(searchParam);
@@ -288,10 +315,28 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         @Override
         public void onResponse(Call<ImageSearchResponse> call, Response<ImageSearchResponse> response) {
             ImageSearchResponse searchResponse = response.body();
+            if (searchResponse == null) {
+                try {
+                    Log.e(LOG_TAG, response.errorBody().string());
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             List<ImageValue> imageValues = searchResponse.getImageValues();
+            // image search results received, now enqueueImageInsightSearch with received value
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            searchFragment.clearRecycler();
-            enqueueImageInsightSearch(imageValues);
+            if (!imageValues.isEmpty()) {
+                searchFragment.updateRecyclerList(imageValues);
+                enqueueImageInsightSearch(imageValues);
+            } else {
+                ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+                progressBar.setVisibility(View.GONE);
+                FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
+                AnimUtils.brightenOverlay(drawableOverlay);
+                Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
+            }
+
         }
 
         @Override
@@ -303,88 +348,6 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         }
     }
 
-    /**
-     * Callback class for ImageInsightCallback.
-     * ContentURL is passed here too.
-     */
-    private class ImageInsightCallback implements Callback<ImageInsightsResponse> {
-        private View rootView = null;
-        private FragmentManager fm = null;
-        private ImageValue imageValue = null;
-
-        public ImageInsightCallback(View rootView, FragmentManager fm, ImageValue imageValue){
-            this.rootView = rootView;
-            this.fm = fm;
-            this.imageValue = imageValue;
-        }
-
-        @Override
-        public void onResponse(Call<ImageInsightsResponse> call, Response<ImageInsightsResponse> response) {
-            ImageInsightsResponse searchResponse = response.body();
-            SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            String imageCaption = null;
-            String imageDesc = null;
-            if(searchResponse.getImageCaption() == null) {
-                imageCaption = " ";
-            }
-            else {
-                imageCaption = searchResponse.getImageCaption().getCaption();
-            }
-            if(searchResponse.getBestRepresentativeQuery() == null) {
-                imageDesc = imageValue.getName();
-            }
-            else {
-                imageDesc = searchResponse.getBestRepresentativeQuery().getDisplayText();
-            }
-            imageValue.setRepresentativeQuery(imageDesc);
-            imageValue.setImageCaption(imageCaption);
-            // TODO: improve loading progress animations
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
-            progressBar.setVisibility(View.GONE);
-            if (imageValue != null) {
-                searchFragment.updateRecycler(imageValue);
-                containerSlideUp();
-            } else {
-                FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                brightenOverlay(drawableOverlay);
-                Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
-            }
-
-        }
-
-        @Override
-        public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
-            Log.e(LOG_TAG, t.getMessage());
-            Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.image_search_fail,
-                    Snackbar.LENGTH_LONG)
-                    .show();
-        }
-    }
-
-    /**
-     * This method creates a search call based on the input param and enqueues it
-     * @param searchParam parameter string to be searched for
-     */
-    private void enqueueSearch(String searchParam) {
-        Log.e(LOG_TAG, "Search String: " + searchParam);
-        BingSearch bingImg = new BingSearch(searchParam);
-        Call<ImageSearchResponse> call = bingImg.buildCall();
-        call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
-    }
-
-
-    /**
-     * This method creates a imageinsight search call based on the input param and enqueues it
-     * @param imgVals parameter string to be searched for
-     * Multiple calls.
-     */
-    private void enqueueImageInsightSearch(List<ImageValue> imgVals) {
-        for(int i = 0; i < imgVals.size(); i++) {
-            ImageInsights bingImg = new ImageInsights(imgVals.get(i).getImageInsightsToken(), "");
-            Call<ImageInsightsResponse> call = bingImg.buildCall();
-            call.enqueue(new ImageInsightCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER, imgVals.get(i)));
-        }
-    }
     /**
      * Callback class that implements callback method to be used for when a
      * response is received from server
@@ -443,6 +406,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         }
     }
 
+
     /**
      * Listener to set boolean value for animating so that we can track it
      */
@@ -465,12 +429,10 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
 
         @Override
         public void onAnimationCancel(Animator animation) {
-
         }
 
         @Override
         public void onAnimationRepeat(Animator animation) {
-
         }
     }
 }

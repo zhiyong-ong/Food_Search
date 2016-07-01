@@ -5,7 +5,6 @@ package orbital.com.foodsearch.Models.ImageInsightsPOJO;
  */
 
 public class Seller {
-
     private String name;
 
     /**

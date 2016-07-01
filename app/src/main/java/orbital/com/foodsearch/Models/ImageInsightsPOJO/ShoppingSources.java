@@ -8,7 +8,6 @@ import java.util.List;
  */
 
 public class ShoppingSources {
-
     private List<Offer> offers = new ArrayList<Offer>();
 
     /**

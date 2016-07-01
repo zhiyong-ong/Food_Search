@@ -12,6 +12,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.BestRepresentativeQuery;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageCaption;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.ScrimTransformation;
@@ -50,11 +52,18 @@ public class BingImageAdapter
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ImageValue imageValue = mImageValues.get(position);
-        String title = imageValue.getRepresentativeQuery();
         String imageUrl = imageValue.getContentUrl();
         String thumbUrl = imageValue.getThumbnailUrl();
         String hostUrl = imageValue.getHostPageUrl();
-        String desc = imageValue.getImageCaption();
+
+        BestRepresentativeQuery brq = imageValue.getRepresentativeQuery();
+        ImageCaption imageCaption = imageValue.getImageCaption();
+        String title = imageValue.getName();
+        String desc = imageValue.getContentUrl();
+        if (brq != null && imageCaption != null) {
+            title = imageValue.getRepresentativeQuery().getText();
+            desc = imageValue.getImageCaption().getCaption();
+        }
 
         // Set image using image url
         ImageView cardImageView = holder.imageView;
@@ -66,7 +75,6 @@ public class BingImageAdapter
 
         // Set title using the name
         holder.titleTextView.setText(title);
-        holder.contentURLView.setText(imageUrl);
         holder.hostPageView.setText(hostUrl);
         holder.descView.setText(desc);
     }
@@ -105,7 +113,6 @@ public class BingImageAdapter
         private ImageView imageView;
         private TextView titleTextView;
         private TextView hostPageView;
-        private TextView contentURLView;
         private TextView descView;
 
         public ViewHolder(View itemView) {
@@ -113,7 +120,6 @@ public class BingImageAdapter
             imageView = (ImageView) itemView.findViewById(R.id.card_image);
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
             hostPageView = (TextView) itemView.findViewById(R.id.card_hostpage);
-            contentURLView = (TextView)itemView.findViewById(R.id.card_contentURL);
             descView = (TextView) itemView.findViewById(R.id.card_description);
         }
     }
