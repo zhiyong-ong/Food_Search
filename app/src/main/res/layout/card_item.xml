@@ -86,4 +86,5 @@
             android:padding="@dimen/activity_horizontal_margin"
             android:src="@drawable/close_button_drawable"/>
     </android.support.percent.PercentRelativeLayout>
+    </ScrollView>
 </android.support.v7.widget.CardView>
