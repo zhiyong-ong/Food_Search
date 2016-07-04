@@ -40,13 +40,13 @@
             android:paddingBottom="18dp"
             android:src="@drawable/link_button_drawable"/>
 
-        <!--<Button-->
-            <!--android:id="@+id/search_button"-->
-            <!--style="@style/Widget.AppCompat.Button.Colored"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:onClick="goSearch"-->
-            <!--android:text="@string/search"/>-->
+        <Button
+            android:id="@+id/search_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="goSearch"
+            android:text="@string/search"/>
 
     </LinearLayout>
 </FrameLayout>

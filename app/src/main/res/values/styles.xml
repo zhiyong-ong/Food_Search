@@ -7,4 +7,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="BorderlessButton" parent="Theme.AppCompat.Light">
+        <item name="colorControlHighlight">@color/onPressed</item>
+    </style>
+
 </resources>
