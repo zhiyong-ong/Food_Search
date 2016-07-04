@@ -50,4 +50,37 @@
         android:layout_toEndOf="@+id/editText"
         android:text="click"
         android:textSize="10dp" />
+
+
+    <EditText
+        android:id="@+id/translateText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@android:drawable/editbox_background"
+        android:ems="10"
+        android:hint="Translate"
+        android:textAlignment="center" />
+
+    <Button
+        android:id="@+id/buttonTranslate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/translateText"
+        android:layout_toEndOf="@+id/translateText"
+        android:text="click"
+        android:textSize="10dp"
+        android:layout_alignBottom="@+id/translateText" />
+
+    <TextView
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/translateText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:id="@+id/translatedText" />
 </RelativeLayout>

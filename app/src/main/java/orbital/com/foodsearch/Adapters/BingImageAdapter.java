@@ -1,13 +1,17 @@
 package orbital.com.foodsearch.Adapters;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -16,11 +20,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
+import orbital.com.foodsearch.Helpers.BingTranslate;
 import orbital.com.foodsearch.Models.ImageInsightsPOJO.BestRepresentativeQuery;
 import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageCaption;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.ScrimTransformation;
+import orbital.com.foodsearch.Utils.AnimUtils;
 
 /**
  * Created by Abel on 6/14/2016.
@@ -58,7 +64,7 @@ public class BingImageAdapter
         ImageValue imageValue = mImageValues.get(position);
         String contentUrl = imageValue.getContentUrl();
         String thumbUrl = imageValue.getThumbnailUrl();
-        String hostUrl = imageValue.getHostPageDisplayUrl();
+        String hostUrl = imageValue.getHostPageUrl();
 
         BestRepresentativeQuery brq = imageValue.getRepresentativeQuery();
         ImageCaption imageCaption = imageValue.getImageCaption();
@@ -111,18 +117,80 @@ public class BingImageAdapter
         return mImageValues.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+//    private class PreDrawListener implements ViewTreeObserver.OnPreDrawListener{
+//        private Context mContext = null;
+//        private ImageView cardImageView = null;
+//        private ImageValue imageValue = null;
+//        private ShapeDrawable shapeDrawable = null;
+//
+//        PreDrawListener(Context context, ImageView cardImageView, ImageValue imageValue) {
+//            mContext = context;
+//            this.cardImageView = cardImageView;
+//            this.imageValue = imageValue;
+//        }
+//
+//        @Override
+//        public boolean onPreDraw() {
+//            cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+//            Picasso.with(mContext).load(imageValue.getThumbnailUrl())
+//                    .centerCrop()
+//                    .resize(cardImageView.getWidth(),
+//                            cardImageView.getHeight())
+//                    .transform(new ScrimTransformation(mContext, cardImageView))
+//                    .into(cardImageView);
+//            return true;
+//        }
+//    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imageView;
         private TextView titleTextView;
         private TextView hostUrlView;
         private TextView descView;
-
+        private Button translateBtn;
+        private ProgressBar progressBar;
+        private FrameLayout overlay;
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.card_image);
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
             hostUrlView = (TextView) itemView.findViewById(R.id.card_hostpage);
             descView = (TextView) itemView.findViewById(R.id.card_description);
+            translateBtn = (Button) itemView.findViewById(R.id.translateButton);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBarCard);
+            progressBar.setVisibility(View.INVISIBLE);
+            overlay = (FrameLayout) itemView.findViewById(R.id.card_overlay);
+            itemView.setOnClickListener(this);
+            translateBtn.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+
+            final String titleText = titleTextView.getText().toString();
+            final String descText = descView.getText().toString();
+            class background extends AsyncTask<Void, Void, Void> {
+
+                private String translatedTitle = "";
+                private String translatedDesc = "";
+                @Override
+                protected Void doInBackground(Void... params) {
+                    translatedTitle = BingTranslate.getTranslatedText(titleText);
+                    translatedDesc = BingTranslate.getTranslatedText(descText);
+                    return null;
+                }
+                @Override
+                protected void onPostExecute(Void result) {
+                    titleTextView.setText(translatedTitle);
+                    descView.setText(translatedDesc);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    AnimUtils.brightenOverlay(overlay);
+                    super.onPostExecute(result);
+                }
+            }
+            new background().execute();
+            progressBar.setVisibility(View.VISIBLE);
+            AnimUtils.darkenOverlay(overlay);
         }
     }
 }

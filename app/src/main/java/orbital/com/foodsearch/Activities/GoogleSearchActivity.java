@@ -1,6 +1,7 @@
 package orbital.com.foodsearch.Activities;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,6 +16,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 
 import orbital.com.foodsearch.Helpers.BingSearch;
+import orbital.com.foodsearch.Helpers.BingTranslate;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
 import orbital.com.foodsearch.R;
 import retrofit2.Call;
@@ -78,6 +80,32 @@ public class GoogleSearchActivity extends AppCompatActivity {
                         txt.setText(t.getMessage());
                     }
                 });
+                }
+            });
+
+
+        }
+        final Button btnTranslate = (Button) findViewById(R.id.buttonTranslate);
+        if(btnTranslate != null) {
+            btnTranslate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final String text = ((EditText) findViewById(R.id.translateText)).getText().toString();
+                    class background extends AsyncTask<Void, Void, Void> {
+
+                        String translatedTxt = "";
+                        @Override
+                        protected Void doInBackground(Void... params) {
+                            translatedTxt = BingTranslate.getTranslatedText(text);
+                            return null;
+                        }
+                        @Override
+                        protected void onPostExecute(Void result) {
+                            ((TextView) findViewById(R.id.translatedText)).setText(translatedTxt);
+                            super.onPostExecute(result);
+                        }
+                    }
+                    new background().execute();
                 }
             });
         }

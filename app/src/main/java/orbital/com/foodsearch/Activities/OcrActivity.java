@@ -47,7 +47,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     private static final String LOG_TAG = "FOODIES";
     private static final String SAVED_FILE_PATH = "SAVEDFILEPATH";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
-
+    private static final int IMAGE_COUNT = 1;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
 
     private boolean animating = false;
@@ -226,7 +226,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             ImageInsightsResponse insightsResponse = response.body();
             imageValue.setInsightsResponse(insightsResponse);
             count++;
-            if (count < 5) {
+            if (count < IMAGE_COUNT) {
                 return;
             }
             count = 0;
@@ -240,7 +240,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
 
         @Override
         public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
-            if (count < 5) {
+            if (count < IMAGE_COUNT) {
                 count++;
                 return;
             }
@@ -339,6 +339,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 AnimUtils.brightenOverlay(drawableOverlay);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
+
         }
 
         @Override
