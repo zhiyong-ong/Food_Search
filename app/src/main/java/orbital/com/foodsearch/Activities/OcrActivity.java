@@ -126,6 +126,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                     case R.id.edit_text:
                         break;
                     case R.id.start_search:
+                        searchButton.setEnabled(false);
                         enqueueSearch(editText.getText().toString());
                         break;
                 }
@@ -215,6 +216,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
 
     public void closeSearch(View view) {
         View rootView = findViewById(R.id.activity_ocr_exp);
+        Button searchButton = (Button)rootView.findViewById(R.id.start_search);
+        searchButton.setEnabled(true);
         AnimUtils.containerSlideDown(rootView,
                 new AnimListener(rootView),
                 containerTransY);
