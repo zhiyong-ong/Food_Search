@@ -23,7 +23,7 @@
             android:id="@+id/card_title"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@id/card_image"
-            android:layout_marginBottom="15dp"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:fontFamily="sans-serif-condensed"
@@ -38,6 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/card_image"
             android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -47,19 +48,18 @@
 
         <TextView
             android:id="@+id/card_hostpage"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
             android:layout_below="@+id/card_description"
-            android:layout_centerHorizontal="true"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:fontFamily="sans-serif"
             android:linksClickable="true"
             android:maxLines="1"
-            android:textColor="@android:color/darker_gray"
-            android:textColorLink="@color/colorLink"
-            android:textSize="@dimen/url_font_size"/>
+            android:textColorLink="@color/colorPrimaryDark"
+            android:textSize="@dimen/url_font_size"
+            android:textStyle="italic"/>
 
         <ImageButton
             android:id="@+id/link_button"
@@ -69,7 +69,7 @@
             android:layout_toRightOf="@id/card_title"
             android:background="@android:color/transparent"
             android:padding="@dimen/activity_horizontal_margin"
-            android:paddingBottom="18dp"
+            android:paddingBottom="20dp"
             android:src="@drawable/link_button_drawable"/>
 
         <ImageButton

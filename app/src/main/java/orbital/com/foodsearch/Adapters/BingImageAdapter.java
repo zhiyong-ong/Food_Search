@@ -58,7 +58,7 @@ public class BingImageAdapter
         ImageValue imageValue = mImageValues.get(position);
         String contentUrl = imageValue.getContentUrl();
         String thumbUrl = imageValue.getThumbnailUrl();
-        String hostUrl = imageValue.getHostPageUrl();
+        String hostUrl = imageValue.getHostPageDisplayUrl();
 
         BestRepresentativeQuery brq = imageValue.getRepresentativeQuery();
         ImageCaption imageCaption = imageValue.getImageCaption();
@@ -110,31 +110,6 @@ public class BingImageAdapter
     public int getItemCount() {
         return mImageValues.size();
     }
-
-//    private class PreDrawListener implements ViewTreeObserver.OnPreDrawListener{
-//        private Context mContext = null;
-//        private ImageView cardImageView = null;
-//        private ImageValue imageValue = null;
-//        private ShapeDrawable shapeDrawable = null;
-//
-//        PreDrawListener(Context context, ImageView cardImageView, ImageValue imageValue) {
-//            mContext = context;
-//            this.cardImageView = cardImageView;
-//            this.imageValue = imageValue;
-//        }
-//
-//        @Override
-//        public boolean onPreDraw() {
-//            cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-//            Picasso.with(mContext).load(imageValue.getThumbnailUrl())
-//                    .centerCrop()
-//                    .resize(cardImageView.getWidth(),
-//                            cardImageView.getHeight())
-//                    .transform(new ScrimTransformation(mContext, cardImageView))
-//                    .into(cardImageView);
-//            return true;
-//        }
-//    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
         private ImageView imageView;

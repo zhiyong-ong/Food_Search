@@ -245,6 +245,9 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 return;
             }
             Log.e(LOG_TAG, t.getMessage());
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+            progressBar.setVisibility(View.GONE);
+            AnimUtils.brightenOverlay((FrameLayout)rootView.findViewById(R.id.drawable_overlay));
             Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.insights_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
@@ -344,6 +347,11 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.image_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+            progressBar.setVisibility(View.GONE);
+            FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
+            AnimUtils.brightenOverlay(drawableOverlay);
+            Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
         }
     }
 

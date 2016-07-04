@@ -73,14 +73,12 @@ public class Line {
         StringBuilder builder = new StringBuilder();
         List<Word> words = getWords();
         String offset = null;
-        boolean eastAsian = false;
         switch (language) {
             case LANGUAGE_CNS:
             case LANGUAGE_CNT:
             case LANGUAGE_KO:
             case LANGUAGE_JA:
                 offset = "";
-                eastAsian = true;
                 break;
             default:
                 offset = " ";

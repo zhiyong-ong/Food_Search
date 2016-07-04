@@ -22,7 +22,7 @@ import retrofit2.http.QueryMap;
  */
 
 public class BingSearch {
-    private static final String OCP_APIM_KEY = "df4bfc35ad584f8c856052cb46f213dd";
+    private static final String OCP_APIM_KEY = "7d381e135b7645baa09420f89815f18a";
     private static final String BING_IMAGE_URL = "https://bingapis.azure-api.net/api/v5/images/";
     private static final String LOG_TAG = "FOODIES";
 
