@@ -5,16 +5,17 @@
     android:id="@+id/activity_ocr_exp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:mContext="orbital.com.foodsearch.Activities.OcrActivity">
 
-    <include android:id="@+id/toolbar_exp"
-        layout="@layout/toolbar_layout"/>
+    <!--<include android:id="@+id/toolbar_exp"-->
+    <!--layout="@layout/toolbar_layout"/>-->
 
     <android.support.percent.PercentRelativeLayout
         android:id="@+id/content_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/previewImageView2"
@@ -25,17 +26,17 @@
             android:id="@+id/drawable_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#BF000000" />
+            android:background="#BF000000"/>
 
         <FrameLayout
             android:id="@+id/drawable_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="#00000000"
-            android:clickable="false"/>
+            android:clickable="false" />
 
         <ProgressBar
-            android:id="@+id/progressBar2"
+            android:id="@+id/progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -45,16 +46,63 @@
             android:id="@+id/search_frag_container"
             android:layout_width="match_parent"
             android:layout_centerInParent="true"
-            app:layout_heightPercent="75%"/>
+            app:layout_heightPercent="70%" />
 
+        <ProgressBar
+            android:id="@+id/search_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/search_bar"
+            android:layout_alignRight="@id/search_bar"
+            android:layout_above="@id/search_bar"
+            android:visibility="gone"
+            style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
+            android:indeterminate="true" />
+
+        <android.support.v7.widget.CardView
+            android:id="@+id/search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            app:cardElevation="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/cancel_search"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="?attr/selectableItemBackground"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:src="@drawable/ic_close_search" />
+
+                <EditText
+                    android:id="@+id/edit_text"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="@dimen/activity_half_margin"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:cursorVisible="false"
+                    android:fontFamily="sans-serif-condensed"
+                    android:hint="@string/searchbar_text"
+                    android:inputType="textNoSuggestions|textCapSentences" />
+
+                <Button
+                    android:id="@+id/start_search"
+                    style="@style/BorderlessButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="@string/search" />
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
     </android.support.percent.PercentRelativeLayout>
-
-    <!--<android.support.v7.widget.CardView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="?attr/actionBarSize"-->
-        <!--app:cardElevation="8dp"-->
-        <!--android:layout_marginBottom="8dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:layout_marginLeft="@dimen/activity_horizontal_margin"-->
-        <!--android:layout_marginRight="@dimen/activity_horizontal_margin"/>-->
 </FrameLayout>

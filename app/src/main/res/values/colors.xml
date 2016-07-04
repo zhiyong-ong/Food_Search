@@ -4,6 +4,6 @@
     <color name="colorPrimaryDark">#b71c1c</color>
     <color name="colorAccent">#FF1744</color>
 
-    <color name="colorLink">#0288d1</color>
-    <color name="onPressed">#ebaa64</color>
+    <color name="colorLink">#37474f</color>
+    <color name="colorOnPress">#ebaa64</color>
 </resources>

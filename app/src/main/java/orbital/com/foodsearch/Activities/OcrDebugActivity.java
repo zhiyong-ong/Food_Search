@@ -227,7 +227,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             searchFragment.finalizeRecycler();
             // TODO: improve loading progress animations
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
             AnimUtils.containerSlideUp(rootView);
         }
@@ -286,7 +286,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
                         @Override
                         public void onClick(View v) {
                             AnimUtils.darkenOverlay((FrameLayout)rootView.findViewById(R.id.drawable_overlay));
-                            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+                            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
                             progressBar.setVisibility(View.VISIBLE);
                             enqueueSearch(searchParam);
                         }
@@ -317,7 +317,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
                 searchFragment.updateRecyclerList(imageValues);
                 enqueueImageInsightSearch(imageValues);
             } else {
-                ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+                ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.GONE);
                 FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
                 AnimUtils.brightenOverlay(drawableOverlay);
@@ -357,14 +357,14 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
             mDrawableView.setBackgroundColor(Color.TRANSPARENT);
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
         }
 
         @Override
         public void onFailure(Call<BingOcrResponse> call, Throwable t) {
             mDrawableView.setBackgroundColor(Color.TRANSPARENT);
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar2);
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
             Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.ocr_call_fail,
                     Snackbar.LENGTH_LONG)

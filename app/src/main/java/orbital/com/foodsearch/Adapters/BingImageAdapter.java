@@ -1,6 +1,7 @@
 package orbital.com.foodsearch.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -86,7 +87,10 @@ public class BingImageAdapter
         // Set title using the name
         holder.titleTextView.setText(title);
         holder.descView.setText(desc);
+        // Set formatted URL on UrlView
         setTextViewUrl(holder.hostUrlView, hostUrl);
+        holder.translateBtn.setTextColor(
+                Color.parseColor("#" + imageValue.getAccentColor()));
     }
 
     /**
@@ -117,30 +121,6 @@ public class BingImageAdapter
         return mImageValues.size();
     }
 
-//    private class PreDrawListener implements ViewTreeObserver.OnPreDrawListener{
-//        private Context mContext = null;
-//        private ImageView cardImageView = null;
-//        private ImageValue imageValue = null;
-//        private ShapeDrawable shapeDrawable = null;
-//
-//        PreDrawListener(Context context, ImageView cardImageView, ImageValue imageValue) {
-//            mContext = context;
-//            this.cardImageView = cardImageView;
-//            this.imageValue = imageValue;
-//        }
-//
-//        @Override
-//        public boolean onPreDraw() {
-//            cardImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-//            Picasso.with(mContext).load(imageValue.getThumbnailUrl())
-//                    .centerCrop()
-//                    .resize(cardImageView.getWidth(),
-//                            cardImageView.getHeight())
-//                    .transform(new ScrimTransformation(mContext, cardImageView))
-//                    .into(cardImageView);
-//            return true;
-//        }
-//    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ImageView imageView;
@@ -150,17 +130,16 @@ public class BingImageAdapter
         private Button translateBtn;
         private ProgressBar progressBar;
         private FrameLayout overlay;
+
         public ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.card_image);
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
             hostUrlView = (TextView) itemView.findViewById(R.id.card_hostpage);
             descView = (TextView) itemView.findViewById(R.id.card_description);
-            translateBtn = (Button) itemView.findViewById(R.id.translateButton);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBarCard);
-            progressBar.setVisibility(View.INVISIBLE);
+            translateBtn = (Button) itemView.findViewById(R.id.translate_button);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar_card);
             overlay = (FrameLayout) itemView.findViewById(R.id.card_overlay);
-            itemView.setOnClickListener(this);
             translateBtn.setOnClickListener(this);
         }
 
@@ -171,8 +150,9 @@ public class BingImageAdapter
             final String descText = descView.getText().toString();
             class background extends AsyncTask<Void, Void, Void> {
 
-                private String translatedTitle = "";
-                private String translatedDesc = "";
+                private String translatedTitle = titleText;
+                private String translatedDesc = descText;
+
                 @Override
                 protected Void doInBackground(Void... params) {
                     translatedTitle = BingTranslate.getTranslatedText(titleText);
@@ -183,7 +163,7 @@ public class BingImageAdapter
                 protected void onPostExecute(Void result) {
                     titleTextView.setText(translatedTitle);
                     descView.setText(translatedDesc);
-                    progressBar.setVisibility(View.INVISIBLE);
+                    progressBar.setVisibility(View.GONE);
                     AnimUtils.brightenOverlay(overlay);
                     super.onPostExecute(result);
                 }

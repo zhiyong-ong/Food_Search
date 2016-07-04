@@ -6,6 +6,8 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 
 import orbital.com.foodsearch.R;
@@ -65,4 +67,22 @@ public class AnimUtils {
         anim.setDuration(600);
         anim.start();
     }
+
+    public static void showSearchBar(View searchBar, String searchParam){
+        searchBar.animate().translationY(0)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setDuration(350)
+                .start();
+        EditText editText = (EditText)searchBar.findViewById(R.id.edit_text);
+        editText.setText(searchParam);
+        editText.clearFocus();
+    }
+
+    public static void hideSearchBar(View searchBar, int searchbarTrans){
+        searchBar.animate().translationY(searchbarTrans)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .setDuration(350)
+                .start();
+    }
 }
+

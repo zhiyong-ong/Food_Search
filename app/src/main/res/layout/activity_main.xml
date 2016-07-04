@@ -31,15 +31,6 @@
             android:onClick="startDebug"
             android:text="@string/debug_start"/>
 
-        <ImageButton
-            android:id="@+id/test_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="@dimen/activity_horizontal_margin"
-            android:paddingBottom="18dp"
-            android:src="@drawable/link_button_drawable"/>
-
         <Button
             android:id="@+id/search_button"
             style="@style/Widget.AppCompat.Button.Colored"

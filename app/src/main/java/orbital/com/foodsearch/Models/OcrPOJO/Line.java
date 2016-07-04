@@ -85,11 +85,6 @@ public class Line {
         }
         for (Word word: words) {
             String text = word.getText();
-//            if (!eastAsian) {
-//                builder.append(text.replaceAll("[^A-Za-z]", ""));
-//            } else {
-//                builder.append(text.replaceAll("[\\.,\\$0-9]", ""));
-//            }
             builder.append(text.replaceAll("[^\\p{L}\\p{Z}]", ""));
             builder.append(offset);
         }
