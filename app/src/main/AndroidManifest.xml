@@ -38,7 +38,7 @@
         <activity android:name=".Activities.OcrActivity"
             android:label="OCR"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
-            android:parentActivityName=".Activities.MainActivity"></activity>
+            android:parentActivityName=".Activities.MainActivity"/>
     </application>
 
 </manifest>

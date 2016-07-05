@@ -5,11 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:mContext="orbital.com.foodsearch.Activities.MainActivity">
-    <include layout="@layout/toolbar_layout"/>
+
+    <include layout="@layout/toolbar_layout"
+        android:theme="@style/Theme.AppCompat.Main" />
+
     <LinearLayout
         android:id="@+id/main_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingTop="?android:attr/actionBarSize"
         android:layout_marginBottom="@dimen/main_bottom_margin"
         android:gravity="center"
         android:orientation="vertical">

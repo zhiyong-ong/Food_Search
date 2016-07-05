@@ -10,16 +10,13 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -29,8 +26,7 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.List;
 
-import me.zhanghai.android.materialprogressbar.IndeterminateHorizontalProgressDrawable;
-import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
+import orbital.com.foodsearch.Fragments.SearchBarFragment;
 import orbital.com.foodsearch.Fragments.SearchResultsFragment;
 import orbital.com.foodsearch.Helpers.BingOcr;
 import orbital.com.foodsearch.Helpers.BingSearch;
@@ -53,6 +49,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     private static final String LOG_TAG = "FOODIES";
     private static final String SAVED_FILE_PATH = "SAVEDFILEPATH";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
+    private static final String SEARCH_BAR_TAG = "SEARCHBARFRAGMENT";
+
     private static final int IMAGE_COUNT = 1;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
 
@@ -87,6 +85,10 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             filePath = getIntent().getStringExtra("filePath");
         }
 
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar_ocr));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
         Picasso.with(this).load("file://" + filePath)
                 //.placeholder(R.color.black_overlay)
@@ -100,41 +102,22 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     }
 
     private void setupSearchBar() {
-        ProgressBar progressBar = (ProgressBar)findViewById(R.id.search_progress);
-        progressBar.setIndeterminateDrawable(new IndeterminateHorizontalProgressDrawable(this));
-        final CardView searchBar = (CardView)findViewById(R.id.search_bar);
-        final EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
-        editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        final FrameLayout searchBarContainer = (FrameLayout) findViewById(R.id.search_bar_container);
+        ViewTreeObserver vto = searchBarContainer.getViewTreeObserver();
+        // To move searchBarContainer out of the screen
+        // Done using onPreDrawListener so as to get the correct measured height
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (hasFocus) {
-                    editText.setCursorVisible(true);
-                } else {
-                    editText.setCursorVisible(false);
-                }
+            public boolean onPreDraw() {
+                searchBarContainer.getViewTreeObserver().removeOnPreDrawListener(this);
+                searchBarTrans = 2*searchBarContainer.getHeight();
+                searchBarContainer.setTranslationY(searchBarTrans);
+                android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
+                ft.replace(R.id.search_bar_container, SearchBarFragment.newInstance(searchBarTrans), SEARCH_BAR_TAG);
+                ft.commit();
+                return true;
             }
         });
-        final Button searchButton = (Button) searchBar.findViewById(R.id.start_search);
-        final ImageButton cancelButton = (ImageButton) searchBar.findViewById(R.id.cancel_search);
-        View.OnClickListener listener= new View.OnClickListener(){
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.cancel_search:
-                        AnimUtils.hideSearchBar(searchBar, searchBarTrans);
-                        break;
-                    case R.id.edit_text:
-                        break;
-                    case R.id.start_search:
-                        searchButton.setEnabled(false);
-                        enqueueSearch(editText.getText().toString());
-                        break;
-                }
-            }
-        };
-        editText.setOnClickListener(listener);
-        searchButton.setOnClickListener(listener);
-        cancelButton.setOnClickListener(listener);
     }
 
     private void setupSearchContainer() {
@@ -152,9 +135,6 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
                 ft.replace(R.id.search_frag_container, new SearchResultsFragment(), SEARCH_FRAGMENT_TAG);
                 ft.commit();
-                View searchBar = findViewById(R.id.search_bar);
-                searchBarTrans = 2 * searchBar.getHeight();
-                searchBar.setTranslationY(searchBarTrans);
                 return true;
             }
         });
@@ -233,7 +213,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
      *
      * @param searchParam parameter string to be searched for
      */
-    private void enqueueSearch(String searchParam) {
+    public void enqueueSearch(String searchParam) {
         AnimUtils.darkenOverlay((FrameLayout)findViewById(R.id.drawable_overlay));
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.search_progress);
         progressBar.setVisibility(View.VISIBLE);
@@ -340,8 +320,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             mDrawableView.updateSelection(i);
             // Display the string in a snackbar and allow for search
             final String searchParam = mDrawableView.getmLineTexts().get(i).toLowerCase();
-            View searchBar = findViewById(R.id.search_bar);
-            AnimUtils.showSearchBar(searchBar, searchParam);
+            View searchContainer = findViewById(R.id.search_bar_container);
+            AnimUtils.showSearchBar(searchContainer, searchParam);
         }
     }
 
