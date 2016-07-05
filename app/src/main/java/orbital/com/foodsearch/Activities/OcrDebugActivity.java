@@ -225,7 +225,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
             }
             count = 0;
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            searchFragment.finalizeRecycler();
+            searchFragment.finalizeRecycler("TITLE");
             // TODO: improve loading progress animations
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);

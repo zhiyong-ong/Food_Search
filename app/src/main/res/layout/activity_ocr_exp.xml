@@ -45,8 +45,8 @@
         <FrameLayout
             android:id="@+id/search_frag_container"
             android:layout_width="match_parent"
-            android:layout_centerInParent="true"
-            app:layout_heightPercent="70%" />
+            android:layout_marginTop="48dp"
+            app:layout_heightPercent="75%" />
 
         <ProgressBar
             android:id="@+id/search_progress"

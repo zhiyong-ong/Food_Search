@@ -4,13 +4,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="orbital.com.foodsearch.Fragments.SearchResultsFragment">
-
-    <orbital.com.foodsearch.Views.SnappyRecyclerView
-        android:id="@+id/recycler_view"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#00000000"
-        android:orientation="horizontal"
-        android:scrollbars="horizontal"/>
-
+        android:layout_height="match_parent">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginRight="18dp"
+            android:id="@+id/translatedSearchText"
+            android:textColor="@android:color/white"
+            android:textSize="20sp" />
+        <orbital.com.foodsearch.Views.SnappyRecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="5dp"
+            android:layout_below="@id/translatedSearchText"
+            android:background="#00000000"
+            android:orientation="horizontal"
+            android:scrollbars="horizontal"/>
+    </RelativeLayout>
 </FrameLayout>
