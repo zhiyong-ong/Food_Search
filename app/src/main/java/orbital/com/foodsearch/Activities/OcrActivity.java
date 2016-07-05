@@ -63,6 +63,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     private List<ImageValue> mImageValues = null;
     private int searchBarTrans;
     private static AsyncTask<Void, Void, Void> translateTask;
+    private static Object lock = new Object();
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -265,8 +266,18 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         }
         @Override
         protected void onPostExecute(Void result) {
-            TRANSLATED_TEXT = translatedTxt;
-            super.onPostExecute(result);
+            synchronized (lock) {
+                try {
+                    synchronized (this) {
+                        wait(2000);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                TRANSLATED_TEXT = translatedTxt;
+                super.onPostExecute(result);
+                lock.notify();
+            }
         }
     }
     /**
@@ -309,8 +320,16 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 return;
             }
             //pseudo pause of current thread lol.
-            while(translateTask.getStatus() != AsyncTask.Status.FINISHED) {
+            synchronized (lock) {
+                while (translateTask.getStatus() != AsyncTask.Status.FINISHED) {
+                    try {
+                        lock.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
+            translateTask = null;
             count = 0;
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             searchFragment.finalizeRecycler(TRANSLATED_TEXT);

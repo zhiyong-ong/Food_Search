@@ -83,4 +83,28 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
         android:id="@+id/translatedText" />
+
+
+    <EditText
+        android:id="@+id/testDB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/translateText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@android:drawable/editbox_background"
+        android:ems="10"
+        android:hint="Enter into DB..."
+        android:textAlignment="center" />
+
+    <Button
+        android:id="@+id/buttonDB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@+id/testDB"
+        android:text="click"
+        android:textSize="10dp"
+        android:layout_alignBottom="@+id/testDB"
+        android:layout_alignTop="@+id/testDB" />
 </RelativeLayout>

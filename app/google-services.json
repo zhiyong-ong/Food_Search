@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "311505204860",
+    "firebase_url": "https://foodies-3c752.firebaseio.com",
+    "project_id": "foodies-3c752",
+    "storage_bucket": "foodies-3c752.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:311505204860:android:ea07e4231fadc146",
+        "android_client_info": {
+          "package_name": "orbital.com.foodsearch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "311505204860-bkdfebqm3mhebqtf5e2nbi55vcar391p.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpl5Nirtp_gtIYHM__322Y9iIBmEtukV8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

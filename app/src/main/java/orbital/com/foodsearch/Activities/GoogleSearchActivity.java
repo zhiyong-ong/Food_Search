@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.FirebaseDatabase;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -35,12 +36,13 @@ public class GoogleSearchActivity extends AppCompatActivity {
     private final String markets = "en-us";
     private final String safeSearch = "Moderate";
     Context context = this;
-
+    FirebaseDatabase database;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_search);
 
+        database = FirebaseDatabase.getInstance();
         final Button btn = (Button) findViewById(R.id.button);
         if(btn != null) {
             btn.setOnClickListener(new View.OnClickListener() {
