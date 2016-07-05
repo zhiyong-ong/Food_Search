@@ -62,6 +62,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     private String filePath = null;
     private List<ImageValue> mImageValues = null;
     private int searchBarTrans;
+    private static AsyncTask<Void, Void, Void> translateTask;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -248,7 +249,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
      * Method for translating searched text
      */
     private void translateSearch(final String searchParam) {
-        new bingTranslateBG(searchParam).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        translateTask = new bingTranslateBG(searchParam).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private class bingTranslateBG extends AsyncTask<Void, Void, Void> {
@@ -307,7 +308,9 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             if (count < IMAGE_COUNT) {
                 return;
             }
-
+            //pseudo pause of current thread lol.
+            while(translateTask.getStatus() != AsyncTask.Status.FINISHED) {
+            }
             count = 0;
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             searchFragment.finalizeRecycler(TRANSLATED_TEXT);
