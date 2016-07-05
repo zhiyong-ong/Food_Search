@@ -5,7 +5,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -95,7 +94,6 @@ public class SearchBarFragment extends Fragment {
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
             }
 
             @Override
@@ -124,7 +122,7 @@ public class SearchBarFragment extends Fragment {
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                         searchButton.setEnabled(false);
-                        ((OcrActivity)getActivity()).enqueueSearch(editText.getText().toString());
+                        ((OcrActivity) getActivity()).search(editText.getText().toString());
                         break;
                 }
             }
