@@ -285,7 +285,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
                         // called when search is clicked
                         @Override
                         public void onClick(View v) {
-                            AnimUtils.darkenOverlay((FrameLayout)rootView.findViewById(R.id.drawable_overlay));
+                            AnimUtils.darkenOverlay(rootView.findViewById(R.id.drawable_overlay), AnimUtils.DURATION_SLOW);
                             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
                             progressBar.setVisibility(View.VISIBLE);
                             enqueueSearch(searchParam);
@@ -320,7 +320,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
                 ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.GONE);
                 FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                AnimUtils.brightenOverlay(drawableOverlay);
+                AnimUtils.brightenOverlay(drawableOverlay, AnimUtils.DURATION_SLOW);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
         }

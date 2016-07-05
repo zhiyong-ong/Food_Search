@@ -2,7 +2,6 @@ package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -219,7 +218,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
      * @param searchParam parameter string to be searched for
      */
     private void enqueueSearch(String searchParam) {
-        AnimUtils.darkenOverlay((FrameLayout) findViewById(R.id.drawable_overlay));
+        AnimUtils.darkenOverlay(findViewById(R.id.drawable_overlay),
+                AnimUtils.DURATION_SLOW);
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.search_progress);
         progressBar.setVisibility(View.VISIBLE);
         Log.d(LOG_TAG, "Search String: " + searchParam);
@@ -291,7 +291,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             Log.e(LOG_TAG, t.getMessage());
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
             progressBar.setVisibility(View.GONE);
-            AnimUtils.brightenOverlay((FrameLayout) rootView.findViewById(R.id.drawable_overlay));
+            AnimUtils.brightenOverlay(rootView.findViewById(R.id.drawable_overlay),
+                    AnimUtils.DURATION_SLOW);
             Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.insights_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
@@ -310,7 +311,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         protected Void doInBackground(Void... params) {
             while (!translateTask.getStatus().equals(Status.FINISHED)) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -361,7 +362,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
                 progressBar.setVisibility(View.GONE);
                 FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                AnimUtils.brightenOverlay(drawableOverlay);
+                AnimUtils.brightenOverlay(drawableOverlay, AnimUtils.DURATION_SLOW);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
 
@@ -376,7 +377,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
             progressBar.setVisibility(View.GONE);
             FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-            AnimUtils.brightenOverlay(drawableOverlay);
+            AnimUtils.brightenOverlay(drawableOverlay, AnimUtils.DURATION_SLOW);
             Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
         }
     }
@@ -403,16 +404,18 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             mDrawableView.drawBoxes(rootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
-            mDrawableView.setBackgroundColor(Color.TRANSPARENT);
+            AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay),
+                    AnimUtils.DURATION_VERY_FAST);
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-            progressBar.setVisibility(View.GONE);
+            AnimUtils.fadeOut(progressBar, AnimUtils.DURATION_VERY_FAST);
         }
 
         @Override
         public void onFailure(Call<BingOcrResponse> call, Throwable t) {
-            mDrawableView.setBackgroundColor(Color.TRANSPARENT);
+            AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay),
+                    AnimUtils.DURATION_VERY_FAST);
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-            progressBar.setVisibility(View.GONE);
+            AnimUtils.fadeOut(progressBar, AnimUtils.DURATION_VERY_FAST);
             Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.ocr_call_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
