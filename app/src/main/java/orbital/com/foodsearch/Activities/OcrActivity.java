@@ -10,13 +10,16 @@ import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -26,7 +29,8 @@ import com.squareup.picasso.Picasso;
 import java.io.IOException;
 import java.util.List;
 
-import orbital.com.foodsearch.Fragments.SearchBarFragment;
+import me.zhanghai.android.materialprogressbar.IndeterminateHorizontalProgressDrawable;
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 import orbital.com.foodsearch.Fragments.SearchResultsFragment;
 import orbital.com.foodsearch.Helpers.BingOcr;
 import orbital.com.foodsearch.Helpers.BingSearch;
@@ -49,17 +53,17 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
     private static final String LOG_TAG = "FOODIES";
     private static final String SAVED_FILE_PATH = "SAVEDFILEPATH";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
-    private static final String SEARCH_BAR_TAG = "SEARCHBARFRAGMENT";
-
     private static final int IMAGE_COUNT = 1;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
 
+    private static String TRANSLATED_TEXT = null;
     private boolean animating = false;
     private int containerTransY;
 
     private String filePath = null;
     private List<ImageValue> mImageValues = null;
     private int searchBarTrans;
+    private static AsyncTask<Void, Void, Void> translateTask;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -84,10 +88,6 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         if (filePath == null) {
             filePath = getIntent().getStringExtra("filePath");
         }
-
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar_ocr));
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
         Picasso.with(this).load("file://" + filePath)
@@ -135,6 +135,9 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
                 ft.replace(R.id.search_frag_container, new SearchResultsFragment(), SEARCH_FRAGMENT_TAG);
                 ft.commit();
+                View searchBar = findViewById(R.id.search_bar);
+                searchBarTrans = 2 * searchBar.getHeight();
+                searchBar.setTranslationY(searchBarTrans);
                 return true;
             }
         });
@@ -213,7 +216,7 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
      *
      * @param searchParam parameter string to be searched for
      */
-    public void enqueueSearch(String searchParam) {
+    private void enqueueSearch(String searchParam) {
         AnimUtils.darkenOverlay((FrameLayout)findViewById(R.id.drawable_overlay));
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.search_progress);
         progressBar.setVisibility(View.VISIBLE);
@@ -223,6 +226,30 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
         call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
     }
 
+    /**
+     * Method for translating searched text
+     */
+    private void translateSearch(final String searchParam) {
+        translateTask = new bingTranslateBG(searchParam).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private class bingTranslateBG extends AsyncTask<Void, Void, Void> {
+        String searchParam;
+        public bingTranslateBG(String searchParam){
+            this.searchParam = searchParam;
+        }
+        String translatedTxt = "";
+        @Override
+        protected Void doInBackground(Void... params) {
+            translatedTxt = BingTranslate.getTranslatedText(searchParam);
+            return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            TRANSLATED_TEXT = translatedTxt;
+            super.onPostExecute(result);
+        }
+    }
     /**
      * This method creates a imageinsight search call based on the input imageValues list and enqueues it
      *
@@ -262,10 +289,14 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             if (count < IMAGE_COUNT) {
                 return;
             }
+            //pseudo pause of current thread lol.
+            while(translateTask.getStatus() != AsyncTask.Status.FINISHED) {
+            }
             count = 0;
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             searchFragment.finalizeRecycler();
             // TODO: improve loading progress animations
+            // TODO: handle merging of threads here? Not sure how Retrofit does its threading. May need to merge with Translation Asynctask
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
             progressBar.setVisibility(View.GONE);
             AnimUtils.containerSlideUp(rootView);
@@ -320,8 +351,8 @@ public class OcrActivity extends AppCompatActivity implements SearchResultsFragm
             mDrawableView.updateSelection(i);
             // Display the string in a snackbar and allow for search
             final String searchParam = mDrawableView.getmLineTexts().get(i).toLowerCase();
-            View searchContainer = findViewById(R.id.search_bar_container);
-            AnimUtils.showSearchBar(searchContainer, searchParam);
+            View searchBar = findViewById(R.id.search_bar);
+            AnimUtils.showSearchBar(searchBar, searchParam);
         }
     }
 

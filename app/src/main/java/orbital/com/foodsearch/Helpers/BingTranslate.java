@@ -23,7 +23,7 @@ public class BingTranslate {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.e(LOG_TAG, "Translated text: " + translation);
+        Log.e(LOG_TAG, "Translated text from: " + txt + "  to: " + translation);
         return translation;
     }
 }

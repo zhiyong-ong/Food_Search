@@ -9,12 +9,14 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
@@ -32,7 +34,7 @@ public class SearchResultsFragment extends Fragment {
     private final String SAVED_IMAGE_VALUES = "savedImageValues";
     private ArrayList<ImageValue> mImageValues = null;
     private BingImageAdapter mAdapter = null;
-
+    private static final int IMAGE_COUNT = OcrActivity.IMAGE_COUNT;
     private OnFragmentInteractionListener mListener;
 
     public SearchResultsFragment() {
@@ -81,7 +83,7 @@ public class SearchResultsFragment extends Fragment {
     private void initializeRecycler() {
         SnappyRecyclerView rvImages = (SnappyRecyclerView) getView().findViewById(R.id.recycler_view);
         // mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
-        mImageValues = new ArrayList<>(5);
+        mImageValues = new ArrayList<>(IMAGE_COUNT);
 
         mAdapter = new BingImageAdapter(getActivity(), mImageValues);
         rvImages.setAdapter(mAdapter);
@@ -111,7 +113,9 @@ public class SearchResultsFragment extends Fragment {
         recyclerView.scrollToPosition(0);
     }
 
-    public void finalizeRecycler() {
+    public void finalizeRecycler(String translatedText) {
+        TextView translatedTitle = (TextView) getView().findViewById(R.id.translatedSearchText);
+        translatedTitle.setText(translatedText);
         mAdapter.notifyDataSetChanged();
     }
 
