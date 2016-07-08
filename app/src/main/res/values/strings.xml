@@ -8,6 +8,7 @@
     <string name="title_activity_fullscreen">Camera</string>
     <string name="title_activity_google_search">Google search</string>
     <string name="title_activity_ocr">OCR</string>
+
     <string name="ocr_start">OCR start</string>
     <string name="debug_start">DEBUG</string>
 
@@ -23,5 +24,8 @@
     <string name="insights_search_fail">Insights call failed!</string>
     <string name="retry">Retry</string>
     <string name="translate">Translate</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

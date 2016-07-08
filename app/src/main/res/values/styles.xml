@@ -10,4 +10,13 @@
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless.Colored">
     </style>
 
+    <style name="Theme.AppCompat.Main" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
+    <style name="Theme.AppCompat.Translucent" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:background">@drawable/action_bar_bg</item>
+        <item name="android:windowActionBarOverlay">true</item>
+    </style>
+
 </resources>

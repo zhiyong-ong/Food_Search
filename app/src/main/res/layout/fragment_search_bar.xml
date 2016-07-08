@@ -1,0 +1,37 @@
+<LinearLayout android:animateLayoutChanges="true"
+    android:id="@+id/search_bar"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:orientation="horizontal"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageButton
+        android:background="?attr/selectableItemBackground"
+        android:id="@+id/cancel_search"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_close_search" />
+
+    <EditText
+        android:background="@android:color/transparent"
+        android:cursorVisible="false"
+        android:fontFamily="sans-serif-condensed"
+        android:hint="@string/searchbar_text"
+        android:id="@+id/edit_text"
+        android:imeOptions="actionSearch"
+        android:inputType="textNoSuggestions|textCapSentences"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/activity_half_margin"
+        android:layout_weight="1"
+        android:layout_width="0dp" />
+
+    <Button
+        style="@style/BorderlessButton"
+        android:id="@+id/start_search"
+        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:text="@string/search" />
+
+</LinearLayout>

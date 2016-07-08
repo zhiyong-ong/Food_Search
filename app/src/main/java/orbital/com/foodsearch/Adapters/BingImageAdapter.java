@@ -164,13 +164,13 @@ public class BingImageAdapter
                     titleTextView.setText(translatedTitle);
                     descView.setText(translatedDesc);
                     progressBar.setVisibility(View.GONE);
-                    AnimUtils.brightenOverlay(overlay);
+                    AnimUtils.brightenOverlay(overlay, AnimUtils.DURATION_NORMAL);
                     super.onPostExecute(result);
                 }
             }
             new background().execute();
             progressBar.setVisibility(View.VISIBLE);
-            AnimUtils.darkenOverlay(overlay);
+            AnimUtils.darkenOverlay(overlay, AnimUtils.DURATION_NORMAL);
         }
     }
 }
