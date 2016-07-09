@@ -26,13 +26,15 @@ public class MainActivity extends AppCompatActivity {
     private static final int EXP_CAMERA_PERMISSION_REQUEST_CODE = 2;
     private static final int OCR_CAMERA_INTENT_REQUEST_CODE = 100;
     private static final int EXP_CAMERA_INTENT_REQUEST_CODE = 200;
-    private static final String SAVED_URI = "savedUri";
 
+    private static final String SAVED_URI = "savedUri";
+    private static final String FILEPATH = "filePath";
     private static final String LOG_TAG = "FOODIES";
     private static final String PHOTO_FILE_NAME = "photo.jpg";
     private static final String DEBUG_FILE_NAME = "debug.jpg";
 
     private Uri photoFileUri = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     public void startDebug(View view) {
         Intent intent = new Intent(this, OcrActivity.class);
         generateDebugUri();
-        intent.putExtra("filePath", photoFileUri.getPath());
+        intent.putExtra(FILEPATH, photoFileUri.getPath());
         startActivity(intent);
     }
 

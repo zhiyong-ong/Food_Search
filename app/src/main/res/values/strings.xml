@@ -22,10 +22,12 @@
     <string name="ocr_call_fail">OCR Call Failed</string>
     <string name="image_search_fail">Image Search Call Failed</string>
     <string name="insights_search_fail">Insights call failed!</string>
-    <string name="retry">Retry</string>
     <string name="translate">Translate</string>
+    <string name="retry">Retry</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="group_dropcancel">dropcancelgroup</string>
+    <string name="drop_icon">drop</string>
+    <string name="cancel_icon">cancel_icon</string>
 
+    <string name="image_shared_view">"imagesharedview</string>
 </resources>

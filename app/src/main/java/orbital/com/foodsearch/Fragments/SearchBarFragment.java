@@ -4,6 +4,7 @@ package orbital.com.foodsearch.Fragments;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.percent.PercentRelativeLayout;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,14 +17,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import me.zhanghai.android.materialprogressbar.IndeterminateHorizontalProgressDrawable;
 import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.Utils.AnimUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -35,7 +34,7 @@ public class SearchBarFragment extends Fragment {
 
     public SearchBarFragment() {
     }
-    
+
     public static SearchBarFragment newInstance(int searchBarTrans) {
         Bundle args = new Bundle();
         args.putInt(SEARCH_BAR_TRANS, searchBarTrans);
@@ -61,13 +60,15 @@ public class SearchBarFragment extends Fragment {
     }
 
     private void initializeBar() {
-        ProgressBar progressBar = (ProgressBar)getView().getRootView().findViewById(R.id.search_progress);
+        ProgressBar progressBar = (ProgressBar) getView().getRootView().findViewById(R.id.search_progress);
         progressBar.setIndeterminateDrawable(new IndeterminateHorizontalProgressDrawable(getActivity()));
 
-        final LinearLayout searchBar = (LinearLayout)getView().findViewById(R.id.search_bar);
+        final PercentRelativeLayout searchBar = (PercentRelativeLayout) getView().findViewById(R.id.search_bar);
         final EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
         final Button searchButton = (Button) searchBar.findViewById(R.id.start_search);
         final ImageButton cancelButton = (ImageButton) searchBar.findViewById(R.id.cancel_search);
+        final InputMethodManager imm = (InputMethodManager) getActivity()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
 
         editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -107,22 +108,23 @@ public class SearchBarFragment extends Fragment {
             }
         });
 
-        View.OnClickListener listener= new View.OnClickListener(){
+        View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.cancel_search:
-                        AnimUtils.hideSearchBar(getView().getRootView().findViewById(R.id.search_bar_container),
-                                searchBarTrans);
+                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                        ((OcrActivity) getActivity()).cancelSearch();
                         break;
                     case R.id.edit_text:
                         break;
                     case R.id.start_search:
-                        InputMethodManager imm = (InputMethodManager) getActivity()
-                                .getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                        searchButton.setEnabled(false);
-                        ((OcrActivity) getActivity()).search(editText.getText().toString());
+                        if (v.isEnabled()) {
+                            editText.clearFocus();
+                            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                            searchButton.setEnabled(false);
+                            ((OcrActivity) getActivity()).search(editText.getText().toString());
+                        }
                         break;
                 }
             }

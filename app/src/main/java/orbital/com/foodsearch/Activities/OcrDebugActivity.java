@@ -4,7 +4,6 @@ import android.animation.Animator;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -41,7 +40,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class OcrDebugActivity extends AppCompatActivity implements SearchResultsFragment.OnFragmentInteractionListener{
+public class OcrDebugActivity extends AppCompatActivity {
     private static final String LOG_TAG = "FOODIES";
     private static final String SAVED_FILE_PATH = "SAVEDFILEPATH";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
@@ -169,11 +168,6 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
         }
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
     /**
      * This method creates a search call based on the input param and enqueues it
      * @param searchParam parameter string to be searched for
@@ -194,7 +188,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
         for (ImageValue imageValue : imageValues) {
             ImageInsights imageInsights = new ImageInsights(imageValue.getImageInsightsToken(), "");
             Call<ImageInsightsResponse> call = imageInsights.buildCall();
-            call.enqueue(new ImageInsightCallback(findViewById(R.id.activity_ocr_exp),
+            call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr_exp),
                     FRAGMENT_MANAGER,
                     imageValue));
         }
@@ -206,10 +200,12 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
     private static class ImageInsightCallback implements Callback<ImageInsightsResponse> {
         private static volatile int count = 0;
         private View rootView = null;
+        private Context context = null;
         private FragmentManager fm = null;
         private ImageValue imageValue = null;
 
-        public ImageInsightCallback(View rootView, FragmentManager fm, ImageValue imageValue){
+        public ImageInsightCallback(Context context, View rootView, FragmentManager fm, ImageValue imageValue) {
+            this.context = context;
             this.rootView = rootView;
             this.fm = fm;
             this.imageValue = imageValue;
@@ -225,11 +221,11 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
             }
             count = 0;
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            searchFragment.finalizeRecycler("TITLE");
+            searchFragment.finalizeRecycler();
             // TODO: improve loading progress animations
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
-            AnimUtils.containerSlideUp(rootView);
+            AnimUtils.containerSlideUp(context, rootView);
         }
 
         @Override
@@ -285,7 +281,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
                         // called when search is clicked
                         @Override
                         public void onClick(View v) {
-                            AnimUtils.darkenOverlay(rootView.findViewById(R.id.drawable_overlay), AnimUtils.DURATION_SLOW);
+                            AnimUtils.darkenOverlay(rootView.findViewById(R.id.drawable_overlay));
                             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
                             progressBar.setVisibility(View.VISIBLE);
                             enqueueSearch(searchParam);
@@ -320,7 +316,7 @@ public class OcrDebugActivity extends AppCompatActivity implements SearchResults
                 ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
                 progressBar.setVisibility(View.GONE);
                 FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                AnimUtils.brightenOverlay(drawableOverlay, AnimUtils.DURATION_SLOW);
+                AnimUtils.brightenOverlay(drawableOverlay);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
         }

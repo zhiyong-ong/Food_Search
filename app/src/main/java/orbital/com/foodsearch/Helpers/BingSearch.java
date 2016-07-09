@@ -25,10 +25,11 @@ public class BingSearch {
     //Zhiyong api key. renew on 11/7/16
     //private static final String OCP_APIM_KEY = "e801fac4192d4741976e816b93bdcb48";
     //private static final String OCP_APIM_KEY = "80940a827ff74b1f882d9b18ef6b8110";
-    private static final String OCP_APIM_KEY = "ccfba34562094f9480bf01f74750b423";
+    //private static final String OCP_APIM_KEY = "ccfba34562094f9480bf01f74750b423";
 
     //Abel's one
     //private static final String OCP_APIM_KEY = "df4bfc35ad584f8c856052cb46f213dd";
+    private static final String OCP_APIM_KEY = "45ab98a696814189ac303f5ceb975476";
     private static final String BING_IMAGE_URL = "https://api.cognitive.microsoft.com/bing/v5.0/images/";
     private static final String LOG_TAG = "FOODIES";
 
