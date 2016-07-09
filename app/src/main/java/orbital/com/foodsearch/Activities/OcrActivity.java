@@ -172,7 +172,7 @@ public class OcrActivity extends AppCompatActivity {
                 Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
                 call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
-                // After call is dispatched, load compress image into preview
+                // After call is dispatched, load full res image into preview
                 ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
                 Picasso.with(mContext).load("file://" + filePath)
                         .noPlaceholder()

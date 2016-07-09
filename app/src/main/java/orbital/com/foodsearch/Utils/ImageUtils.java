@@ -3,6 +3,8 @@ package orbital.com.foodsearch.Utils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
@@ -16,6 +18,7 @@ import java.io.IOException;
  */
 
 public class ImageUtils {
+    public static final String COMPRESSED = "(COMPRESSED)";
     private static final float maxHeight = 1280.0f;
     private static final float maxWidth = 1280.0f;
 
@@ -92,15 +95,34 @@ public class ImageUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        ByteArrayOutputStream greyOut = new ByteArrayOutputStream();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Bitmap greyScaleBmp = toGrayscale(scaledBitmap);
+        greyScaleBmp.compress(Bitmap.CompressFormat.JPEG, 85, greyOut);
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out);
-        byte[] result = out.toByteArray();
+        byte[] coloredResult = out.toByteArray();
         try {
-            writeFile(result, imagePath);
+            writeFile(coloredResult, imagePath);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return result;
+        return greyOut.toByteArray();
+    }
+
+    private static Bitmap toGrayscale(Bitmap bmpOriginal) {
+        int width, height;
+        height = bmpOriginal.getHeight();
+        width = bmpOriginal.getWidth();
+
+        Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(bmpGrayscale);
+        Paint paint = new Paint();
+        ColorMatrix cm = new ColorMatrix();
+        cm.setSaturation(0);
+        ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
+        paint.setColorFilter(f);
+        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        return bmpGrayscale;
     }
 
     public static void writeFile(byte[] data, String fileName) throws IOException{
