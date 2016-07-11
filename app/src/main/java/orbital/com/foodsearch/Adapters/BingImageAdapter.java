@@ -3,7 +3,6 @@ package orbital.com.foodsearch.Adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -74,8 +73,6 @@ public class BingImageAdapter
         holder.clearState();
         holder.thumbUrl = thumbUrl;
         holder.imageUrl = imageUrl;
-        ViewCompat.setTransitionName(holder.imageView,
-                mContext.getString(R.string.image_shared_view) + position);
 
         // Use image captions for title and description if available
         BestRepresentativeQuery brq = imageValue.getRepresentativeQuery();
