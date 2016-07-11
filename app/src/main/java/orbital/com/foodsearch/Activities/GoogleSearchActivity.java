@@ -11,7 +11,11 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -36,13 +40,51 @@ public class GoogleSearchActivity extends AppCompatActivity {
     private final String markets = "en-us";
     private final String safeSearch = "Moderate";
     Context context = this;
-    FirebaseDatabase database;
+    DatabaseReference database;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_google_search);
 
-        database = FirebaseDatabase.getInstance();
+        database = FirebaseDatabase.getInstance().getReference();
+        final Button btnDB = (Button) findViewById(R.id.buttonDB);
+        if(btnDB != null) {
+            btnDB.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final EditText edt = (EditText) findViewById(R.id.testDB);
+                    String input = edt.getText().toString();
+                    database.child("users").child(input).setValue(input);
+                }
+            });
+        }
+        final Button getDB = (Button) findViewById(R.id.retrieveDBBtn);
+        if(getDB != null) {
+            getDB.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final String query = ((EditText) findViewById(R.id.textQueryDB)).getText().toString();
+                    final TextView txt = (TextView) findViewById(R.id.retrieveDB);
+                    database.child("users").child(query).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (!dataSnapshot.exists()) {
+                                txt.setText("Null");
+                            } else {
+                                ImageSearchResponse img = dataSnapshot.getValue(ImageSearchResponse.class);
+                                txt.setText(String.valueOf(img.toString()));
+                                Log.e(LOG_TAG, "SNAPSHOT: " + dataSnapshot.toString());
+                                Log.e(LOG_TAG, "ITERATOR: " + dataSnapshot.getChildren().iterator().toString());
+                            }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            });
+        }
         final Button btn = (Button) findViewById(R.id.button);
         if(btn != null) {
             btn.setOnClickListener(new View.OnClickListener() {

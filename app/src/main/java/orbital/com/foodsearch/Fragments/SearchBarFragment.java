@@ -122,7 +122,7 @@ public class SearchBarFragment extends Fragment {
                                 .getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                         searchButton.setEnabled(false);
-                        ((OcrActivity) getActivity()).search(editText.getText().toString());
+                        ((OcrActivity) getActivity()).searchImageResponse(editText.getText().toString().trim());
                         break;
                 }
             }

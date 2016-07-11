@@ -23,8 +23,8 @@ import retrofit2.http.QueryMap;
 public class ImageInsights {
     //Zhiyong api key. renew on 11/7/16
     //private static final String OCP_APIM_KEY = "e801fac4192d4741976e816b93bdcb48";
-    //private static final String OCP_APIM_KEY = "80940a827ff74b1f882d9b18ef6b8110";
-    private static final String OCP_APIM_KEY = "ccfba34562094f9480bf01f74750b423";
+    private static final String OCP_APIM_KEY = "80940a827ff74b1f882d9b18ef6b8110";
+    //private static final String OCP_APIM_KEY = "ccfba34562094f9480bf01f74750b423";
 
     //Abel's one
     //private static final String OCP_APIM_KEY = "df4bfc35ad584f8c856052cb46f213dd";
