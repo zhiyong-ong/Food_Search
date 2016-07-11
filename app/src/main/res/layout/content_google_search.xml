@@ -107,4 +107,36 @@
         android:textSize="10dp"
         android:layout_alignBottom="@+id/testDB"
         android:layout_alignTop="@+id/testDB" />
+
+    <TextView
+        android:text="database"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/retrieveDBBtn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:id="@+id/retrieveDB" />
+
+    <Button
+        android:text="Get from db"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="84dp"
+        android:id="@+id/retrieveDBBtn"
+        android:layout_below="@+id/testDB"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:layout_below="@+id/testDB"
+        android:layout_toStartOf="@+id/buttonDB"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@android:drawable/editbox_background"
+        android:ems="10"
+        android:hint="Enter into DB..."
+        android:textAlignment="center"
+        android:id="@+id/textQueryDB" />
 </RelativeLayout>

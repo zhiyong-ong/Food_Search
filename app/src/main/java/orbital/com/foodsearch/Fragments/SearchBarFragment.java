@@ -123,7 +123,7 @@ public class SearchBarFragment extends Fragment {
                             editText.clearFocus();
                             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
                             searchButton.setEnabled(false);
-                            ((OcrActivity) getActivity()).search(editText.getText().toString());
+                            ((OcrActivity) getActivity()).search(editText.getText().toString().trim());
                         }
                         break;
                 }

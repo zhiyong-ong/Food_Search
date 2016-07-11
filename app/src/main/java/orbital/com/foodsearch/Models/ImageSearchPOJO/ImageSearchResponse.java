@@ -25,95 +25,97 @@ public class ImageSearchResponse {
     private Boolean displayShoppingSourcesBadges;
     private Boolean displayRecipeSourcesBadges;
 
-    /**
-     *
-     * @return
-     *     The type
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
-     *
-     * @param type
-     *     The _type
-     */
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    /**
-     *
-     * @return
-     *     The instrumentation
-     */
-    public Instrumentation getInstrumentation() {
-        return instrumentation;
-    }
-
-    /**
-     *
-     * @param instrumentation
-     *     The instrumentation
-     */
-    public void setInstrumentation(Instrumentation instrumentation) {
-        this.instrumentation = instrumentation;
-    }
-
-    /**
-     *
-     * @return
-     *     The readLink
-     */
-    public String getReadLink() {
-        return readLink;
-    }
-
-    /**
-     *
-     * @param readLink
-     *     The readLink
-     */
-    public void setReadLink(String readLink) {
-        this.readLink = readLink;
-    }
-
-    /**
-     *
-     * @return
-     *     The webSearchUrl
-     */
-    public String getWebSearchUrl() {
-        return webSearchUrl;
-    }
-
-    /**
-     *
-     * @param webSearchUrl
-     *     The webSearchUrl
-     */
-    public void setWebSearchUrl(String webSearchUrl) {
-        this.webSearchUrl = webSearchUrl;
-    }
-
-    /**
-     *
-     * @return
-     *     The totalEstimatedMatches
-     */
-    public Integer getTotalEstimatedMatches() {
-        return totalEstimatedMatches;
-    }
-
-    /**
-     *
-     * @param totalEstimatedMatches
-     *     The totalEstimatedMatches
-     */
-    public void setTotalEstimatedMatches(Integer totalEstimatedMatches) {
-        this.totalEstimatedMatches = totalEstimatedMatches;
-    }
+    private String searchQuery;
+    private String translatedQuery;
+//    /**
+//     *
+//     * @return
+//     *     The type
+//     */
+//    public String getType() {
+//        return type;
+//    }
+//
+//    /**
+//     *
+//     * @param type
+//     *     The _type
+//     */
+//    public void setType(String type) {
+//        this.type = type;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The instrumentation
+//     */
+//    public Instrumentation getInstrumentation() {
+//        return instrumentation;
+//    }
+//
+//    /**
+//     *
+//     * @param instrumentation
+//     *     The instrumentation
+//     */
+//    public void setInstrumentation(Instrumentation instrumentation) {
+//        this.instrumentation = instrumentation;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The readLink
+//     */
+//    public String getReadLink() {
+//        return readLink;
+//    }
+//
+//    /**
+//     *
+//     * @param readLink
+//     *     The readLink
+//     */
+//    public void setReadLink(String readLink) {
+//        this.readLink = readLink;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The webSearchUrl
+//     */
+//    public String getWebSearchUrl() {
+//        return webSearchUrl;
+//    }
+//
+//    /**
+//     *
+//     * @param webSearchUrl
+//     *     The webSearchUrl
+//     */
+//    public void setWebSearchUrl(String webSearchUrl) {
+//        this.webSearchUrl = webSearchUrl;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The totalEstimatedMatches
+//     */
+//    public Integer getTotalEstimatedMatches() {
+//        return totalEstimatedMatches;
+//    }
+//
+//    /**
+//     *
+//     * @param totalEstimatedMatches
+//     *     The totalEstimatedMatches
+//     */
+//    public void setTotalEstimatedMatches(Integer totalEstimatedMatches) {
+//        this.totalEstimatedMatches = totalEstimatedMatches;
+//    }
 
     /**
      *
@@ -133,93 +135,109 @@ public class ImageSearchResponse {
         this.imageValues = imageValue;
     }
 
-    /**
-     *
-     * @return
-     *     The queryExpansions
-     */
-    public List<QueryExpansion> getQueryExpansions() {
-        return queryExpansions;
+//    /**
+//     *
+//     * @return
+//     *     The queryExpansions
+//     */
+//    public List<QueryExpansion> getQueryExpansions() {
+//        return queryExpansions;
+//    }
+//
+//    /**
+//     *
+//     * @param queryExpansions
+//     *     The queryExpansions
+//     */
+//    public void setQueryExpansions(List<QueryExpansion> queryExpansions) {
+//        this.queryExpansions = queryExpansions;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The nextOffsetAddCount
+//     */
+//    public Integer getNextOffsetAddCount() {
+//        return nextOffsetAddCount;
+//    }
+//
+//    /**
+//     *
+//     * @param nextOffsetAddCount
+//     *     The nextOffsetAddCount
+//     */
+//    public void setNextOffsetAddCount(Integer nextOffsetAddCount) {
+//        this.nextOffsetAddCount = nextOffsetAddCount;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The pivotSuggestions
+//     */
+//    public List<PivotSuggestion> getPivotSuggestions() {
+//        return pivotSuggestions;
+//    }
+//
+//    /**
+//     *
+//     * @param pivotSuggestions
+//     *     The pivotSuggestions
+//     */
+//    public void setPivotSuggestions(List<PivotSuggestion> pivotSuggestions) {
+//        this.pivotSuggestions = pivotSuggestions;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The displayShoppingSourcesBadges
+//     */
+//    public Boolean getDisplayShoppingSourcesBadges() {
+//        return displayShoppingSourcesBadges;
+//    }
+//
+//    /**
+//     *
+//     * @param displayShoppingSourcesBadges
+//     *     The displayShoppingSourcesBadges
+//     */
+//    public void setDisplayShoppingSourcesBadges(Boolean displayShoppingSourcesBadges) {
+//        this.displayShoppingSourcesBadges = displayShoppingSourcesBadges;
+//    }
+//
+//    /**
+//     *
+//     * @return
+//     *     The displayRecipeSourcesBadges
+//     */
+//    public Boolean getDisplayRecipeSourcesBadges() {
+//        return displayRecipeSourcesBadges;
+//    }
+//
+//    /**
+//     *
+//     * @param displayRecipeSourcesBadges
+//     *     The displayRecipeSourcesBadges
+//     */
+//    public void setDisplayRecipeSourcesBadges(Boolean displayRecipeSourcesBadges) {
+//        this.displayRecipeSourcesBadges = displayRecipeSourcesBadges;
+//    }
+
+    public String getSearchQuery() {
+        return searchQuery;
     }
 
-    /**
-     *
-     * @param queryExpansions
-     *     The queryExpansions
-     */
-    public void setQueryExpansions(List<QueryExpansion> queryExpansions) {
-        this.queryExpansions = queryExpansions;
+    public void setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
     }
 
-    /**
-     *
-     * @return
-     *     The nextOffsetAddCount
-     */
-    public Integer getNextOffsetAddCount() {
-        return nextOffsetAddCount;
+    public String getTranslatedQuery() {
+        return translatedQuery;
     }
 
-    /**
-     *
-     * @param nextOffsetAddCount
-     *     The nextOffsetAddCount
-     */
-    public void setNextOffsetAddCount(Integer nextOffsetAddCount) {
-        this.nextOffsetAddCount = nextOffsetAddCount;
-    }
-
-    /**
-     *
-     * @return
-     *     The pivotSuggestions
-     */
-    public List<PivotSuggestion> getPivotSuggestions() {
-        return pivotSuggestions;
-    }
-
-    /**
-     *
-     * @param pivotSuggestions
-     *     The pivotSuggestions
-     */
-    public void setPivotSuggestions(List<PivotSuggestion> pivotSuggestions) {
-        this.pivotSuggestions = pivotSuggestions;
-    }
-
-    /**
-     *
-     * @return
-     *     The displayShoppingSourcesBadges
-     */
-    public Boolean getDisplayShoppingSourcesBadges() {
-        return displayShoppingSourcesBadges;
-    }
-
-    /**
-     *
-     * @param displayShoppingSourcesBadges
-     *     The displayShoppingSourcesBadges
-     */
-    public void setDisplayShoppingSourcesBadges(Boolean displayShoppingSourcesBadges) {
-        this.displayShoppingSourcesBadges = displayShoppingSourcesBadges;
-    }
-
-    /**
-     *
-     * @return
-     *     The displayRecipeSourcesBadges
-     */
-    public Boolean getDisplayRecipeSourcesBadges() {
-        return displayRecipeSourcesBadges;
-    }
-
-    /**
-     *
-     * @param displayRecipeSourcesBadges
-     *     The displayRecipeSourcesBadges
-     */
-    public void setDisplayRecipeSourcesBadges(Boolean displayRecipeSourcesBadges) {
-        this.displayRecipeSourcesBadges = displayRecipeSourcesBadges;
+    public void setTranslatedQuery(String translatedQuery) {
+        this.translatedQuery = translatedQuery;
     }
 }
