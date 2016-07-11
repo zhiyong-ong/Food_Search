@@ -1,37 +1,51 @@
-<LinearLayout android:animateLayoutChanges="true"
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/search_bar"
-    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:orientation="horizontal"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:layout_height="match_parent">
+
+    <ProgressBar
+        android:id="@+id/search_progress"
+        style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="-7dp"
+        android:indeterminate="true"
+        android:visibility="gone" />
 
     <ImageButton
-        android:background="?attr/selectableItemBackground"
         android:id="@+id/cancel_search"
-        android:layout_height="match_parent"
         android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:background="?attr/selectableItemBackground"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:src="@drawable/ic_close_search" />
+        android:src="@drawable/ic_cancel_search" />
 
     <EditText
+        android:id="@+id/edit_text"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/activity_half_margin"
+        android:layout_toLeftOf="@+id/start_search"
+        android:layout_toRightOf="@id/cancel_search"
+        android:layout_weight="1"
         android:background="@android:color/transparent"
         android:cursorVisible="false"
         android:fontFamily="sans-serif-condensed"
         android:hint="@string/searchbar_text"
-        android:id="@+id/edit_text"
         android:imeOptions="actionSearch"
-        android:inputType="textNoSuggestions|textCapSentences"
-        android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/activity_half_margin"
-        android:layout_weight="1"
-        android:layout_width="0dp" />
+        android:inputType="textNoSuggestions|textCapSentences" />
 
     <Button
+        android:id="@id/start_search"
         style="@style/BorderlessButton"
-        android:id="@+id/start_search"
-        android:layout_height="match_parent"
         android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
         android:text="@string/search" />
 
-</LinearLayout>
+</android.support.percent.PercentRelativeLayout>

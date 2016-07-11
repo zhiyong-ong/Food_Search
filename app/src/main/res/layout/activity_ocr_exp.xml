@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_ocr_exp"
@@ -13,8 +13,7 @@
     <android.support.percent.PercentRelativeLayout
         android:id="@+id/content_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/previewImageView2"
@@ -25,13 +24,14 @@
             android:id="@+id/drawable_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#00000000" />
+            android:background="@android:color/transparent"
+            android:clickable="true" />
 
         <FrameLayout
             android:id="@+id/drawable_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#9F000000"
+            android:background="@color/overlayDark"
             android:clickable="false" />
 
         <ProgressBar
@@ -42,46 +42,24 @@
             android:indeterminate="true"
             android:visibility="visible" />
 
-        <FrameLayout
-            android:id="@+id/search_frag_container"
-            android:layout_width="match_parent"
-            android:layout_marginTop="48dp"
-            app:layout_heightPercent="75%" />
-
         <android.support.v7.widget.CardView
             android:id="@+id/search_bar_container"
             android:layout_width="match_parent"
-            android:layout_height="?android:attr/actionBarSize"
+            android:layout_height="@dimen/search_bar_height"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/activity_vertical_margin"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            app:cardElevation="8dp"/>
+            android:layout_marginBottom="@dimen/activity_half_margin"
+            android:layout_marginLeft="@dimen/activity_half_margin"
+            android:layout_marginRight="@dimen/activity_half_margin"
+            app:cardElevation="@dimen/search_bar_elevation" />
 
-        <ProgressBar
-            android:id="@+id/search_progress"
-            style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/search_bar_container"
-            android:layout_alignLeft="@id/search_bar_container"
-            android:layout_alignRight="@id/search_bar_container"
-            android:indeterminate="true"
-            android:visibility="gone" />
+        <FrameLayout
+            android:id="@+id/search_frag_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true" />
+
     </android.support.percent.PercentRelativeLayout>
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar_ocr"
-        android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize"
-        android:theme="@style/Theme.AppCompat.Translucent">
-        <!--<TextView-->
-            <!--android:id="@+id/toolbar_title"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:gravity="center_vertical"-->
-            <!--android:background="@android:color/transparent"-->
-            <!--android:text="@string/title_activity_ocr"-->
-            <!--style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"/>-->
-    </android.support.v7.widget.Toolbar>
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

@@ -12,7 +12,7 @@ import android.graphics.RectF;
 import android.support.design.widget.Snackbar;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ import orbital.com.foodsearch.R;
  * Extended ImageView to draw the bounding boxes. Overrides onDraw method and it has
  * a transparent background so as to overlay over another view.
  */
-public class DrawableView extends ImageView{
+public class DrawableView extends FrameLayout {
     private View mRootView = null;
 
     private List<Rect> mRects = null;

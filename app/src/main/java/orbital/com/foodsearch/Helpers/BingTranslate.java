@@ -14,8 +14,8 @@ public class BingTranslate {
     private static final String LOG_TAG = "FOODIES";
 
     public static String getTranslatedText(String txt) {
-        Translate.setClientId("foodies");
-        Translate.setClientSecret("yHTnJd2isVkTXxMRAJ7cSDgugHQmwKg+qYT/LbkNrtg=");
+        Translate.setClientId("foodies1");
+        Translate.setClientSecret("visGDAEgH0FXxw/Qskj+vHWNhfWphVu+0RRK/5cVYAw=");
         String translation = null;
         try {
             //2nd param is translate from, 3rd param is translate to

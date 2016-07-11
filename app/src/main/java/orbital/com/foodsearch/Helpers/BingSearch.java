@@ -29,6 +29,7 @@ public class BingSearch {
 
     //Abel's one
     //private static final String OCP_APIM_KEY = "df4bfc35ad584f8c856052cb46f213dd";
+    private static final String OCP_APIM_KEY = "45ab98a696814189ac303f5ceb975476";
     private static final String BING_IMAGE_URL = "https://api.cognitive.microsoft.com/bing/v5.0/images/";
     private static final String LOG_TAG = "FOODIES";
 
