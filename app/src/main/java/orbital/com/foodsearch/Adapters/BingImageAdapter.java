@@ -70,6 +70,8 @@ public class BingImageAdapter
         String thumbUrl = imageValue.getThumbnailUrl();
         String hostUrl = imageValue.getHostPageUrl();
 
+        // Set holder string values
+        holder.clearState();
         holder.thumbUrl = thumbUrl;
         holder.imageUrl = imageUrl;
         ViewCompat.setTransitionName(holder.imageView,
@@ -100,8 +102,8 @@ public class BingImageAdapter
 
         // Set formatted URL on UrlView
         setTextViewUrl(holder.hostUrlView, hostUrl);
-        holder.translateBtn.setTextColor(
-                Color.parseColor("#" + imageValue.getAccentColor()));
+        int accentColor = Color.parseColor("#" + imageValue.getAccentColor());
+        holder.translateBtn.setTextColor(accentColor);
     }
 
     /**
@@ -136,32 +138,50 @@ public class BingImageAdapter
 
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private View itemView;
         private ImageView imageView;
         private TextView titleTextView;
         private TextView hostUrlView;
         private TextView descView;
         private Button translateBtn;
+        private Button undoBtn;
         private ImageButton closeBtn;
         private ImageButton fullscreenBtn;
         private ProgressBar progressBar;
         private FrameLayout overlay;
         private String imageUrl;
         private String thumbUrl;
+        private String mOriginalTitle;
+        private String mOriginalDesc;
+        private String mTranslatedTitle;
+        private String mTranslatedDesc;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            this.itemView = itemView;
             imageView = (ImageView) itemView.findViewById(R.id.card_image);
             titleTextView = (TextView) itemView.findViewById(R.id.card_title);
             hostUrlView = (TextView) itemView.findViewById(R.id.card_hostpage);
             descView = (TextView) itemView.findViewById(R.id.card_description);
             translateBtn = (Button) itemView.findViewById(R.id.translate_button);
+            undoBtn = (Button) itemView.findViewById(R.id.undo_button);
             closeBtn = (ImageButton) itemView.findViewById(R.id.close_button);
             fullscreenBtn = (ImageButton) itemView.findViewById(R.id.fullscrn_button);
             progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar_card);
-            overlay = (FrameLayout) itemView.findViewById(R.id.card_overlay);
+            overlay = (FrameLayout) itemView.findViewById(R.id.translate_overlay);
             translateBtn.setOnClickListener(this);
             closeBtn.setOnClickListener(this);
             fullscreenBtn.setOnClickListener(this);
+            undoBtn.setOnClickListener(this);
+        }
+
+        private void clearState() {
+            undoBtn.setVisibility(View.GONE);
+            translateBtn.setVisibility(View.VISIBLE);
+            mOriginalTitle = null;
+            mOriginalDesc = null;
+            mTranslatedTitle = null;
+            mTranslatedDesc = null;
         }
 
         @Override
@@ -169,6 +189,9 @@ public class BingImageAdapter
             switch (v.getId()) {
                 case R.id.translate_button:
                     translateResults();
+                    break;
+                case R.id.undo_button:
+                    undoTranslate();
                     break;
                 case R.id.close_button:
                     ((OcrActivity) mContext).closeSearchResults();
@@ -180,33 +203,59 @@ public class BingImageAdapter
             }
         }
 
+        private void undoTranslate() {
+            titleTextView.setText(mOriginalTitle);
+            descView.setText(mOriginalDesc);
+            undoBtn.setVisibility(View.GONE);
+            translateBtn.setVisibility(View.VISIBLE);
+        }
+
         private void translateResults() {
-            final String titleText = titleTextView.getText().toString();
-            final String descText = descView.getText().toString();
+            mOriginalTitle = titleTextView.getText().toString();
+            mOriginalDesc = descView.getText().toString();
             class translateBackground extends AsyncTask<Void, Void, Void> {
 
-                private String translatedTitle = titleText;
-                private String translatedDesc = descText;
+                private String translatedTitle = mOriginalTitle;
+                private String translatedDesc = mOriginalDesc;
 
                 @Override
                 protected Void doInBackground(Void... params) {
-                    translatedTitle = BingTranslate.getTranslatedText(titleText);
-                    translatedDesc = BingTranslate.getTranslatedText(descText);
+                    translatedTitle = BingTranslate.getTranslatedText(mOriginalTitle);
+                    translatedDesc = BingTranslate.getTranslatedText(mOriginalDesc);
                     return null;
                 }
 
+                // Fade out progress and overlay, set texts, change button visibilities
+                // and save values on obtaining translated result
                 @Override
                 protected void onPostExecute(Void result) {
                     titleTextView.setText(translatedTitle);
                     descView.setText(translatedDesc);
+                    translateBtn.setVisibility(View.GONE);
+                    undoBtn.setVisibility(View.VISIBLE);
                     AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
                     AnimUtils.brightenOverlay(overlay);
+                    if (!translatedTitle.equals(mOriginalTitle) && !translatedDesc.equals(mOriginalDesc)) {
+                        mTranslatedDesc = translatedDesc;
+                        mTranslatedTitle = translatedTitle;
+                    }
                     super.onPostExecute(result);
                 }
             }
-            new translateBackground().execute();
-            AnimUtils.fadeIn(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
-            AnimUtils.darkenOverlay(overlay);
+            // If never translated before or we have null values, perform translate task.
+            // Otherwise, set the new translated texts to the corresponding views.
+            if (mTranslatedDesc == null || mTranslatedTitle == null) {
+                AnimUtils.darkenOverlay(overlay);
+                AnimUtils.fadeIn(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
+                new translateBackground().execute();
+            } else {
+                titleTextView.setText(mTranslatedTitle);
+                descView.setText(mTranslatedDesc);
+                translateBtn.setVisibility(View.GONE);
+                undoBtn.setVisibility(View.VISIBLE);
+            }
         }
+
+
     }
 }

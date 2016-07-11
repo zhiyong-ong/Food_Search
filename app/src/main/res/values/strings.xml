@@ -23,6 +23,7 @@
     <string name="image_search_fail">Image Search Call Failed</string>
     <string name="insights_search_fail">Insights call failed!</string>
     <string name="translate">Translate</string>
+    <string name="undo">Undo Translate</string>
     <string name="retry">Retry</string>
 
     <string name="group_dropcancel">dropcancelgroup</string>

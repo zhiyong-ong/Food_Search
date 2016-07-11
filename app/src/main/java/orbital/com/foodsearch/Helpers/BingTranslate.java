@@ -16,7 +16,7 @@ public class BingTranslate {
     public static String getTranslatedText(String txt) {
         Translate.setClientId("foodies1");
         Translate.setClientSecret("visGDAEgH0FXxw/Qskj+vHWNhfWphVu+0RRK/5cVYAw=");
-        String translation = null;
+        String translation = txt;
         try {
             //2nd param is translate from, 3rd param is translate to
             translation = Translate.execute(txt, Language.CHINESE_SIMPLIFIED);
