@@ -270,7 +270,7 @@ public class OcrActivity extends AppCompatActivity {
      *
      * @param searchParam String to be searched for
      */
-    public void searchImageResponse (final String searchParam) {
+    public void searchImageResponse (final Context context, final String searchParam) {
         AnimUtils.containerSlideDown(findViewById(R.id.activity_ocr_exp),
                 new AnimatingListener(findViewById(R.id.activity_ocr_exp)),
                 containerTransY);
@@ -313,7 +313,6 @@ public class OcrActivity extends AppCompatActivity {
     private void searchImageInsights(final Context context, final ImageValue imgVal) {
         String insightsToken = imgVal.getImageInsightsToken();
         final View rootView = findViewById(R.id.activity_ocr_exp);
-        final Context context = this;
         database.child("imageinsights").child(insightsToken).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -359,6 +358,12 @@ public class OcrActivity extends AppCompatActivity {
         BingSearch bingImg = new BingSearch(searchParam);
         Call<ImageSearchResponse> call = bingImg.buildCall();
         call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER, searchParam));
+    }
+
+    private void enqueueTranslate(final String searchParam) {
+        mTranslatedText = searchParam;
+        translateTask = new translateTask(searchParam).executeOnExecutor(
+                AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -533,7 +538,7 @@ public class OcrActivity extends AppCompatActivity {
     private class translateTask extends AsyncTask<Void, Void, String> {
         String searchParam;
 
-        TranslateTask(String searchParam) {
+        translateTask(String searchParam) {
             this.searchParam = searchParam;
         }
 
