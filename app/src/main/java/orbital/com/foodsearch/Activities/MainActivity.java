@@ -2,7 +2,9 @@ package orbital.com.foodsearch.Activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -16,8 +18,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.util.Iterator;
 
 import orbital.com.foodsearch.R;
 
@@ -35,12 +50,89 @@ public class MainActivity extends AppCompatActivity {
 
     private Uri photoFileUri = null;
 
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseAuth mAuth;
+    private String user = "foodies@firebase.com";
+    private String password = "Orbital123";
+    public static final String MyPREFERENCES = "Preferences" ;
+    public static final String image = "ImageKey";
+    public static final String translate = "TranslateKey";
+    public static final String ocr = "OCRKey";
+    SharedPreferences sharedpreferences;
+    private DatabaseReference database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        database = FirebaseDatabase.getInstance().getReference();
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    final SharedPreferences.Editor editor = sharedpreferences.edit();
+                    database.child("APIKEY").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Iterator<DataSnapshot> iter = dataSnapshot.getChildren().iterator();
+
+                            while(iter.hasNext()) {
+                                DataSnapshot next = iter.next();
+                                if(next.getKey().equals("OCP_APIM_KEY")) {
+                                    editor.putString(image, next.getChildren().iterator().next().getValue(String.class));
+                                }
+                                else if(next.getKey().equals("OCR_KEY")) {
+                                    editor.putString(ocr, next.getChildren().iterator().next().getValue(String.class));
+                                }
+                                else if(next.getKey().equals("TRANSLATE_KEY")) {
+                                    editor.putString(translate, next.getChildren().iterator().next().getValue(String.class));
+                                }
+                            }
+                            editor.commit();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.e(LOG_TAG, "getUser:onCancelled", databaseError.toException());
+                        }
+                    });
+
+
+                    Log.e(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+        signInFirebase();
+    }
+
+    private void signInFirebase() {
+        mAuth.signInWithEmailAndPassword(user, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.e(LOG_TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.e(LOG_TAG, "signInWithEmail", task.getException());
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
     }
 
     @Override
@@ -184,5 +276,19 @@ public class MainActivity extends AppCompatActivity {
         }
         photoFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
                 + File.separator + DEBUG_FILE_NAME));
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 }
