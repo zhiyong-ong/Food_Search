@@ -12,7 +12,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
-import android.support.v4.view.animation.LinearOutSlowInInterpolator;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.widget.EditText;
@@ -28,30 +28,55 @@ import orbital.com.foodsearch.R;
 public class AnimUtils {
     public static final int PROGRESS_BAR_DURATION = 150;
     public static final int SEARCH_BAR_SHOW = 270;
+    public static final int SEARCH_BAR_HIDE = 350;
     public static final int RESULTS_UP_DURATION = 550;
     public static final int RESULTS_DOWN_DURATION = 400;
     public static final int OVERLAY_DURATION = 400;
+    public static final int TRANSLATE_REVEAL_DURATION = 600;
     public static final int SEARCH_BAR_RAISE = 450;
     public static final int SEARCH_BAR_DROP = 400;
     public static final int TRANSLATE_SHOW = 400;
 
     public static void brightenOverlay(final View overlay) {
         int currentColor = ((ColorDrawable) overlay.getBackground()).getColor();
-        ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
+        ValueAnimator brightenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
                 currentColor,
                 Color.TRANSPARENT);
-        darkenAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        brightenAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 overlay.setBackgroundColor((Integer) valueAnimator.getAnimatedValue());
             }
         });
 
-        darkenAnim.setDuration(OVERLAY_DURATION);
-        darkenAnim.start();
+        brightenAnim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                overlay.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+
+        brightenAnim.setDuration(OVERLAY_DURATION);
+        brightenAnim.start();
     }
 
     public static void darkenOverlay(final View overlay) {
+        overlay.setVisibility(View.VISIBLE);
         int currentColor = ((ColorDrawable) overlay.getBackground()).getColor();
         ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
                 currentColor,
@@ -104,8 +129,7 @@ public class AnimUtils {
 
     public static void hideSearchBar(View searchBar, int searchbarTrans){
         searchBar.animate().translationY(searchbarTrans)
-                .setInterpolator(new LinearOutSlowInInterpolator())
-                .setDuration(SEARCH_BAR_SHOW)
+                .setDuration(SEARCH_BAR_HIDE)
                 .start();
     }
 
@@ -135,28 +159,74 @@ public class AnimUtils {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private static void exitReveal(final View view) {
+    public static void enterReveal(final View revealView, View startView, View parentView) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            AnimUtils.darkenOverlay(revealView);
             return;
         }
 
         // get the center for the clipping circle
-        int cx = view.getMeasuredWidth() / 2;
-        int cy = view.getMeasuredHeight() / 2;
+        int cx = startView.getLeft() + startView.getWidth() / 2;
+        int cy = startView.getTop() + startView.getHeight() / 2;
+
+        // get the final radius for the clipping circle
+        int finalRadius = (int) Math.hypot(parentView.getWidth(), parentView.getHeight());
+
+        // create the animator for this view (the start radius is zero)
+        Animator anim = ViewAnimationUtils.createCircularReveal(revealView, cx, cy, 0, finalRadius);
+
+        // make the view visible and start the animation
+        anim.setDuration(TRANSLATE_REVEAL_DURATION);
+        anim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                fadeOut(revealView, OVERLAY_DURATION);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
+        revealView.setVisibility(View.VISIBLE);
+        Log.e("FOODIES", "animation about to start");
+        anim.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void exitReveal(final View exitView, View startView) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            AnimUtils.brightenOverlay(exitView);
+            return;
+        }
+        // get the center for the clipping circle
+        int cx = startView.getLeft() + startView.getMeasuredWidth() / 2;
+        int cy = startView.getTop() + startView.getMeasuredHeight() / 2;
 
         // get the initial radius for the clipping circle
-        int initialRadius = view.getWidth() / 2;
+        int initialRadius = exitView.getWidth() / 2;
 
         // create the animation (the final radius is zero)
         Animator anim =
-                ViewAnimationUtils.createCircularReveal(view, cx, cy, initialRadius, 0);
+                null;
+        anim = ViewAnimationUtils.createCircularReveal(exitView, cx, cy, initialRadius, 0);
 
         // make the view invisible when the animation is done
         anim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                view.setVisibility(View.GONE);
+                exitView.setVisibility(View.GONE);
             }
         });
 
@@ -173,7 +243,8 @@ public class AnimUtils {
     }
 
     public static void fadeOut(final View view, int duration) {
-        ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, view.getAlpha(), 0);
+        final Float originalAlpha = view.getAlpha();
+        ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, originalAlpha, 0);
         animator.setDuration(duration);
         animator.addListener(new Animator.AnimatorListener() {
             @Override
@@ -184,6 +255,7 @@ public class AnimUtils {
             @Override
             public void onAnimationEnd(Animator animation) {
                 view.setVisibility(View.GONE);
+                view.setAlpha(originalAlpha);
             }
 
             @Override

@@ -113,7 +113,7 @@ public class ImageUtils {
         int width, height;
         height = bmpOriginal.getHeight();
         width = bmpOriginal.getWidth();
-
+        Bitmap bmpCopy = Bitmap.createBitmap(bmpOriginal);
         Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(bmpGrayscale);
         Paint paint = new Paint();
@@ -121,7 +121,7 @@ public class ImageUtils {
         cm.setSaturation(0);
         ColorMatrixColorFilter f = new ColorMatrixColorFilter(cm);
         paint.setColorFilter(f);
-        c.drawBitmap(bmpOriginal, 0, 0, paint);
+        c.drawBitmap(bmpCopy, 0, 0, paint);
         return bmpGrayscale;
     }
 

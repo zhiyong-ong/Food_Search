@@ -21,8 +21,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/card_image_height"
             android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:transitionName="@string/image_shared_view" />
+            android:clickable="true" />
 
         <TextView
             android:id="@+id/card_title"
@@ -80,6 +79,19 @@
             android:padding="@dimen/button_text_padding"
             android:text="@string/translate" />
 
+        <Button
+            android:id="@+id/undo_button"
+            style="@style/BorderlessButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="@dimen/button_margin"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="@dimen/button_text_padding"
+            android:text="@string/undo"
+            android:visibility="gone" />
+
         <ImageButton
             android:id="@+id/fullscrn_button"
             android:layout_width="wrap_content"
@@ -102,11 +114,11 @@
             android:src="@drawable/btn_close_card" />
 
         <FrameLayout
-            android:id="@+id/card_overlay"
+            android:id="@+id/translate_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#00000000"
-            android:clickable="false" />
+            android:background="@android:color/transparent"
+            android:visibility="gone" />
 
         <ProgressBar
             android:id="@+id/progress_bar_card"
