@@ -8,6 +8,7 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
+import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -23,7 +24,8 @@ import retrofit2.http.QueryMap;
 
 public class BingOcr {
     private static final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
-    private static final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
+    //private static final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
+    private static final String API_KEY = OcrActivity.OCR_KEY;
 
     private static final Interceptor interceptor = new Interceptor() {
         @Override

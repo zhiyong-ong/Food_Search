@@ -14,8 +14,15 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+
         }
     }
 }
@@ -36,6 +43,7 @@ dependencies {
     compile 'me.zhanghai.android.materialprogressbar:library:1.1.6'
     compile 'com.github.chrisbanes:PhotoView:1.2.6'
     compile 'com.google.firebase:firebase-database:9.2.0'
+    compile 'com.google.firebase:firebase-auth:9.2.0'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'
