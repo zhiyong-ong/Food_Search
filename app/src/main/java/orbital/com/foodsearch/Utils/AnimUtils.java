@@ -18,6 +18,7 @@ import android.view.ViewAnimationUtils;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import orbital.com.foodsearch.R;
 
@@ -106,12 +107,13 @@ public class AnimUtils {
         anim.start();
     }
 
-    public static void containerSlideUp(final Context context, final View rootView) {
+    public static void containerSlideUp(final Context context, final View rootView, Animator.AnimatorListener listener) {
         FrameLayout resultsContainer = (FrameLayout) rootView.findViewById(R.id.search_frag_container);
         ObjectAnimator anim = ObjectAnimator.ofFloat(resultsContainer,
                 View.TRANSLATION_Y, 0);
         anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.setDuration(RESULTS_UP_DURATION);
+        anim.addListener(listener);
         anim.start();
     }
 
@@ -159,7 +161,7 @@ public class AnimUtils {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void enterReveal(final View revealView, View startView, View parentView) {
+    public static void enterReveal(View startView, final View revealView, View filledView) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             AnimUtils.darkenOverlay(revealView);
             return;
@@ -170,7 +172,7 @@ public class AnimUtils {
         int cy = startView.getTop() + startView.getHeight() / 2;
 
         // get the final radius for the clipping circle
-        int finalRadius = (int) Math.hypot(parentView.getWidth(), parentView.getHeight());
+        int finalRadius = (int) Math.hypot(filledView.getWidth(), filledView.getHeight());
 
         // create the animator for this view (the start radius is zero)
         Animator anim = ViewAnimationUtils.createCircularReveal(revealView, cx, cy, 0, finalRadius);
@@ -269,6 +271,36 @@ public class AnimUtils {
             }
         });
         animator.start();
+    }
+
+    public static class displaySearchListener implements Animator.AnimatorListener {
+        View cardView;
+
+        public displaySearchListener(View cardView, String translatedText) {
+            this.cardView = cardView;
+            TextView tv = (TextView) cardView.findViewById(R.id.translated_textview);
+            tv.setText(translatedText);
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            enterReveal(cardView, cardView, cardView);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
+        }
     }
 }
 

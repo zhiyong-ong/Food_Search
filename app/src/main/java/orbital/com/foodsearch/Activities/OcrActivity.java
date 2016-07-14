@@ -98,7 +98,7 @@ public class OcrActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance().getReference();
         imgDAO = new BingImageDAO();
 
-        ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
+        ImageView imgView = (ImageView) findViewById(R.id.preview_image_view);
         Picasso.with(this).load("file://" + filePath)
                 //.placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -184,7 +184,7 @@ public class OcrActivity extends AppCompatActivity {
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
                 call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
                 // After call is dispatched, load full res image into preview
-                ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
+                ImageView previewImageView2 = (ImageView) findViewById(R.id.preview_image_view);
                 Picasso.with(mContext).load("file://" + filePath)
                         .noPlaceholder()
                         .fit()
@@ -253,7 +253,7 @@ public class OcrActivity extends AppCompatActivity {
     /**
      * Opens photo view activity to view the high resolution photo
      *
-     * @param view     View in which button was clicked on, gives us the exact card position
+     * @param view     View in which button was clicked on, gives us the exact card item position
      * @param imageUrl String of the high res image url
      * @param thumbUrl String of the thumbnail image url for placeholder
      * @param position position of the card so that we can assign the correct transition name
@@ -324,7 +324,9 @@ public class OcrActivity extends AppCompatActivity {
                         searchFragment.finalizeRecycler();
                         ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
                         progressBar.setVisibility(View.GONE);
-                        AnimUtils.containerSlideUp(context, rootView);
+                        AnimUtils.containerSlideUp(context, rootView,
+                                new AnimUtils.displaySearchListener(rootView.findViewById(R.id.translation_card),
+                                        mTranslatedText));
                         imageExist = false;
                     }
                 }
@@ -347,7 +349,8 @@ public class OcrActivity extends AppCompatActivity {
         Log.d(LOG_TAG, "Search String: " + searchParam);
         BingSearch bingImg = new BingSearch(searchParam);
         Call<ImageSearchResponse> call = bingImg.buildCall();
-        call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER, searchParam));
+        call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr_exp),
+                FRAGMENT_MANAGER, searchParam));
     }
 
     /**
@@ -376,6 +379,10 @@ public class OcrActivity extends AppCompatActivity {
                 imgVal));
     }
 
+    /**
+     * This Asynctask is used to track translateTask status until it is FINISHED.
+     * Once FINISHED, complete the whole search task.
+     */
     private static class CompleteTask extends AsyncTask<Void, Void, Void> {
         Context context = null;
         View rootView = null;
@@ -406,15 +413,19 @@ public class OcrActivity extends AppCompatActivity {
                 //persist search result to DB
                 searchResponse.setTranslatedQuery(mTranslatedText);
                 imgDAO.persistImage(searchResponse);
-                searchFragment.finalizeRecycler();//mTranslatedText);
+                searchFragment.finalizeRecycler(); // mTranslatedText);
             }
-            //in the case where the database has the image but doesn't have the imageinsights.
+            // in the case where the database has the image but doesn't have the imageinsights.
+            // Set member translated text into DB result.
             else {
-                searchFragment.finalizeRecycler();//searchResponseDB.getTranslatedQuery());
+                mTranslatedText = searchResponseDB.getTranslatedQuery();
+                searchFragment.finalizeRecycler(); // searchResponseDB.getTranslatedQuery());
             }
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
             progressBar.setVisibility(View.GONE);
-            AnimUtils.containerSlideUp(context, rootView);
+            AnimUtils.containerSlideUp(context, rootView,
+                    new AnimUtils.displaySearchListener(rootView.findViewById(R.id.translation_card),
+                            mTranslatedText));
             imageExist = false;
         }
     }

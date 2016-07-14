@@ -80,7 +80,7 @@ public class OcrDebugActivity extends AppCompatActivity {
 //        setSupportActionBar(toolbar);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
+        ImageView imgView = (ImageView) findViewById(R.id.preview_image_view);
         Picasso.with(this).load("file://" + filePath)
                 //.placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -145,7 +145,7 @@ public class OcrDebugActivity extends AppCompatActivity {
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
                 call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
                 // After call is dispatched, load compress image into preview
-                ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
+                ImageView previewImageView2 = (ImageView) findViewById(R.id.preview_image_view);
                 Picasso.with(mContext).load("file://" + filePath)
                         .noPlaceholder()
                         .fit()
@@ -225,7 +225,7 @@ public class OcrDebugActivity extends AppCompatActivity {
             // TODO: improve loading progress animations
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
-            AnimUtils.containerSlideUp(context, rootView);
+            //AnimUtils.containerSlideUp(context, rootView);
         }
 
         @Override
