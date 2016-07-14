@@ -24,7 +24,6 @@ import retrofit2.http.QueryMap;
 
 public class BingOcr {
     private static final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
-    //private static final String API_KEY = "b2d6262c77174bafbb5bda3e5997dbfe";
     private static final String API_KEY = OcrActivity.OCR_KEY;
 
     private static final Interceptor interceptor = new Interceptor() {
@@ -36,7 +35,8 @@ public class BingOcr {
                 return chain.proceed(originalRequest);
             }
             return chain.proceed(originalRequest
-                    .newBuilder().addHeader("Ocp-Apim-Subscription-Key", API_KEY)
+                    .newBuilder()
+                    .addHeader("Ocp-Apim-Subscription-Key", API_KEY)
                     .addHeader("Content-Type", "multipart/form-data")
                     .build());
         }
@@ -48,7 +48,7 @@ public class BingOcr {
 
     /**
      * This method sets up the POST call query and enqueues it for async up/download.
-     * @param rawImage raw image binary data to be uploaded via POST
+     * @param rawImage raw IMAGE_KEY binary data to be uploaded via POST
      */
     public static Call<BingOcrResponse> buildCall(byte[] rawImage) {
         Retrofit retrofit = new Retrofit.Builder()

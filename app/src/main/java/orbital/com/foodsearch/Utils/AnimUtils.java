@@ -12,7 +12,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.widget.EditText;
@@ -179,29 +178,7 @@ public class AnimUtils {
 
         // make the view visible and start the animation
         anim.setDuration(TRANSLATE_REVEAL_DURATION);
-        anim.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                fadeOut(revealView, OVERLAY_DURATION);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
-        });
         revealView.setVisibility(View.VISIBLE);
-        Log.e("FOODIES", "animation about to start");
         anim.start();
     }
 
@@ -289,7 +266,7 @@ public class AnimUtils {
 
         @Override
         public void onAnimationEnd(Animator animation) {
-            enterReveal(cardView, cardView, cardView);
+            // enterReveal(cardView, cardView, cardView);
         }
 
         @Override

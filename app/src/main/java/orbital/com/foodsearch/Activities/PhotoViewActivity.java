@@ -46,7 +46,7 @@ public class PhotoViewActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess() {
                         Picasso.with(context)
-                                .load(url) // image url goes here
+                                .load(url) // IMAGE_KEY url goes here
                                 .noPlaceholder()
                                 .into(photoView);
                     }

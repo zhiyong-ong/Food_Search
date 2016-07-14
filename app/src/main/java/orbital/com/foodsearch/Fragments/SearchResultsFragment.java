@@ -81,7 +81,7 @@ public class SearchResultsFragment extends Fragment {
     }
 
     /**
-     * This method is used to update the recyclerView with new image values
+     * This method is used to update the recyclerView with new IMAGE_KEY values
      *
      * @param newImageValues new Image values to be displayed in recyclerView
      */

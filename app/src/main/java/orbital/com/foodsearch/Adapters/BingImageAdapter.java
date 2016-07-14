@@ -74,7 +74,7 @@ public class BingImageAdapter
         holder.thumbUrl = thumbUrl;
         holder.imageUrl = imageUrl;
 
-        // Use image captions for title and description if available
+        // Use IMAGE_KEY captions for title and description if available
         BestRepresentativeQuery brq = imageValue.getRepresentativeQuery();
         ImageCaption imageCaption = imageValue.getImageCaption();
         String title = imageValue.getName();
@@ -85,7 +85,7 @@ public class BingImageAdapter
             hostUrl = imageCaption.getDataSourceUrl();
         }
 
-        // Set image using image url
+        // Set IMAGE_KEY using IMAGE_KEY url
         ImageView cardImageView = holder.imageView;
         Picasso.with(mContext).load(thumbUrl)
                 .fit()
@@ -239,7 +239,7 @@ public class BingImageAdapter
                     super.onPostExecute(result);
                 }
             }
-            // If never translated before or we have null values, perform translate task.
+            // If never translated before or we have null values, perform TRANSLATE_KEY task.
             // Otherwise, set the new translated texts to the corresponding views.
             if (mTranslatedDesc == null || mTranslatedTitle == null) {
                 AnimUtils.darkenOverlay(overlay);

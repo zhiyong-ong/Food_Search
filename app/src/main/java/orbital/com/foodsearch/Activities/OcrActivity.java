@@ -59,12 +59,16 @@ public class OcrActivity extends AppCompatActivity {
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
     private static final String SEARCH_BAR_TAG = "SEARCHBARTAG";
     private static final String PHOTO_FRAGMENT_TAG = "PHOTOVIEWFRAGMENT";
+    public static SharedPreferences sharedPreferences;
+    public static String IMAGE_KEY;
+    public static String OCR_KEY;
+    public static String TRANSLATE_KEY;
     private static String mTranslatedText = null;
     private static AsyncTask<Void, Void, String> translateTask;
     private static int barMarginTop = 0;
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
-    private static Boolean imageExist = false;
+    private static Boolean imageExistDB = false;
     private static ImageSearchResponse searchResponseDB;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private DatabaseReference database;
@@ -72,10 +76,6 @@ public class OcrActivity extends AppCompatActivity {
     private int containerTransY;
     private int searchBarTrans;
     private String filePath = null;
-    public static SharedPreferences sharedPreferences;
-    public static String IMAGE_KEY;
-    public static String OCR_KEY;
-    public static String TRANSLATE_KEY;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -103,14 +103,14 @@ public class OcrActivity extends AppCompatActivity {
         database = FirebaseDatabase.getInstance().getReference();
         imgDAO = new BingImageDAO();
         sharedPreferences = getSharedPreferences(MainActivity.MyPREFERENCES, MODE_PRIVATE);
-        IMAGE_KEY = sharedPreferences.getString(MainActivity.image, null);
-        OCR_KEY = sharedPreferences.getString(MainActivity.ocr, null);
-        TRANSLATE_KEY = sharedPreferences.getString(MainActivity.translate, null);
+        IMAGE_KEY = sharedPreferences.getString(MainActivity.IMAGE_KEY, null);
+        OCR_KEY = sharedPreferences.getString(MainActivity.OCR_KEY, null);
+        TRANSLATE_KEY = sharedPreferences.getString(MainActivity.TRANSLATE_KEY, null);
 
         Log.e(LOG_TAG, "IMAGE KEY: " + IMAGE_KEY);
         Log.e(LOG_TAG, "OCR KEY: " + OCR_KEY);
         Log.e(LOG_TAG, "TRANSLATE KEY: " + TRANSLATE_KEY);
-        ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
+        ImageView imgView = (ImageView) findViewById(R.id.preview_image_view);
         Picasso.with(this).load("file://" + filePath)
                 //.placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -184,7 +184,7 @@ public class OcrActivity extends AppCompatActivity {
     }
 
     /**
-     * Method that compresses the image before sending it to BingOcrService
+     * Method that compresses the IMAGE_KEY before sending it to BingOcrService
      */
     private void bingOcrConnect() {
         View root = findViewById(R.id.activity_ocr_exp);
@@ -195,13 +195,13 @@ public class OcrActivity extends AppCompatActivity {
                 Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
                 call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
-                // After call is dispatched, load full res image into preview
-                ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
+                // After call is dispatched, load full res IMAGE_KEY into preview
+                ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
                 Picasso.with(mContext).load("file://" + filePath)
                         .noPlaceholder()
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
-                        .into(previewImageView2);
+                        .into(previewImageView);
             }
         };
         compressTask.execute(filePath);
@@ -251,8 +251,8 @@ public class OcrActivity extends AppCompatActivity {
      * Opens photo view activity to view the high resolution photo
      *
      * @param view     View in which button was clicked on, gives us the exact card position
-     * @param imageUrl String of the high res image url
-     * @param thumbUrl String of the thumbnail image url for placeholder
+     * @param imageUrl String of the high res IMAGE_KEY url
+     * @param thumbUrl String of the thumbnail IMAGE_KEY url for placeholder
      * @param position position of the card so that we can assign the correct transition name
      */
     public void openPhotoView(View view, String imageUrl, String thumbUrl, int position) {
@@ -277,17 +277,19 @@ public class OcrActivity extends AppCompatActivity {
         AnimUtils.darkenOverlay(findViewById(R.id.drawable_overlay));
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.search_progress);
         progressBar.setVisibility(View.VISIBLE);
+        imageExistDB = false;
 
         database.child("images").child(searchParam).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                // Set search response DB to value from cloud
                 searchResponseDB = dataSnapshot.getValue(ImageSearchResponse.class);
-                //initialize the imagesearch again
+                // initialize the imagesearch again
                 if (searchResponseDB == null) {
                     enqueueSearch(searchParam);
                     enqueueTranslate(searchParam);
                 } else {
-                    imageExist = true;
+                    imageExistDB = true;
                     SearchResultsFragment searchFragment = (SearchResultsFragment) FRAGMENT_MANAGER.findFragmentByTag(SEARCH_FRAGMENT_TAG);
                     searchFragment.updateRecyclerList(searchResponseDB.getImageValues());
                     for (ImageValue imgVal : searchResponseDB.getImageValues()) {
@@ -306,7 +308,7 @@ public class OcrActivity extends AppCompatActivity {
     }
 
     /*
-    There is a possibility that there may exist 2 different images with the same image insight.
+    There is a possibility that there may exist 2 different images with the same IMAGE_KEY insight.
     This method is called after onresponse for imagesearch callback in order to prevent duplicates from being
     persisted into the database. Flag used is imageExists
      */
@@ -317,7 +319,7 @@ public class OcrActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ImageInsightsResponse imgInsightsDB = dataSnapshot.getValue(ImageInsightsResponse.class);
-                //initialize the image insights search again
+                //initialize the IMAGE_KEY insights search again
                 if (imgInsightsDB == null) {
                     enqueueImageInsightCall(imgVal);
                 } else {
@@ -326,7 +328,7 @@ public class OcrActivity extends AppCompatActivity {
                     if (ImageInsightCallback.count < IMAGE_COUNT) {
                         return;
                     }
-                    if (!imageExist) {
+                    if (!imageExistDB) {
                         new CompleteTask(context, rootView, FRAGMENT_MANAGER)
                                 .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     } else {
@@ -334,8 +336,10 @@ public class OcrActivity extends AppCompatActivity {
                         searchFragment.finalizeRecycler();
                         ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
                         progressBar.setVisibility(View.GONE);
-                        AnimUtils.containerSlideUp(context, rootView);
-                        imageExist = false;
+                        AnimUtils.containerSlideUp(context, rootView,
+                                new AnimUtils.displaySearchListener(rootView.findViewById(R.id.translation_card),
+                                        searchResponseDB.getTranslatedQuery()));
+                        imageExistDB = false;
                     }
                 }
             }
@@ -369,7 +373,7 @@ public class OcrActivity extends AppCompatActivity {
     /**
      * This method creates a imageinsight search call based on the input imageValues list and enqueues it
      *
-     * @param imgVal image values list to be used as param for insightsToken call
+     * @param imgVal IMAGE_KEY values list to be used as param for insightsToken call
      *               Multiple calls.
      */
     private void enqueueImageInsightCall(ImageValue imgVal) {
@@ -407,20 +411,23 @@ public class OcrActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            if (!imageExist) {
+            if (!imageExistDB) {
                 //persist search result to DB
                 searchResponse.setTranslatedQuery(mTranslatedText);
                 imgDAO.persistImage(searchResponse);
-                searchFragment.finalizeRecycler();//mTranslatedText);
+                searchFragment.finalizeRecycler();
             }
-            //in the case where the database has the image but doesn't have the imageinsights.
+            // in the case where the database has the IMAGE_KEY but doesn't have the imageinsights.
+            // Should never be called because CompleteTask only executes when !imageExistDB
+            // but check for condition anyway.
             else {
                 searchFragment.finalizeRecycler();//searchResponseDB.getTranslatedQuery());
             }
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
             progressBar.setVisibility(View.GONE);
-            AnimUtils.containerSlideUp(context, rootView);
-            imageExist = false;
+            AnimUtils.containerSlideUp(context, rootView,
+                    new AnimUtils.displaySearchListener(rootView.findViewById(R.id.translation_card),
+                            mTranslatedText));
         }
     }
 
@@ -443,9 +450,9 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         public void onResponse(Call<ImageInsightsResponse> call, Response<ImageInsightsResponse> response) {
+            // Get response body, persist to DB then complete task
             ImageInsightsResponse insightsResponse = response.body();
             imageValue.setInsightsResponse(insightsResponse);
-            //persist to DB
             imgDAO.persistImageInsight(insightsResponse);
             count++;
             if (count < IMAGE_COUNT) {
@@ -464,7 +471,7 @@ public class OcrActivity extends AppCompatActivity {
                 return;
             }
             count = 0;
-            // Failed to get the image insights so display snackbar error dialog
+            // Failed to get the IMAGE_KEY insights so display snackbar error dialog
             Log.e(LOG_TAG, t.getMessage());
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
             progressBar.setVisibility(View.GONE);
@@ -504,7 +511,7 @@ public class OcrActivity extends AppCompatActivity {
             }
             searchResponse.setSearchQuery(searchParam);
             List<ImageValue> imageValues = searchResponse.getImageValues();
-            // image search results received, now enqueueImageInsightCall with received value
+            // IMAGE_KEY search results received, now enqueueImageInsightCall with received value
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
                 searchFragment.updateRecyclerList(imageValues);
@@ -595,7 +602,7 @@ public class OcrActivity extends AppCompatActivity {
     }
 
     /**
-     * This async task is used to compress the image to be sent in the
+     * This async task is used to compress the IMAGE_KEY to be sent in the
      * background thread using ImageUtils.compressImage
      */
     private class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {

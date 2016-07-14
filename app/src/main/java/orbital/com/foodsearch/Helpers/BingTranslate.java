@@ -20,7 +20,7 @@ public class BingTranslate {
         Translate.setClientSecret(OcrActivity.TRANSLATE_KEY);
         String translation = null;
         try {
-            //2nd param is translate from, 3rd param is translate to
+            //2nd param is TRANSLATE_KEY from, 3rd param is TRANSLATE_KEY to
             translation = Translate.execute(txt, Language.CHINESE_SIMPLIFIED);
         } catch (Exception e) {
             e.printStackTrace();
