@@ -75,7 +75,7 @@ public class DrawableView extends FrameLayout {
     /**
      * Draws boxes on drawableView with
      * @param rootView rootView holding  this view
-     * @param imagePath image path for the compressed image file
+     * @param imagePath IMAGE_KEY path for the compressed IMAGE_KEY file
      * @param lines list of line to be drawn
      * @param angle textAngle as received from bing api
      */

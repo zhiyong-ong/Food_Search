@@ -39,28 +39,25 @@ import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.R;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String MyPREFERENCES = "Preferences";
+    public static final String IMAGE_KEY = "ImageKey";
+    public static final String TRANSLATE_KEY = "TranslateKey";
+    public static final String OCR_KEY = "OCRKey";
     private static final int OCR_CAMERA_PERMISSION_REQUEST_CODE = 1;
     private static final int EXP_CAMERA_PERMISSION_REQUEST_CODE = 2;
     private static final int OCR_CAMERA_INTENT_REQUEST_CODE = 100;
     private static final int EXP_CAMERA_INTENT_REQUEST_CODE = 200;
-
     private static final String SAVED_URI = "savedUri";
     private static final String FILEPATH = "filePath";
     private static final String LOG_TAG = "FOODIES";
     private static final String PHOTO_FILE_NAME = "photo.jpg";
     private static final String DEBUG_FILE_NAME = "debug.jpg";
-
+    SharedPreferences sharedpreferences;
     private Uri photoFileUri = null;
-
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private String user = "foodies@firebase.com";
     private String password = "Orbital123";
-    public static final String MyPREFERENCES = "Preferences" ;
-    public static final String image = "ImageKey";
-    public static final String translate = "TranslateKey";
-    public static final String ocr = "OCRKey";
-    public static SharedPreferences sharedpreferences;
     private DatabaseReference database;
 
     @Override
@@ -83,17 +80,16 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             Iterator<DataSnapshot> iter = dataSnapshot.getChildren().iterator();
-
                             while(iter.hasNext()) {
                                 DataSnapshot next = iter.next();
                                 if(next.getKey().equals("OCP_APIM_KEY")) {
-                                    editor.putString(image, next.getChildren().iterator().next().getValue(String.class));
+                                    editor.putString(IMAGE_KEY, next.getChildren().iterator().next().getValue(String.class));
                                 }
                                 else if(next.getKey().equals("OCR_KEY")) {
-                                    editor.putString(ocr, next.getChildren().iterator().next().getValue(String.class));
+                                    editor.putString(OCR_KEY, next.getChildren().iterator().next().getValue(String.class));
                                 }
                                 else if(next.getKey().equals("TRANSLATE_KEY")) {
-                                    editor.putString(translate, next.getChildren().iterator().next().getValue(String.class));
+                                    editor.putString(TRANSLATE_KEY, next.getChildren().iterator().next().getValue(String.class));
                                 }
                             }
                             editor.commit();
@@ -104,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
                             Log.e(LOG_TAG, "getUser:onCancelled", databaseError.toException());
                         }
                     });
-
 
                     Log.e(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
@@ -227,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * This method is called after user takes a photo. If result is OK
-     * then send the image file path to the ocr activity intent.
+     * then send the IMAGE_KEY file path to the OCR_KEY activity intent.
      * @param requestCode requestCode for this request
      * @param resultCode resultCode returned by camera
      * @param data data as returned by camera, should be null because EXTRA_MEDIA_OUTPUT

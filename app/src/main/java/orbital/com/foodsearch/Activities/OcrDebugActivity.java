@@ -80,7 +80,7 @@ public class OcrDebugActivity extends AppCompatActivity {
 //        setSupportActionBar(toolbar);
 //        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        ImageView imgView = (ImageView) findViewById(R.id.previewImageView2);
+        ImageView imgView = (ImageView) findViewById(R.id.preview_image_view);
         Picasso.with(this).load("file://" + filePath)
                 //.placeholder(R.color.black_overlay)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -133,7 +133,7 @@ public class OcrDebugActivity extends AppCompatActivity {
     }
 
     /**
-     * Method that compresses the image before sending it to BingOcrService
+     * Method that compresses the IMAGE_KEY before sending it to BingOcrService
      * */
     private void bingOcrConnect() {
         View root = findViewById(R.id.activity_ocr_exp);
@@ -144,8 +144,8 @@ public class OcrDebugActivity extends AppCompatActivity {
                 Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
                 call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
-                // After call is dispatched, load compress image into preview
-                ImageView previewImageView2 = (ImageView) findViewById(R.id.previewImageView2);
+                // After call is dispatched, load compress IMAGE_KEY into preview
+                ImageView previewImageView2 = (ImageView) findViewById(R.id.preview_image_view);
                 Picasso.with(mContext).load("file://" + filePath)
                         .noPlaceholder()
                         .fit()
@@ -181,7 +181,7 @@ public class OcrDebugActivity extends AppCompatActivity {
 
     /**
      * This method creates a imageinsight search call based on the input imageValues list and enqueues it
-     * @param imageValues image values list to be used as param for insightsToken call
+     * @param imageValues IMAGE_KEY values list to be used as param for insightsToken call
      * Multiple calls.
      */
     private void enqueueImageInsightSearch(List<ImageValue> imageValues) {
@@ -225,7 +225,7 @@ public class OcrDebugActivity extends AppCompatActivity {
             // TODO: improve loading progress animations
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             progressBar.setVisibility(View.GONE);
-            AnimUtils.containerSlideUp(context, rootView);
+            //AnimUtils.containerSlideUp(context, rootView);
         }
 
         @Override
@@ -307,7 +307,7 @@ public class OcrDebugActivity extends AppCompatActivity {
         public void onResponse(Call<ImageSearchResponse> call, Response<ImageSearchResponse> response) {
             ImageSearchResponse searchResponse = response.body();
             List<ImageValue> imageValues = searchResponse.getImageValues();
-            // image search results received, now enqueueImageInsightSearch with received value
+            // IMAGE_KEY search results received, now enqueueImageInsightSearch with received value
             SearchResultsFragment searchFragment = (SearchResultsFragment)fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
                 searchFragment.updateRecyclerList(imageValues);
@@ -370,7 +370,7 @@ public class OcrDebugActivity extends AppCompatActivity {
     }
 
     /**
-     * This async task is used to compress the image to be sent in the
+     * This async task is used to compress the IMAGE_KEY to be sent in the
      * background thread using ImageUtils.compressImage
      */
     private class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {
