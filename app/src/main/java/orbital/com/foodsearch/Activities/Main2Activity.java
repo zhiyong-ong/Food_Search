@@ -12,15 +12,18 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -35,10 +38,11 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.util.Iterator;
 
+import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.R;
 
-public class MainActivity extends AppCompatActivity {
+public class Main2Activity extends AppCompatActivity {
     public static final String MyPREFERENCES = "Preferences";
     public static final String IMAGE_KEY = "ImageKey";
     public static final String TRANSLATE_KEY = "TranslateKey";
@@ -61,8 +65,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_main2);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setBottomNavigationBar();
+        setFab();
         database = FirebaseDatabase.getInstance().getReference();
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
@@ -106,16 +112,57 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         signInFirebase();
+    }
 
-        Button settings = (Button) findViewById(R.id.settings_button);
-        if (settings != null) {
-            settings.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getFragmentManager().beginTransaction().replace(R.id.main_frame, new SettingFragment()).commit();
+    private void setBottomNavigationBar() {
+        AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
+        AHBottomNavigationItem recentsItem = new AHBottomNavigationItem(R.string.recents_tab, R.drawable.ic_history,
+                R.color.colorAccent);
+        AHBottomNavigationItem settingsItem = new AHBottomNavigationItem(R.string.settings_tab, R.drawable.ic_settings,
+                R.color.colorAccent);
+        bottomNavigation.addItem(recentsItem);
+        bottomNavigation.addItem(settingsItem);
+        bottomNavigation.setForceTitlesDisplay(true);
+        bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
+            @Override
+            public boolean onTabSelected(int position, boolean wasSelected) {
+                android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+                switch (position) {
+                    case 0:
+                        ft.replace(R.id.nav_frag_container, new RecentsFragment());
+                        //noinspection WrongConstant
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        ft.commit();
+                        break;
+                    case 1:
+                        Log.e("HELLO", "replaced with settings");
+                        ft.replace(R.id.nav_frag_container, new SettingFragment());
+                        //noinspection WrongConstant
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        ft.commit();
+                        break;
                 }
-            });
-        }
+                return true;
+            }
+        });
+        bottomNavigation.setSelected(true);
+    }
+
+    private void setFab() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.camera_fab);
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                startDebug(v);
+                return true;
+            }
+        });
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startOcr(v);
+            }
+        });
     }
 
     private void signInFirebase() {
@@ -130,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.e(LOG_TAG, "signInWithEmail", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                            Toast.makeText(Main2Activity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
                     }
@@ -289,6 +336,4 @@ public class MainActivity extends AppCompatActivity {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }
-
-    //TODO: Add onBackPressed. Check if got threads running, if there are, interrupt them.
 }

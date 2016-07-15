@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coord_main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:mContext="orbital.com.foodsearch.Activities.MainActivity">
+
+    <include
+        layout="@layout/toolbar_layout"
+        android:theme="@style/Theme.AppCompat.Main" />
+
+    <FrameLayout
+        android:id="@+id/nav_frag_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize" />
+
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+        android:id="@+id/bottom_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/camera_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="72dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_camera"
+        app:fabSize="normal"
+        app:layout_anchor="@id/bottom_navigation"
+        app:layout_anchorGravity="right|top" />
+</android.support.design.widget.CoordinatorLayout>

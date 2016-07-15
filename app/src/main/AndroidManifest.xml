@@ -28,14 +28,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Activities.Main2Activity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".Activities.GoogleSearchActivity"
             android:label="@string/title_activity_google_search"
-            android:parentActivityName=".Activities.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".Activities.OcrDebugActivity"
-            android:label="@string/title_activity_ocr"
             android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity

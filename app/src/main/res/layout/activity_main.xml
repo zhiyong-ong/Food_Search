@@ -2,7 +2,7 @@
 <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+    android:id="@+id/coord_main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:mContext="orbital.com.foodsearch.Activities.MainActivity">
@@ -15,7 +15,6 @@
         android:layout_width="match_parent"
         app:layout_heightPercent="80%">
     </FrameLayout>
-
 
     <RelativeLayout
         android:layout_width="match_parent"

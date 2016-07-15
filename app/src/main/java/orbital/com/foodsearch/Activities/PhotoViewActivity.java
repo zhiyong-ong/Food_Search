@@ -33,10 +33,6 @@ public class PhotoViewActivity extends AppCompatActivity {
 
     private void initialize() {
         final PhotoView photoView = (PhotoView) findViewById(R.id.photo_view);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            photoView.setTransitionName(getString(R.string.image_shared_view)
-                    + getIntent().getIntExtra(POSITION, 0));
-        }
         final Context context = this;
         final String url = getIntent().getStringExtra(URL);
         Picasso.with(this)

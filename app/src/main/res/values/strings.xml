@@ -43,10 +43,9 @@
     <string name="save_recents_key">save_photos</string>
     <string name="num_photos_key">num_photos</string>
 
-    <string name="group_dropcancel">dropcancelgroup</string>
-    <string name="drop_icon">drop</string>
-    <string name="cancel_icon">cancel_icon</string>
+    <string name="recents_tab">Recents</string>
+    <string name="settings_tab">Settings</string>
 
-    <string name="image_shared_view">"imagesharedview</string>
-
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
