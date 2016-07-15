@@ -133,19 +133,19 @@ public class Main2Activity extends AppCompatActivity {
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
-                        break;
+                        return true;
                     case 1:
                         Log.e("HELLO", "replaced with settings");
                         ft.replace(R.id.nav_frag_container, new SettingFragment());
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
-                        break;
+                        return true;
                 }
-                return true;
+                return false;
             }
         });
-        bottomNavigation.setSelected(true);
+        bottomNavigation.setCurrentItem(0, true);
     }
 
     private void setFab() {
