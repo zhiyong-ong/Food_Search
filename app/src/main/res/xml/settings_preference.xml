@@ -2,38 +2,39 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <ListPreference
-        android:title="@string/select_lang"
-        android:summary="@string/select_lang_summary"
-        android:key="@string/select_lang_key"
         android:defaultValue="en"
         android:entries="@array/listLanguages"
-        android:entryValues="@array/listLanguagesValues" />
+        android:entryValues="@array/listLanguagesValues"
+        android:key="@string/select_lang_key"
+        android:summary="@string/select_lang_summary"
+        android:title="@string/select_lang" />
 
     <CheckBoxPreference
-        android:title="@string/loading_images"
         android:defaultValue="false"
-        android:summary="@string/loading_images_summary"
-        android:key="@string/load_images_key" />
+        android:key="@string/search_immediately_key"
+        android:summary="@string/search_immediately_summary"
+        android:title="@string/search_immediately_title" />
 
     <ListPreference
-        android:title="@string/number_of_images"
+        android:defaultValue="1"
+        android:entries="@array/listNumber"
+        android:entryValues="@array/listNumber"
         android:key="@string/num_images_key"
-        android:defaultValue="1"
         android:summary="@string/number_of_images_summary"
-        android:entries="@array/listNumber"
-        android:entryValues="@array/listNumber"/>
+        android:title="@string/number_of_images" />
 
     <CheckBoxPreference
-        android:title="@string/save_photos_check"
         android:defaultValue="false"
-        android:summary="@string/save_photos_check_summary"
-        android:key="@string/save_photos_key" />
+        android:key="@string/save_recents_key"
+        android:summary="@string/save_recents_check_summary"
+        android:title="@string/save_menus_check" />
+
     <ListPreference
-        android:title="@string/keep_photos"
-        android:summary="@string/keep_photos_summary"
-        android:dependency="save_photos"
         android:defaultValue="1"
-        android:key="@string/num_photos_key"
+        android:dependency="save_photos"
         android:entries="@array/listNumber"
-        android:entryValues="@array/listNumber"/>
+        android:entryValues="@array/listNumber"
+        android:key="@string/num_photos_key"
+        android:summary="@string/keep_photos_summary"
+        android:title="@string/keep_photos" />
 </PreferenceScreen>

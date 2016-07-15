@@ -172,13 +172,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @TargetApi(Build.VERSION_CODES.M)
-    public void startExp(View view) {
+    public void startOcr(View view) {
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.CAMERA},
-                    EXP_CAMERA_PERMISSION_REQUEST_CODE);
+                    OCR_CAMERA_PERMISSION_REQUEST_CODE);
         } else {
-            dispatchCameraIntent(EXP_CAMERA_INTENT_REQUEST_CODE);
+            dispatchCameraIntent(OCR_CAMERA_INTENT_REQUEST_CODE);
         }
     }
 
@@ -191,7 +191,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode){
-            case OCR_CAMERA_PERMISSION_REQUEST_CODE: case EXP_CAMERA_PERMISSION_REQUEST_CODE:
+            case OCR_CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     dispatchCameraIntent(requestCode * 100);
                 } else {
@@ -232,13 +232,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case OCR_CAMERA_INTENT_REQUEST_CODE:
-                if (resultCode == RESULT_OK) {
-                    Intent intent = new Intent(this, OcrActivity.class);
-                    intent.putExtra("filePath", photoFileUri.getPath());
-                    startActivity(intent);
-                }
-                break;
-            case EXP_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(this, OcrActivity.class);
                     intent.putExtra("filePath", photoFileUri.getPath());

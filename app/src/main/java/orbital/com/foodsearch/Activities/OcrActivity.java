@@ -11,7 +11,6 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -59,7 +58,11 @@ public class OcrActivity extends AppCompatActivity {
     private static final String SAVED_FILE_PATH = "SAVEDFILEPATH";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
     private static final String SEARCH_BAR_TAG = "SEARCHBARTAG";
-    private static final String PHOTO_FRAGMENT_TAG = "PHOTOVIEWFRAGMENT";
+    public static String IMAGE_KEY;
+    public static String OCR_KEY;
+    public static String TRANSLATE_KEY;
+    public static String BASE_LANGUAGE;
+    public static int IMAGES_COUNT;
     private static volatile int insightsCount = 0;
     private static String mTranslatedText = null;
     private static AsyncTask<Void, Void, String> translateTask;
@@ -67,20 +70,15 @@ public class OcrActivity extends AppCompatActivity {
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
     private static ImageSearchResponse searchResponseDB;
+    private static SharedPreferences sharedPreferences;
+    private static SharedPreferences sharedPreferencesSettings;
+    private static int IMAGES_COUNT_MAX;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private DatabaseReference database;
     private boolean animating = false;
     private int containerTransY;
     private int searchBarTrans;
     private String filePath = null;
-    private static SharedPreferences sharedPreferences;
-    private static SharedPreferences sharedPreferencesSettings;
-    public static String IMAGE_KEY;
-    public static String OCR_KEY;
-    public static String TRANSLATE_KEY;
-    public static String BASE_LANGUAGE;
-    public static int NUM_IMAGES;
-    private static int MAX_IMAGES_COUNT;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -114,9 +112,9 @@ public class OcrActivity extends AppCompatActivity {
 
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         BASE_LANGUAGE = sharedPreferencesSettings.getString(getResources().getString(R.string.select_lang_key), "test");
-        MAX_IMAGES_COUNT = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
-        NUM_IMAGES = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "test"));
-        Log.e(LOG_TAG, "MAX IMAGES: " + MAX_IMAGES_COUNT);
+        IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
+        IMAGES_COUNT = sharedPreferencesSettings.getInt(getResources().getString(R.string.num_images_key), 1);
+        Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
         ImageView imgView = (ImageView) findViewById(R.id.preview_image_view);
         Picasso.with(this).load("file://" + filePath)
                 //.placeholder(R.color.black_overlay)
@@ -193,8 +191,7 @@ public class OcrActivity extends AppCompatActivity {
     public void startBingImageSearch(final Context context, final String searchParam) {
         if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
             searchImageResponse(context, searchParam);
-        }
-        else {
+        } else {
             Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr_exp),
                     R.string.internet_error_text, Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.retry, new View.OnClickListener() {
@@ -244,23 +241,15 @@ public class OcrActivity extends AppCompatActivity {
      * Method called by cancel button on search bar
      */
     public void cancelSearch() {
-        CardView searchBarContainer = (CardView) findViewById(R.id.search_bar_container);
-        // If searchBarContainer is at the top and in "RAISED" position, call closeSearchResults()
-        // to go to "DROPPED" position
-        if (searchBarContainer.getY() == barMarginTop) {
-            closeSearchResults();
-        } else {
-            // If not, hide search bar
-            AnimUtils.hideSearchBar(findViewById(R.id.search_bar_container),
-                    searchBarTrans);
-        }
+        View searchBarContainer = findViewById(R.id.search_bar_container);
+        AnimUtils.hideSearchBar(searchBarContainer,
+                searchBarTrans);
     }
 
     /**
      * Closes search results cards and drops the search bar
      */
     public void closeSearchResults() {
-        AnimUtils.dropSearchBar(this, findViewById(R.id.search_bar_container));
         View rootView = findViewById(R.id.activity_ocr_exp);
         Button searchButton = (Button) rootView.findViewById(R.id.start_search);
         searchButton.setEnabled(true);
@@ -268,7 +257,6 @@ public class OcrActivity extends AppCompatActivity {
                 new AnimatingListener(rootView),
                 containerTransY);
     }
-
 
 
     /**
@@ -294,7 +282,7 @@ public class OcrActivity extends AppCompatActivity {
      *
      * @param searchParam String to be searched for
      */
-    private void searchImageResponse (final Context context, final String searchParam) {
+    private void searchImageResponse(final Context context, final String searchParam) {
         AnimUtils.containerSlideDown(findViewById(R.id.activity_ocr_exp),
                 new AnimatingListener(findViewById(R.id.activity_ocr_exp)),
                 containerTransY);
@@ -314,8 +302,8 @@ public class OcrActivity extends AppCompatActivity {
                 } else {
                     SearchResultsFragment searchFragment = (SearchResultsFragment) FRAGMENT_MANAGER.findFragmentByTag(SEARCH_FRAGMENT_TAG);
                     searchFragment.clearRecycler();
-                    for(int i = 0; i < NUM_IMAGES; i++) {
-                        searchFragment.updateRecyclerList(searchResponseDB.getImageValues().get(i));
+                    searchFragment.updateRecyclerList(searchResponseDB.getImageValues());
+                    for (int i = 0; i < IMAGES_COUNT; i++) {
                         ImageValue imgVal = searchResponseDB.getImageValues().get(i);
                         searchImageInsights(context, imgVal);
                     }
@@ -332,9 +320,9 @@ public class OcrActivity extends AppCompatActivity {
     }
 
     /**
-     *  There is a possibility that there may exist 2 different images with the same image insight.
-     *  This method is called after onresponse for imagesearch callback in order to prevent duplicates from being
-     *  persisted into the database. Flag used is imageExists
+     * There is a possibility that there may exist 2 different images with the same image insight.
+     * This method is called after onresponse for imagesearch callback in order to prevent duplicates from being
+     * persisted into the database. Flag used is imageExists
      */
     private void searchImageInsights(final Context context, final ImageValue imgVal) {
         String insightsToken = imgVal.getImageInsightsToken();
@@ -350,11 +338,11 @@ public class OcrActivity extends AppCompatActivity {
                     imgVal.setInsightsResponse(imgInsightsDB);
                     insightsCount++;
                     Log.e(LOG_TAG, "Insights DB count: " + insightsCount);
-                    if (insightsCount < NUM_IMAGES) {
+                    if (insightsCount < IMAGES_COUNT) {
                         return;
                     }
                     new CompleteTask(context, rootView, FRAGMENT_MANAGER)
-                                .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
 
@@ -374,7 +362,7 @@ public class OcrActivity extends AppCompatActivity {
      */
     private void enqueueSearch(String searchParam) {
         Log.d(LOG_TAG, "Search String: " + searchParam);
-        BingSearch bingImg = new BingSearch(searchParam, String.valueOf(MAX_IMAGES_COUNT));
+        BingSearch bingImg = new BingSearch(searchParam, String.valueOf(IMAGES_COUNT_MAX));
         Call<ImageSearchResponse> call = bingImg.buildCall();
         call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER, searchParam));
     }
@@ -418,12 +406,13 @@ public class OcrActivity extends AppCompatActivity {
             } else {
                 int count = 0;
                 while (!translateTask.getStatus().equals(Status.FINISHED)) {
-                    if(count == 50) {
-                        //TODO: Return a notification?
+                    if (count == 10) {
+                        Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
+                        return null;
                     }
                     try {
                         count++;
-                        Thread.sleep(100);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -440,8 +429,7 @@ public class OcrActivity extends AppCompatActivity {
                 searchResponse.setTranslatedQuery(mTranslatedText);
                 imgDAO.persistImage(searchResponse);
                 //mTranslatedText;
-            }
-            else {
+            } else {
                 mTranslatedText = searchResponseDB.getTranslatedQuery();
             }
             insightsCount = 0;
@@ -479,7 +467,7 @@ public class OcrActivity extends AppCompatActivity {
             imgDAO.persistImageInsight(insightsResponse);
             insightsCount++;
             Log.e(LOG_TAG, "Insights callback count: " + insightsCount);
-            if (insightsCount < NUM_IMAGES) {
+            if (insightsCount < IMAGES_COUNT) {
                 return;
             }
             // Once we have collated X imageinsights count, start CompleteTask to synchronize all tasks
@@ -489,7 +477,7 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
-            if (insightsCount < NUM_IMAGES) {
+            if (insightsCount < IMAGES_COUNT) {
                 insightsCount++;
                 return;
             }
@@ -538,8 +526,8 @@ public class OcrActivity extends AppCompatActivity {
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
                 searchFragment.clearRecycler();
-                for (int i = 0; i < NUM_IMAGES; i++) {
-                    searchFragment.updateRecyclerList(imageValues.get(i));
+                searchFragment.updateRecyclerList(imageValues);
+                for (int i = 0; i < IMAGES_COUNT; i++) {
                     searchImageInsights(context, imageValues.get(i));
                 }
             } else {

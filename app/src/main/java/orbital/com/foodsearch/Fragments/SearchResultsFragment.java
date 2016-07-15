@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
@@ -17,7 +18,7 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Views.SnappyRecyclerView;
 
 public class SearchResultsFragment extends Fragment {
-    private static final int IMAGE_COUNT = OcrActivity.NUM_IMAGES;
+    private static final int IMAGE_COUNT = OcrActivity.IMAGES_COUNT;
     private final String RECYCLER_SAVED_STATE = "RECYCLERSAVEDSTATE";
     private ArrayList<ImageValue> mImageValues;
     private BingImageAdapter mAdapter;
@@ -68,7 +69,6 @@ public class SearchResultsFragment extends Fragment {
 
     private void initializeRecycler(View view) {
         mRecyclerView = (SnappyRecyclerView) view.findViewById(R.id.recycler_view);
-        // mImageValues = new ArrayList<>(Arrays.asList(test1, test2));
         mImageValues = new ArrayList<>(IMAGE_COUNT);
         LinearLayoutManager layoutMgr = new LinearLayoutManager(getActivity());
         layoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -82,10 +82,10 @@ public class SearchResultsFragment extends Fragment {
     /**
      * This method is used to update the recyclerView with new IMAGE_KEY values
      *
-     * @param newImageValue new Image values to be displayed in recyclerView
+     * @param newImageValues new Image values to be displayed in recyclerView
      */
-    public void updateRecyclerList(ImageValue newImageValue) {
-        mImageValues.add(newImageValue);
+    public void updateRecyclerList(List<ImageValue> newImageValues) {
+        mImageValues.addAll(newImageValues);
     }
 
     public void clearRecycler() {
