@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
@@ -83,16 +82,17 @@ public class SearchResultsFragment extends Fragment {
     /**
      * This method is used to update the recyclerView with new IMAGE_KEY values
      *
-     * @param newImageValues new Image values to be displayed in recyclerView
+     * @param newImageValue new Image values to be displayed in recyclerView
      */
-    public void updateRecyclerList(List<ImageValue> newImageValues) {
-        mImageValues.clear();
-        mImageValues.addAll(newImageValues);
-
-        mRecyclerView.scrollToPosition(0);
+    public void updateRecyclerList(ImageValue newImageValue) {
+        mImageValues.add(newImageValue);
     }
 
+    public void clearRecycler() {
+        mImageValues.clear();
+    }
     public void finalizeRecycler() {
+        mRecyclerView.scrollToPosition(0);
         mAdapter.notifyDataSetChanged();
     }
 

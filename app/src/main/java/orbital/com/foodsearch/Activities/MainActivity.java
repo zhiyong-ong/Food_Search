@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode){
             case OCR_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    Intent intent = new Intent(this, OcrDebugActivity.class);
+                    Intent intent = new Intent(this, OcrActivity.class);
                     intent.putExtra("filePath", photoFileUri.getPath());
                     startActivity(intent);
                 }
