@@ -18,7 +18,7 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Views.SnappyRecyclerView;
 
 public class SearchResultsFragment extends Fragment {
-    private static final int IMAGE_COUNT = OcrActivity.IMAGE_COUNT;
+    private static final int IMAGE_COUNT = OcrActivity.NUM_IMAGES;
     private final String RECYCLER_SAVED_STATE = "RECYCLERSAVEDSTATE";
     private ArrayList<ImageValue> mImageValues;
     private BingImageAdapter mAdapter;

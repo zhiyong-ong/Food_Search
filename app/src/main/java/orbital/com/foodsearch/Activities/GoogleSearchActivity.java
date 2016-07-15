@@ -94,7 +94,7 @@ public class GoogleSearchActivity extends AppCompatActivity {
                 String input = edt.getText().toString();
                 final ImageView imgView = (ImageView) findViewById(R.id.imgView);
                 final TextView txt = (TextView) findViewById(R.id.textView);
-                BingSearch bingImg = new BingSearch(input);
+                BingSearch bingImg = new BingSearch(input, "1");
                 //get call from the helper class
                 Call<ImageSearchResponse> call = bingImg.buildCall();
                 call.enqueue(new Callback<ImageSearchResponse>() {

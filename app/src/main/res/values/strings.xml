@@ -25,10 +25,29 @@
     <string name="translate">Translate</string>
     <string name="undo">Undo Translate</string>
     <string name="retry">Retry</string>
+    <string name="OCRFailed">No Internet Connection Available!</string>
+    <string name="number_of_images">Number of Images</string>
+    <string name="number_of_images_summary">Select the number of images to be displayed</string>
+    <string name="select_lang">Select Preferred Language</string>
+    <string name="select_lang_summary">Select the language that you would like the words to be translated to.</string>
+    <string name="loading_images">Loading Images</string>
+    <string name="loading_images_summary">Load images immediately when the item is clicked.</string>
+    <string name="save_photos_check">Save Photos</string>
+    <string name="save_photos_check_summary">Save photos that have been taken recently.</string>
+    <string name="keep_photos">Saving Photos</string>
+    <string name="keep_photos_summary">Select the number of photos to be saved. Additional photos will be automatically deleted.</string>
+    <string name="select_lang_key">select_lang</string>
+    <string name="load_images_key">load_images</string>
+    <string name="num_images_key">num_images</string>
+    <string name="save_photos_key">save_photos</string>
+    <string name="num_photos_key">num_photos</string>
 
     <string name="group_dropcancel">dropcancelgroup</string>
     <string name="drop_icon">drop</string>
     <string name="cancel_icon">cancel_icon</string>
 
     <string name="image_shared_view">"imagesharedview</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

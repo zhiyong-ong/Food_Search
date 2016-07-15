@@ -122,8 +122,8 @@ public class SearchBarFragment extends Fragment {
                         if (v.isEnabled()) {
                             editText.clearFocus();
                             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                            searchButton.setEnabled(false);
-                            ((OcrActivity) getActivity()).searchImageResponse(getActivity(), editText.getText().toString().trim());
+                            //searchButton.setEnabled(false);
+                            ((OcrActivity) getActivity()).startBingImageSearch(getActivity(), editText.getText().toString().trim());
                         }
                         break;
                 }

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:title="@string/select_lang"
+        android:summary="@string/select_lang_summary"
+        android:key="@string/select_lang_key"
+        android:defaultValue="en"
+        android:entries="@array/listLanguages"
+        android:entryValues="@array/listLanguagesValues" />
+
+    <CheckBoxPreference
+        android:title="@string/loading_images"
+        android:defaultValue="false"
+        android:summary="@string/loading_images_summary"
+        android:key="@string/load_images_key" />
+
+    <ListPreference
+        android:title="@string/number_of_images"
+        android:key="@string/num_images_key"
+        android:defaultValue="1"
+        android:summary="@string/number_of_images_summary"
+        android:entries="@array/listNumber"
+        android:entryValues="@array/listNumber"/>
+
+    <CheckBoxPreference
+        android:title="@string/save_photos_check"
+        android:defaultValue="false"
+        android:summary="@string/save_photos_check_summary"
+        android:key="@string/save_photos_key" />
+    <ListPreference
+        android:title="@string/keep_photos"
+        android:summary="@string/keep_photos_summary"
+        android:dependency="save_photos"
+        android:defaultValue="1"
+        android:key="@string/num_photos_key"
+        android:entries="@array/listNumber"
+        android:entryValues="@array/listNumber"/>
+</PreferenceScreen>

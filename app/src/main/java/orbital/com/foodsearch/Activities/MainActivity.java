@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -34,6 +35,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.util.Iterator;
 
+import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String image = "ImageKey";
     public static final String translate = "TranslateKey";
     public static final String ocr = "OCRKey";
-    SharedPreferences sharedpreferences;
+    public static SharedPreferences sharedpreferences;
     private DatabaseReference database;
 
     @Override
@@ -113,6 +115,16 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         signInFirebase();
+
+        Button settings = (Button) findViewById(R.id.settings_button);
+        if(settings != null) {
+            settings.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getFragmentManager().beginTransaction().replace(R.id.main_frame, new SettingFragment()).commit();
+                }
+            });
+        }
     }
 
     private void signInFirebase() {
@@ -291,4 +303,6 @@ public class MainActivity extends AppCompatActivity {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }
+
+    //TODO: Add onBackPressed. Check if got threads running, if there are, interrupt them.
 }

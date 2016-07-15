@@ -1,7 +1,5 @@
 package orbital.com.foodsearch.Helpers;
 
-import android.content.SharedPreferences;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,14 +36,15 @@ public class BingSearch {
     private static final String OCP_APIM_KEY = OcrActivity.IMAGE_KEY;
     //sample data
     private String queryTxt = null;
-    private String count = "1";
+    private String count = null;
     private String offset = "0";
     private String markets = "en-us";
     private String safeSearch = "Moderate";
-    SharedPreferences sharedpreferences;
 
-    public BingSearch(String queryTxt) {
+
+    public BingSearch(String queryTxt, String count) {
         this.queryTxt = queryTxt;
+        this.count = count;
     }
     public String getQueryTxt() {
         return queryTxt;

@@ -174,7 +174,7 @@ public class OcrDebugActivity extends AppCompatActivity {
      */
     private void enqueueSearch(String searchParam) {
         Log.e(LOG_TAG, "Search String: " + searchParam);
-        BingSearch bingImg = new BingSearch(searchParam);
+        BingSearch bingImg = new BingSearch(searchParam, "1");
         Call<ImageSearchResponse> call = bingImg.buildCall();
         call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER));
     }
