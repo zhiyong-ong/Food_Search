@@ -134,33 +134,8 @@ public class AnimUtils {
                 .start();
     }
 
-    public static void raiseSearchBar(Context context, View searchBar, int marginTopPx) {
-        searchBar.animate().y(marginTopPx)
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .setDuration(SEARCH_BAR_RAISE)
-                .start();
-        EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
-        editText.clearFocus();
-        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_search);
-        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_drop_search));
-    }
-
-    public static void dropSearchBar(Context context, View searchBar) {
-        if (searchBar.getTranslationY() > 0) {
-            return;
-        }
-        searchBar.animate().translationY(0)
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .setDuration(SEARCH_BAR_DROP)
-                .start();
-        EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
-        editText.clearFocus();
-        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_search);
-        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel_search));
-    }
-
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void enterReveal(View startView, final View revealView, View filledView) {
+    public static void enterReveal(View startView, final View revealView, View filledView, Animator.AnimatorListener listener) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
             AnimUtils.darkenOverlay(revealView);
             return;
@@ -179,6 +154,9 @@ public class AnimUtils {
         // make the view visible and start the animation
         anim.setDuration(TRANSLATE_REVEAL_DURATION);
         revealView.setVisibility(View.VISIBLE);
+        if (listener != null) {
+            anim.addListener(listener);
+        }
         anim.start();
     }
 
@@ -221,6 +199,31 @@ public class AnimUtils {
         animator.start();
     }
 
+    public static void raiseSearchBar(Context context, View searchBar, int marginTopPx) {
+        searchBar.animate().y(marginTopPx)
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .setDuration(SEARCH_BAR_RAISE)
+                .start();
+        EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
+        editText.clearFocus();
+        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_search);
+        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_drop_search));
+    }
+
+    public static void dropSearchBar(Context context, View searchBar) {
+        if (searchBar.getTranslationY() > 0) {
+            return;
+        }
+        searchBar.animate().translationY(0)
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .setDuration(SEARCH_BAR_DROP)
+                .start();
+        EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
+        editText.clearFocus();
+        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_search);
+        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel_search));
+    }
+
     public static void fadeOut(final View view, int duration) {
         final Float originalAlpha = view.getAlpha();
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, originalAlpha, 0);
@@ -248,6 +251,34 @@ public class AnimUtils {
             }
         });
         animator.start();
+    }
+
+    public static class circularFadeOutListener implements Animator.AnimatorListener {
+        View overlay;
+
+        public circularFadeOutListener(View overlay) {
+            this.overlay = overlay;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            fadeOut(overlay, OVERLAY_DURATION);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
+        }
     }
 
     public static class displaySearchListener implements Animator.AnimatorListener {

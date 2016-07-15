@@ -113,7 +113,7 @@ public class OcrActivity extends AppCompatActivity {
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         BASE_LANGUAGE = sharedPreferencesSettings.getString(getResources().getString(R.string.select_lang_key), "test");
         IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
-        IMAGES_COUNT = sharedPreferencesSettings.getInt(getResources().getString(R.string.num_images_key), 1);
+        IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
         Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
         ImageView imgView = (ImageView) findViewById(R.id.preview_image_view);
         Picasso.with(this).load("file://" + filePath)

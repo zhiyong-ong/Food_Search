@@ -101,6 +101,7 @@ public class BingImageAdapter
         setTextViewUrl(holder.hostUrlView, hostUrl);
         int accentColor = Color.parseColor("#" + imageValue.getAccentColor());
         holder.translateBtn.setTextColor(accentColor);
+        holder.overlay.setBackgroundColor(accentColor);
     }
 
     /**
@@ -231,7 +232,7 @@ public class BingImageAdapter
                     translateBtn.setVisibility(View.GONE);
                     undoBtn.setVisibility(View.VISIBLE);
                     AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
-                    AnimUtils.brightenOverlay(overlay);
+                    // AnimUtils.brightenOverlay(overlay);
                     if (!translatedTitle.equals(mOriginalTitle) && !translatedDesc.equals(mOriginalDesc)) {
                         mTranslatedDesc = translatedDesc;
                         mTranslatedTitle = translatedTitle;
@@ -239,10 +240,11 @@ public class BingImageAdapter
                     super.onPostExecute(result);
                 }
             }
-            // If never translated before or we have null values, perform TRANSLATE_KEY task.
-            // Otherwise, set the new translated texts to the corresponding views.
+            // If never translated before or we have null values, perform translate bg task.
+            // Otherwise, set the new translated texts on the corresponding views.
             if (mTranslatedDesc == null || mTranslatedTitle == null) {
-                AnimUtils.darkenOverlay(overlay);
+                AnimUtils.enterReveal(translateBtn, overlay, itemView,
+                        new AnimUtils.circularFadeOutListener(overlay));
                 AnimUtils.fadeIn(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
                 new translateBackground().execute();
             } else {
