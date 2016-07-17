@@ -26,7 +26,7 @@ public class ImageSearchResponse {
     private Boolean displayRecipeSourcesBadges;
 
     private String searchQuery;
-    private String translatedQuery;
+
 //    /**
 //     *
 //     * @return
@@ -233,11 +233,4 @@ public class ImageSearchResponse {
         this.searchQuery = searchQuery;
     }
 
-    public String getTranslatedQuery() {
-        return translatedQuery;
-    }
-
-    public void setTranslatedQuery(String translatedQuery) {
-        this.translatedQuery = translatedQuery;
-    }
 }

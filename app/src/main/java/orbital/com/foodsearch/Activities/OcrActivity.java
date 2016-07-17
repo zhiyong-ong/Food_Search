@@ -298,16 +298,16 @@ public class OcrActivity extends AppCompatActivity {
                 // initialize the imagesearch again
                 if (searchResponseDB == null) {
                     enqueueSearch(searchParam);
-                    enqueueTranslate(searchParam);
                 } else {
                     SearchResultsFragment searchFragment = (SearchResultsFragment) FRAGMENT_MANAGER.findFragmentByTag(SEARCH_FRAGMENT_TAG);
                     searchFragment.clearRecycler();
-                    searchFragment.updateRecyclerList(searchResponseDB.getImageValues());
                     for (int i = 0; i < IMAGES_COUNT; i++) {
                         ImageValue imgVal = searchResponseDB.getImageValues().get(i);
+                        searchFragment.updateRecyclerList(imgVal);
                         searchImageInsights(context, imgVal);
                     }
                 }
+                enqueueTranslate(searchParam);
             }
 
             @Override
@@ -401,42 +401,38 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-            if (searchResponseDB != null) {
-                return null;
-            } else {
-                int count = 0;
-                while (!translateTask.getStatus().equals(Status.FINISHED)) {
-                    if (count == 10) {
-                        Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
-                        return null;
-                    }
-                    try {
-                        count++;
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+
+            int count = 0;
+            while (!translateTask.getStatus().equals(Status.FINISHED)) {
+                if (count == 10) {
+                    Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
+                    return null;
                 }
-                return null;
+                try {
+                    count++;
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+            return null;
         }
+
 
         @Override
         protected void onPostExecute(Void aVoid) {
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (searchResponseDB == null) {
                 //persist search result to DB
-                searchResponse.setTranslatedQuery(mTranslatedText);
                 imgDAO.persistImage(searchResponse);
-                //mTranslatedText;
-            } else {
-                mTranslatedText = searchResponseDB.getTranslatedQuery();
+                //mTranslatedText is the translated text here.
             }
             insightsCount = 0;
             //in the case where the database has the image but doesn't have the imageinsights.
             searchFragment.finalizeRecycler();//searchResponseDB.getTranslatedQuery());
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
             progressBar.setVisibility(View.GONE);
+            Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
             AnimUtils.containerSlideUp(context, rootView,
                     new AnimUtils.displaySearchListener(rootView.findViewById(R.id.translation_card),
                             mTranslatedText));
@@ -526,9 +522,10 @@ public class OcrActivity extends AppCompatActivity {
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
                 searchFragment.clearRecycler();
-                searchFragment.updateRecyclerList(imageValues);
                 for (int i = 0; i < IMAGES_COUNT; i++) {
-                    searchImageInsights(context, imageValues.get(i));
+                    ImageValue imgVal = imageValues.get(i);
+                    searchFragment.updateRecyclerList(imgVal);
+                    searchImageInsights(context, imgVal);
                 }
             } else {
                 ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
