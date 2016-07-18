@@ -15,6 +15,7 @@
         android:id="@+id/nav_frag_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="?android:attr/actionBarSize"
         android:layout_marginTop="?attr/actionBarSize" />
 
     <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
@@ -23,16 +24,24 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom" />
 
+    <FrameLayout
+        android:id="@+id/fab_anchor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="100dp"
+        android:clickable="false"
+        android:visibility="gone" />
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/camera_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="72dp"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_horizontal_margin"
         android:src="@drawable/ic_camera"
         app:fabSize="normal"
-        app:layout_anchor="@id/bottom_navigation"
-        app:layout_anchorGravity="right|top" />
+        app:layout_anchor="@id/fab_anchor"
+        app:layout_anchorGravity="bottom|right" />
 </android.support.design.widget.CoordinatorLayout>

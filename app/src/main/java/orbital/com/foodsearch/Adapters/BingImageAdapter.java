@@ -3,6 +3,7 @@ package orbital.com.foodsearch.Adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
@@ -30,6 +31,7 @@ import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.ScrimTransformation;
 import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.NetworkUtils;
 
 /**
  * Created by Abel on 6/14/2016.
@@ -99,9 +101,12 @@ public class BingImageAdapter
 
         // Set formatted URL on UrlView
         setTextViewUrl(holder.hostUrlView, hostUrl);
+        // Set overlay and button colors
         int accentColor = Color.parseColor("#" + imageValue.getAccentColor());
         holder.translateBtn.setTextColor(accentColor);
+        holder.undoBtn.setTextColor(accentColor);
         holder.overlay.setBackgroundColor(accentColor);
+        holder.overlay.setAlpha(0.9f);
     }
 
     /**
@@ -209,42 +214,26 @@ public class BingImageAdapter
         }
 
         private void translateResults() {
+            // Check for network connection and throw snackbar error to prompt user if no internet connection.
+            if (!NetworkUtils.isNetworkAvailable(mContext) || !NetworkUtils.isOnline()) {
+                Snackbar snackbar = Snackbar.make(itemView.getRootView().findViewById(R.id.activity_ocr),
+                        R.string.internet_error_text, Snackbar.LENGTH_LONG);
+                snackbar.setAction(R.string.retry, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        translateResults();
+                    }
+                });
+                snackbar.show();
+                return;
+            }
+            // Save original titles first for undo translate later
             mOriginalTitle = titleTextView.getText().toString();
             mOriginalDesc = descView.getText().toString();
-            class translateBackground extends AsyncTask<Void, Void, Void> {
-
-                private String translatedTitle = mOriginalTitle;
-                private String translatedDesc = mOriginalDesc;
-
-                @Override
-                protected Void doInBackground(Void... params) {
-                    translatedTitle = BingTranslate.getTranslatedText(mOriginalTitle);
-                    translatedDesc = BingTranslate.getTranslatedText(mOriginalDesc);
-                    return null;
-                }
-
-                // Fade out progress and overlay, set texts, change button visibilities
-                // and save values on obtaining translated result
-                @Override
-                protected void onPostExecute(Void result) {
-                    titleTextView.setText(translatedTitle);
-                    descView.setText(translatedDesc);
-                    translateBtn.setVisibility(View.GONE);
-                    undoBtn.setVisibility(View.VISIBLE);
-                    AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
-                    // AnimUtils.brightenOverlay(overlay);
-                    if (!translatedTitle.equals(mOriginalTitle) && !translatedDesc.equals(mOriginalDesc)) {
-                        mTranslatedDesc = translatedDesc;
-                        mTranslatedTitle = translatedTitle;
-                    }
-                    super.onPostExecute(result);
-                }
-            }
             // If never translated before or we have null values, perform translate bg task.
             // Otherwise, set the new translated texts on the corresponding views.
             if (mTranslatedDesc == null || mTranslatedTitle == null) {
-                AnimUtils.enterReveal(translateBtn, overlay, itemView,
-                        new AnimUtils.circularFadeOutListener(overlay));
+                AnimUtils.enterReveal(translateBtn, overlay, itemView, null);
                 AnimUtils.fadeIn(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
                 new translateBackground().execute();
             } else {
@@ -255,6 +244,38 @@ public class BingImageAdapter
             }
         }
 
+        // Asynctask class to translate in background and finish animations and layout
+        // changes on post execute
+        private class translateBackground extends AsyncTask<Void, Void, Void> {
+
+            private String translatedTitle = mOriginalTitle;
+            private String translatedDesc = mOriginalDesc;
+
+            // Translate in the background both the title and description
+            @Override
+            protected Void doInBackground(Void... params) {
+                translatedTitle = BingTranslate.getTranslatedText(mOriginalTitle);
+                translatedDesc = BingTranslate.getTranslatedText(mOriginalDesc);
+                return null;
+            }
+
+            // Fade out progress and overlay, set texts, change button visibilities
+            // and save values on obtaining translated result
+            @Override
+            protected void onPostExecute(Void result) {
+                translateBtn.setVisibility(View.GONE);
+                undoBtn.setVisibility(View.VISIBLE);
+                AnimUtils.fadeOut(overlay, AnimUtils.OVERLAY_DURATION);
+                AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
+                titleTextView.setText(translatedTitle);
+                descView.setText(translatedDesc);
+                if (!translatedTitle.equals(mOriginalTitle) && !translatedDesc.equals(mOriginalDesc)) {
+                    mTranslatedDesc = translatedDesc;
+                    mTranslatedTitle = translatedTitle;
+                }
+                super.onPostExecute(result);
+            }
+        }
 
     }
 }

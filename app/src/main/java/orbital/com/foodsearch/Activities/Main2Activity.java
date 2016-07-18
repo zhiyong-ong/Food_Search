@@ -117,15 +117,21 @@ public class Main2Activity extends AppCompatActivity {
     private void setBottomNavigationBar() {
         AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
         AHBottomNavigationItem recentsItem = new AHBottomNavigationItem(R.string.recents_tab, R.drawable.ic_history,
-                R.color.colorAccent);
+                R.color.colorPrimary);
         AHBottomNavigationItem settingsItem = new AHBottomNavigationItem(R.string.settings_tab, R.drawable.ic_settings,
-                R.color.colorAccent);
+                R.color.colorPrimary);
         bottomNavigation.addItem(recentsItem);
         bottomNavigation.addItem(settingsItem);
+        bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimary));
         bottomNavigation.setForceTitlesDisplay(true);
+        bottomNavigation.setCurrentItem(1);
+
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
+                if (wasSelected) {
+                    return true;
+                }
                 android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
                 switch (position) {
                     case 0:
@@ -135,7 +141,6 @@ public class Main2Activity extends AppCompatActivity {
                         ft.commit();
                         return true;
                     case 1:
-                        Log.e("HELLO", "replaced with settings");
                         ft.replace(R.id.nav_frag_container, new SettingFragment());
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
@@ -145,7 +150,7 @@ public class Main2Activity extends AppCompatActivity {
                 return false;
             }
         });
-        bottomNavigation.setCurrentItem(0, true);
+        bottomNavigation.setCurrentItem(0);
     }
 
     private void setFab() {
