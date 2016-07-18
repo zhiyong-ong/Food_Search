@@ -12,15 +12,18 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -35,6 +38,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.util.Iterator;
 
+import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.R;
 
@@ -63,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setBottomNavigationBar();
+        setFab();
         database = FirebaseDatabase.getInstance().getReference();
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
@@ -106,16 +112,62 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         signInFirebase();
+    }
 
-        Button settings = (Button) findViewById(R.id.settings_button);
-        if (settings != null) {
-            settings.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getFragmentManager().beginTransaction().replace(R.id.main_frame, new SettingFragment()).commit();
+    private void setBottomNavigationBar() {
+        AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
+        AHBottomNavigationItem recentsItem = new AHBottomNavigationItem(R.string.recents_tab, R.drawable.ic_history,
+                R.color.colorPrimary);
+        AHBottomNavigationItem settingsItem = new AHBottomNavigationItem(R.string.settings_tab, R.drawable.ic_settings,
+                R.color.colorPrimary);
+        bottomNavigation.addItem(recentsItem);
+        bottomNavigation.addItem(settingsItem);
+        bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        bottomNavigation.setForceTitlesDisplay(true);
+        bottomNavigation.setCurrentItem(1);
+
+        bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
+            @Override
+            public boolean onTabSelected(int position, boolean wasSelected) {
+                if (wasSelected) {
+                    return true;
                 }
-            });
-        }
+                android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+                switch (position) {
+                    case 0:
+                        ft.replace(R.id.nav_frag_container, new RecentsFragment());
+                        //noinspection WrongConstant
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        ft.commit();
+                        return true;
+                    case 1:
+                        ft.replace(R.id.nav_frag_container, new SettingFragment());
+                        //noinspection WrongConstant
+                        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+                        ft.commit();
+                        return true;
+                }
+                return false;
+            }
+        });
+        bottomNavigation.setCurrentItem(0);
+    }
+
+    private void setFab() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.camera_fab);
+        fab.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                startDebug(v);
+                return true;
+            }
+        });
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startOcr(v);
+            }
+        });
     }
 
     private void signInFirebase() {
@@ -289,6 +341,4 @@ public class MainActivity extends AppCompatActivity {
             mAuth.removeAuthStateListener(mAuthListener);
         }
     }
-
-    //TODO: Add onBackPressed. Check if got threads running, if there are, interrupt them.
 }
