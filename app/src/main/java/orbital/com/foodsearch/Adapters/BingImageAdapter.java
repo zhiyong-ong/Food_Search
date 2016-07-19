@@ -131,7 +131,7 @@ public class BingImageAdapter
         }
         sb.append(url.getHost());
         sb.append("</a>");
-        textView.setText(Html.fromHtml(sb.toString()));
+        textView.setText(Html.fromHtml(sb.toString()), TextView.BufferType.EDITABLE);
     }
 
     @Override
@@ -200,8 +200,7 @@ public class BingImageAdapter
                     ((OcrActivity) mContext).closeSearchResults();
                     break;
                 case R.id.fullscrn_button:
-                    ((OcrActivity) mContext).openPhotoView(v, imageUrl, thumbUrl,
-                            getAdapterPosition());
+                    ((OcrActivity) mContext).openPhotoView(itemView, imageUrl, thumbUrl, getAdapterPosition());
                     break;
             }
         }

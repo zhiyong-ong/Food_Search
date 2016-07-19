@@ -41,39 +41,39 @@
             android:indeterminate="true"
             android:visibility="visible" />
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/translation_card"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/search_bar_height"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="@dimen/activity_half_margin"
-            android:layout_marginRight="@dimen/activity_half_margin"
-            android:layout_marginTop="@dimen/translation_margin_top"
-            android:visibility="gone"
-            app:cardBackgroundColor="@color/colorTranslate"
-            app:cardElevation="@dimen/search_bar_elevation">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/translated_textview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/url_font_size" />
-            </LinearLayout>
-        </android.support.v7.widget.CardView>
-
     </android.support.percent.PercentRelativeLayout>
 
     <FrameLayout
         android:id="@+id/search_frag_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/translation_card"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/search_bar_height"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="@dimen/activity_half_margin"
+        android:layout_marginRight="@dimen/activity_half_margin"
+        android:layout_marginTop="@dimen/translation_margin_top"
+        android:visibility="gone"
+        app:cardBackgroundColor="@color/colorTranslate"
+        app:cardElevation="@dimen/search_bar_elevation">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/translated_textview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/url_font_size" />
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
 
     <android.support.v7.widget.CardView
         android:id="@+id/search_bar_container"

@@ -48,10 +48,10 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
 
 public class MainActivity extends AppCompatActivity {
-    public static final String MyPREFERENCES = "Preferences";
-    public static final String IMAGE_KEY = "ImageKey";
-    public static final String TRANSLATE_KEY = "TranslateKey";
-    public static final String OCR_KEY = "OCRKey";
+    static final String MyPREFERENCES = "Preferences";
+    static final String IMAGE_KEY = "ImageKey";
+    static final String TRANSLATE_KEY = "TranslateKey";
+    static final String OCR_KEY = "OCRKey";
     private static final int OCR_CAMERA_PERMISSION_REQUEST_CODE = 1;
     private static final int OCR_CAMERA_INTENT_REQUEST_CODE = 100;
     private static final int READ_STORAGE_PERMISSION_REQUEST_CODE = 2;
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
         setupFab();
         setBottomNavigationBar();
         generateUri();
@@ -393,9 +393,6 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return;
         }
-        // None of the case fits so make snackbar to prompt user
-        Snackbar.make(findViewById(R.id.coord_main_layout), R.string.no_photo_text, Snackbar.LENGTH_LONG)
-                .show();
     }
 
     private void startCropActivity(Intent data) {

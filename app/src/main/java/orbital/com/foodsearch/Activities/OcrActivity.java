@@ -9,8 +9,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,6 +22,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -312,22 +316,21 @@ public class OcrActivity extends AppCompatActivity {
                 containerTransY);
     }
 
-
-    /**
-     * Opens photo view activity to view the high resolution photo
-     *
-     * @param view     View in which button was clicked on, gives us the exact card position
-     * @param imageUrl String of the high res IMAGE_KEY url
-     * @param thumbUrl String of the thumbnail IMAGE_KEY url for placeholder
-     * @param position position of the card so that we can assign the correct transition name
-     */
-    public void openPhotoView(View view, String imageUrl, String thumbUrl, int position) {
-        Intent intent = new Intent(this, PhotoViewActivity.class);
-        intent.putExtra(PhotoViewActivity.POSITION, position);
-        intent.putExtra(PhotoViewActivity.URL, imageUrl);
+    public void openPhotoView(View itemView, String contentUrl, String thumbUrl, int position) {
+        final Intent intent = new Intent(this, PhotoViewActivity.class);
+        intent.putExtra(PhotoViewActivity.URL, contentUrl);
         intent.putExtra(PhotoViewActivity.THUMBURL, thumbUrl);
-        // TODO: Set ZOOM anims here by Abel
-        startActivity(intent);
+        intent.putExtra(PhotoViewActivity.POSITION, position);
+        intent.putExtra(PhotoViewActivity.TITLE,
+                ((TextView) itemView.findViewById(R.id.card_title)).getText());
+        String htmlText = Html.toHtml(((TextView) findViewById(R.id.card_hostpage)).getEditableText());
+        intent.putExtra(PhotoViewActivity.FORMATTED_URL, htmlText);
+        ImageView cardImage = (ImageView) findViewById(R.id.card_image);
+        String transName = getString(R.string.fullscreen_transition_name);
+        ViewCompat.setTransitionName(cardImage, transName);
+        ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, cardImage, transName);
+        startActivity(intent, options.toBundle());
     }
 
     /**
@@ -455,7 +458,6 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-
             int count = 0;
             while (!translateTask.getStatus().equals(Status.FINISHED)) {
                 if (count == 10) {
@@ -576,7 +578,8 @@ public class OcrActivity extends AppCompatActivity {
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
                 searchFragment.clearRecycler();
-                for (int i = 0; i < IMAGES_COUNT; i++) {
+                int resultSize = imageValues.size();
+                for (int i = 0; i < resultSize && i < IMAGES_COUNT; i++) {
                     ImageValue imgVal = imageValues.get(i);
                     searchFragment.updateRecyclerList(imgVal);
                     searchImageInsights(context, imgVal);
