@@ -402,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
         CropImage.activity(data.getData())
                 .setScaleType(CropImageView.ScaleType.CENTER_CROP)
                 .setFixAspectRatio(true)
-                .setAspectRatio(3, 4)
+                .setAspectRatio(3, 5)
                 .setAllowRotation(false)
                 .setOutputUri(destFileUri)
                 .start(this);
