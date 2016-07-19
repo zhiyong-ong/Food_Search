@@ -43,16 +43,6 @@
             android:visibility="visible" />
 
         <android.support.v7.widget.CardView
-            android:id="@+id/search_bar_container"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/search_bar_height"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/activity_half_margin"
-            android:layout_marginLeft="@dimen/activity_half_margin"
-            android:layout_marginRight="@dimen/activity_half_margin"
-            app:cardElevation="@dimen/search_bar_elevation" />
-
-        <android.support.v7.widget.CardView
             android:id="@+id/translation_card"
             android:layout_width="match_parent"
             android:layout_height="@dimen/search_bar_height"
@@ -79,14 +69,21 @@
             </LinearLayout>
         </android.support.v7.widget.CardView>
 
-        <FrameLayout
-            android:id="@+id/search_frag_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true" />
-
     </android.support.percent.PercentRelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/search_frag_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/search_bar_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/search_bar_height"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="@dimen/activity_half_margin"
+        android:layout_marginLeft="@dimen/activity_half_margin"
+        android:layout_marginRight="@dimen/activity_half_margin"
+        app:cardElevation="@dimen/search_bar_elevation" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -54,8 +54,9 @@ import retrofit2.Response;
 
 public class OcrActivity extends AppCompatActivity {
 
+    static final String DEST_FILE_PATH = "DESTFILEPATH";
+    static final String SOURCE_FILE_PATH = "SOURCEFILEPATH";
     private static final String LOG_TAG = "FOODIES";
-    private static final String SAVED_FILE_PATH = "SAVEDFILEPATH";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
     private static final String SEARCH_BAR_TAG = "SEARCHBARTAG";
     public static String IMAGE_KEY;
@@ -78,12 +79,16 @@ public class OcrActivity extends AppCompatActivity {
     private boolean animating = false;
     private int containerTransY;
     private int searchBarTrans;
-    private String filePath = null;
+    private String destFilePath = null;
+    private String sourceFilePath = null;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (filePath != null) {
-            outState.putString(SAVED_FILE_PATH, filePath);
+        if (destFilePath != null) {
+            outState.putString(DEST_FILE_PATH, destFilePath);
+        }
+        if (sourceFilePath != null) {
+            outState.putString(SOURCE_FILE_PATH, sourceFilePath);
         }
         super.onSaveInstanceState(outState);
     }
@@ -91,8 +96,11 @@ public class OcrActivity extends AppCompatActivity {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.containsKey(SAVED_FILE_PATH)) {
-            filePath = savedInstanceState.getString(SAVED_FILE_PATH);
+        if (savedInstanceState.containsKey(DEST_FILE_PATH)) {
+            destFilePath = savedInstanceState.getString(DEST_FILE_PATH);
+        }
+        if (savedInstanceState.containsKey(SOURCE_FILE_PATH)) {
+            sourceFilePath = savedInstanceState.getString(SOURCE_FILE_PATH);
         }
     }
 
@@ -100,8 +108,9 @@ public class OcrActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
-        if (filePath == null) {
-            filePath = getIntent().getStringExtra("filePath");
+        if (destFilePath == null) {
+            destFilePath = getIntent().getStringExtra(DEST_FILE_PATH);
+            sourceFilePath = getIntent().getStringExtra(SOURCE_FILE_PATH);
         }
         database = FirebaseDatabase.getInstance().getReference();
         imgDAO = new BingImageDAO();
@@ -118,7 +127,7 @@ public class OcrActivity extends AppCompatActivity {
 
         // Load a placeholder low res image first, resized to 30x48
         ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-        Picasso.with(this).load("file://" + filePath)
+        Picasso.with(this).load("file://" + destFilePath)
                 .memoryPolicy(MemoryPolicy.NO_CACHE)
                 .resize(30, 48)
                 .into(previewImageView);
@@ -185,7 +194,7 @@ public class OcrActivity extends AppCompatActivity {
                 @Override
                 protected void onPostExecute(byte[] compressedImage) {
                     ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                    Picasso.with(mContext).load("file://" + filePath)
+                    Picasso.with(mContext).load("file://" + destFilePath)
                             .noPlaceholder()
                             .fit()
                             .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -193,7 +202,7 @@ public class OcrActivity extends AppCompatActivity {
                     onHoldBingOcrConnect(compressedImage);
                 }
             };
-            compressTask.execute(filePath);
+            compressTask.execute(sourceFilePath, destFilePath);
         }
     }
 
@@ -220,7 +229,7 @@ public class OcrActivity extends AppCompatActivity {
                 if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
                     Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                     // Enqueue the method to the call and wait for callback (Asynchronous call)
-                    call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), filePath));
+                    call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
                 } else {
                     onHoldBingOcrConnect(compressedImage);
                 }
@@ -257,17 +266,17 @@ public class OcrActivity extends AppCompatActivity {
                 // When compressTask is done, invoke dispatchCall for POST call
                 Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
-                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), filePath));
+                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
                 // After call is dispatched, load full res IMAGE_KEY into preview
                 ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                Picasso.with(mContext).load("file://" + filePath)
+                Picasso.with(mContext).load("file://" + destFilePath)
                         .noPlaceholder()
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .into(previewImageView);
             }
         };
-        compressTask.execute(filePath);
+        compressTask.execute(sourceFilePath, destFilePath);
     }
 
     @Override
@@ -670,7 +679,7 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         protected byte[] doInBackground(String... params) {
-            return ImageUtils.compressImage(params[0]);
+            return ImageUtils.compressImage(params[0], params[1]);
         }
     }
 

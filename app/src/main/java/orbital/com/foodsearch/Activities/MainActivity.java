@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
@@ -20,10 +19,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -34,6 +36,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.util.Iterator;
@@ -41,6 +45,7 @@ import java.util.Iterator;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.R;
+import orbital.com.foodsearch.Utils.AnimUtils;
 
 public class MainActivity extends AppCompatActivity {
     public static final String MyPREFERENCES = "Preferences";
@@ -49,26 +54,32 @@ public class MainActivity extends AppCompatActivity {
     public static final String OCR_KEY = "OCRKey";
     private static final int OCR_CAMERA_PERMISSION_REQUEST_CODE = 1;
     private static final int OCR_CAMERA_INTENT_REQUEST_CODE = 100;
+    private static final int READ_STORAGE_PERMISSION_REQUEST_CODE = 2;
+    private static final int IMAGE_PICK_INTENT_REQUEST_CODE = 200;
     private static final String SAVED_URI = "savedUri";
-    private static final String FILEPATH = "filePath";
     private static final String LOG_TAG = "FOODIES";
     private static final String PHOTO_FILE_NAME = "photo.jpg";
     private static final String DEBUG_FILE_NAME = "debug.jpg";
-    SharedPreferences sharedpreferences;
-    private Uri photoFileUri = null;
+    private SharedPreferences sharedpreferences;
+    private Uri sourceFileUri = null;
+    private Uri destFileUri = null;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private String user = "foodies@firebase.com";
     private String password = "Orbital123";
     private DatabaseReference database;
+    private FrameLayout mFabOverlay;
+    private FloatingActionMenu mFabMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setupFab();
         setBottomNavigationBar();
-        setFab();
+        generateUri();
+
         database = FirebaseDatabase.getInstance().getReference();
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
 
@@ -115,6 +126,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setBottomNavigationBar() {
+        if (mFabOverlay == null || mFabMenu == null) {
+            mFabOverlay = (FrameLayout) findViewById(R.id.fab_overlay);
+            mFabMenu = (FloatingActionMenu) findViewById(R.id.start_fab);
+        }
         AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
         AHBottomNavigationItem recentsItem = new AHBottomNavigationItem(R.string.recents_tab, R.drawable.ic_history,
                 R.color.colorPrimary);
@@ -129,6 +144,9 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
+                mFabOverlay.setClickable(false);
+                mFabMenu.close(true);
+                AnimUtils.fadeOut(mFabOverlay, AnimUtils.FAB_OVERLAY_DURATION);
                 if (wasSelected) {
                     return true;
                 }
@@ -153,19 +171,35 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigation.setCurrentItem(0);
     }
 
-    private void setFab() {
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.camera_fab);
-        fab.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                startDebug(v);
-                return true;
-            }
-        });
-        fab.setOnClickListener(new View.OnClickListener() {
+    private void setupFab() {
+        mFabOverlay = (FrameLayout) findViewById(R.id.fab_overlay);
+        mFabMenu = (FloatingActionMenu) findViewById(R.id.start_fab);
+        mFabMenu.setClosedOnTouchOutside(true);
+        AnimUtils.setFabMenuIcon(this, mFabMenu);
+        mFabMenu.getIconToggleAnimatorSet();
+        mFabOverlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startOcr(v);
+                closeFab();
+            }
+        });
+        mFabMenu.setOnMenuButtonClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mFabMenu.isOpened()) {
+                    closeFab();
+                    startCameraOcr();
+                } else {
+                    openFab();
+                }
+            }
+        });
+        FloatingActionButton fileFab = (FloatingActionButton) findViewById(R.id.start_image_pick_fab);
+        fileFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeFab();
+                startImagePick();
             }
         });
     }
@@ -191,9 +225,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        if (mFabMenu != null && mFabMenu.isOpened()) {
+            closeFab();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    private void closeFab() {
+        mFabOverlay.setClickable(false);
+        mFabMenu.close(true);
+        AnimUtils.fadeOut(mFabOverlay, AnimUtils.FAB_OVERLAY_DURATION);
+    }
+
+    private void openFab() {
+        mFabOverlay.setClickable(true);
+        mFabMenu.open(true);
+        AnimUtils.fadeIn(mFabOverlay, AnimUtils.FAB_OVERLAY_DURATION);
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (photoFileUri != null) {
-            outState.putString(SAVED_URI, photoFileUri.toString());
+        if (sourceFileUri != null) {
+            outState.putString(SAVED_URI, sourceFileUri.toString());
         }
         super.onSaveInstanceState(outState);
     }
@@ -202,38 +257,8 @@ public class MainActivity extends AppCompatActivity {
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.containsKey(SAVED_URI)) {
-            photoFileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
+            sourceFileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
         }
-    }
-
-    /**
-     * This method starts the camera by checking permissions for api > 23
-     * and if api < 23 it just dispatches Camera Intent
-     *
-     * @param view
-     */
-    @TargetApi(Build.VERSION_CODES.M)
-    public void startDebug(View view) {
-        Intent intent = new Intent(this, OcrActivity.class);
-        generateDebugUri();
-        intent.putExtra(FILEPATH, photoFileUri.getPath());
-        startActivity(intent);
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    public void startOcr(View view) {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA},
-                    OCR_CAMERA_PERMISSION_REQUEST_CODE);
-        } else {
-            dispatchCameraIntent(OCR_CAMERA_INTENT_REQUEST_CODE);
-        }
-    }
-
-    public void goSearch(View view) {
-        Intent intent = new Intent(this, GoogleSearchActivity.class);
-        startActivity(intent);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -242,10 +267,10 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case OCR_CAMERA_PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    dispatchCameraIntent(requestCode * 100);
+                    dispatchCameraIntent();
                 } else {
                     Snackbar.make(findViewById(R.id.coord_main_layout), getString(R.string.permission_ungranted),
-                            Snackbar.LENGTH_SHORT)
+                            Snackbar.LENGTH_LONG)
                             .setAction(R.string.retry, new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
@@ -255,23 +280,87 @@ public class MainActivity extends AppCompatActivity {
                             })
                             .show();
                 }
+                break;
+            case READ_STORAGE_PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dispatchGalleryIntent();
+                } else {
+                    Snackbar.make(findViewById(R.id.coord_main_layout), getString(R.string.permission_ungranted),
+                            Snackbar.LENGTH_LONG)
+                            .setAction(R.string.retry, new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                                            requestCode);
+                                }
+                            })
+                            .show();
+                }
+                break;
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void startCameraOcr() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA},
+                    OCR_CAMERA_PERMISSION_REQUEST_CODE);
+        } else {
+            dispatchCameraIntent();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void startImagePick() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    READ_STORAGE_PERMISSION_REQUEST_CODE);
+        } else {
+            dispatchGalleryIntent();
         }
     }
 
     /**
-     * This method dispatches the camera intent by generating uri and attaching
-     * it to the camera intent.
+     * This method starts the camera by checking permissions for api > 23
+     * and if api < 23 it just dispatches Camera Intent
      */
-    private void dispatchCameraIntent(int requestCode) {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        generateUri();
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoFileUri);
-        startActivityForResult(cameraIntent, requestCode);
+    @TargetApi(Build.VERSION_CODES.M)
+    private void startDebug() {
+        Intent intent = new Intent(this, OcrActivity.class);
+        generateDebugUri();
+        intent.putExtra(OcrActivity.SOURCE_FILE_PATH, sourceFileUri.getPath());
+        intent.putExtra(OcrActivity.DEST_FILE_PATH, sourceFileUri.getPath());
+        startActivity(intent);
+    }
+
+    public void goSearch(View view) {
+        Intent intent = new Intent(this, GoogleSearchActivity.class);
+        startActivity(intent);
     }
 
     /**
-     * This method is called after user takes a photo. If result is OK
-     * then send the IMAGE_KEY file path to the OCR_KEY activity intent.
+     * This method dispatches the camera intent
+     */
+    private void dispatchCameraIntent() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, sourceFileUri);
+        startActivityForResult(cameraIntent, OCR_CAMERA_INTENT_REQUEST_CODE);
+    }
+
+    /**
+     * This method dispatches the image pick intent
+     */
+    private void dispatchGalleryIntent() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, IMAGE_PICK_INTENT_REQUEST_CODE);
+    }
+
+    /**
+     * This method is called after user takes or selected a photo.
+     * The image is then cropped and sent directly to ocr activity.
      *
      * @param requestCode requestCode for this request
      * @param resultCode  resultCode returned by camera
@@ -283,17 +372,50 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case OCR_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    Intent intent = new Intent(this, OcrActivity.class);
-                    intent.putExtra("filePath", photoFileUri.getPath());
-                    startActivity(intent);
+                    startOcrActivity();
+                } else {
+                    break;
                 }
-                break;
-            default:
-                // requestCode fits none of the case so make snackbar to show that no
-                // photo was taken
-                Snackbar.make(findViewById(R.id.coord_main_layout), R.string.no_photo_text, Snackbar.LENGTH_SHORT)
-                        .show();
+                return;
+            case IMAGE_PICK_INTENT_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    startCropActivity(data);
+                } else {
+                    break;
+                }
+                return;
+            case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                if (resultCode == RESULT_OK) {
+                    startOcrActivity();
+                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Log.e("HELLO", result.getError().getMessage());
+                }
+                return;
         }
+        // None of the case fits so make snackbar to prompt user
+        Snackbar.make(findViewById(R.id.coord_main_layout), R.string.no_photo_text, Snackbar.LENGTH_LONG)
+                .show();
+    }
+
+    private void startCropActivity(Intent data) {
+        CropImage.activity(data.getData())
+                .setScaleType(CropImageView.ScaleType.CENTER_CROP)
+                .setFixAspectRatio(true)
+                .setAspectRatio(3, 4)
+                .setAllowRotation(false)
+                .setOutputUri(destFileUri)
+                .start(this);
+    }
+
+    /**
+     * Starts OcrActivity with the file uris
+     */
+    private void startOcrActivity() {
+        Intent intent = new Intent(this, OcrActivity.class);
+        intent.putExtra(OcrActivity.SOURCE_FILE_PATH, sourceFileUri.getPath());
+        intent.putExtra(OcrActivity.DEST_FILE_PATH, destFileUri.getPath());
+        startActivity(intent);
     }
 
     /**
@@ -308,7 +430,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
             }
         }
-        photoFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
+        sourceFileUri = destFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
                 + File.separator + PHOTO_FILE_NAME));
     }
 
@@ -324,7 +446,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
             }
         }
-        photoFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
+        destFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
                 + File.separator + DEBUG_FILE_NAME));
     }
 

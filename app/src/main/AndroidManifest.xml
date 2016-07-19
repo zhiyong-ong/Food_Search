@@ -41,6 +41,11 @@
             android:name=".Activities.PhotoViewActivity"
             android:parentActivityName=".Activities.OcrActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
+            android:parentActivityName=".Activities.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" />
     </application>
 
 </manifest>

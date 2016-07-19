@@ -29,6 +29,10 @@
     <string name="ocr_start">OCR start</string>
     <string name="debug_start">DEBUG</string>
 
+    <!--For Floating action buttons-->
+    <string name="camera_fab_label">Take a photo of the menu</string>
+    <string name="image_pick_fab_label">Pick a menu image from gallery</string>
+
     <!--For preferences-->
     <string name="select_lang_title">Translated language</string>
     <string name="select_lang_key">select_lang</string>
@@ -52,6 +56,8 @@
     <string name="recents_tab">Recents</string>
     <string name="settings_tab">Settings</string>
 
+
+    <string name="fab_menu_behavior">orbital.com.foodsearch.FloatingActionMenuBehavior</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

@@ -6,8 +6,13 @@
 
     <color name="colorLink">#37474f</color>
     <color name="colorOnTap">#0277bd</color>
-    <color name="colorGrey">#9e9e9e</color>
+    <color name="colorGrey">#616161</color>
     <color name="colorTranslate">#00b0ff</color>
-
     <color name="overlayDark">#9f000000</color>
+
+    <!--For Floating action buttons-->
+    <color name="colorFabStart">#f44336</color>
+    <color name="colorFabPick">#1976d2</color>
+    <color name="colorFabPicked">#0d47a1</color>
+    <color name="colorFabOverlay">#bfffffff</color>
 </resources>

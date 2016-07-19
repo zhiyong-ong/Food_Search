@@ -2,6 +2,7 @@ package orbital.com.foodsearch.Utils;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -14,10 +15,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import com.github.clans.fab.FloatingActionMenu;
 
 import orbital.com.foodsearch.R;
 
@@ -32,6 +36,7 @@ public class AnimUtils {
     public static final int RESULTS_UP_DURATION = 550;
     public static final int RESULTS_DOWN_DURATION = 400;
     public static final int OVERLAY_DURATION = 400;
+    public static final int FAB_OVERLAY_DURATION = 150;
     public static final int TRANSLATE_REVEAL_DURATION = 600;
     public static final int SEARCH_BAR_RAISE = 450;
     public static final int SEARCH_BAR_DROP = 400;
@@ -197,6 +202,36 @@ public class AnimUtils {
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1);
         animator.setDuration(duration);
         animator.start();
+    }
+
+    public static void setFabMenuIcon(Context context, final FloatingActionMenu fam) {
+        AnimatorSet set = new AnimatorSet();
+
+        ObjectAnimator scaleOutX = ObjectAnimator.ofFloat(fam.getMenuIconView(), "rotation", 1.0f, 0.2f);
+        ObjectAnimator scaleOutY = ObjectAnimator.ofFloat(fam.getMenuIconView(), "scaleY", 1.0f, 0.2f);
+
+        ObjectAnimator scaleInX = ObjectAnimator.ofFloat(fam.getMenuIconView(), "scaleX", 0.2f, 1.0f);
+        ObjectAnimator scaleInY = ObjectAnimator.ofFloat(fam.getMenuIconView(), "scaleY", 0.2f, 1.0f);
+
+        scaleOutX.setDuration(50);
+        scaleOutY.setDuration(50);
+
+        scaleInX.setDuration(150);
+        scaleInY.setDuration(150);
+
+        scaleInX.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                fam.getMenuIconView().setImageResource(fam.isOpened()
+                        ? R.drawable.ic_camera_iris : R.drawable.ic_camera);
+            }
+        });
+
+        set.play(scaleOutX).with(scaleOutY);
+        set.play(scaleInX).with(scaleInY).after(scaleOutX);
+        set.setInterpolator(new OvershootInterpolator(2));
+
+        fam.setIconToggleAnimatorSet(set);
     }
 
     public static void raiseSearchBar(Context context, View searchBar, int marginTopPx) {

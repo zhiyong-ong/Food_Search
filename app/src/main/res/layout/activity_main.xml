@@ -9,7 +9,7 @@
 
     <include
         layout="@layout/toolbar_layout"
-        android:theme="@style/Theme.AppCompat.Main" />
+        android:theme="@style/ToolbarTheme" />
 
     <FrameLayout
         android:id="@+id/nav_frag_container"
@@ -17,6 +17,16 @@
         android:layout_height="match_parent"
         android:layout_marginBottom="?android:attr/actionBarSize"
         android:layout_marginTop="?attr/actionBarSize" />
+
+    <FrameLayout
+        android:id="@+id/fab_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?android:attr/actionBarSize"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:background="@color/colorFabOverlay"
+        android:clickable="false"
+        android:visibility="gone" />
 
     <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
         android:id="@+id/bottom_navigation"
@@ -29,19 +39,38 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="132dp"
         android:clickable="false"
         android:visibility="gone" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/camera_fab"
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/start_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:src="@drawable/ic_camera"
         app:fabSize="normal"
         app:layout_anchor="@id/fab_anchor"
-        app:layout_anchorGravity="bottom|right" />
+        app:layout_anchorGravity="bottom|right|end"
+        app:layout_behavior="@string/fab_menu_behavior"
+        app:menu_colorNormal="@color/colorFabStart"
+        app:menu_colorPressed="@color/colorFabStart"
+        app:menu_colorRipple="@color/colorPrimary"
+        app:menu_fab_label="@string/camera_fab_label"
+        app:menu_icon="@drawable/ic_camera_iris"
+        app:menu_labels_colorNormal="@android:color/black"
+        app:menu_labels_colorPressed="@color/colorGrey"
+        app:menu_labels_textColor="@android:color/white">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/start_image_pick_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_folder_image"
+            app:fab_colorNormal="@color/colorFabPick"
+            app:fab_colorPressed="@color/colorFabPicked"
+            app:fab_label="@string/image_pick_fab_label"
+            app:fab_size="mini" />
+    </com.github.clans.fab.FloatingActionMenu>
 </android.support.design.widget.CoordinatorLayout>
