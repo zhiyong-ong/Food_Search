@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
@@ -18,8 +20,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -55,6 +60,8 @@ import orbital.com.foodsearch.Views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import static orbital.com.foodsearch.Utils.AnimUtils.brightenOverlay;
 
 public class OcrActivity extends AppCompatActivity {
 
@@ -116,6 +123,13 @@ public class OcrActivity extends AppCompatActivity {
             destFilePath = getIntent().getStringExtra(DEST_FILE_PATH);
             sourceFilePath = getIntent().getStringExtra(SOURCE_FILE_PATH);
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(Color.BLACK);
+        }
+        findViewById(R.id.drawable_overlay).setClickable(true);
         database = FirebaseDatabase.getInstance().getReference();
         imgDAO = new BingImageDAO();
         sharedPreferences = getSharedPreferences(MainActivity.MyPREFERENCES, MODE_PRIVATE);
@@ -219,7 +233,7 @@ public class OcrActivity extends AppCompatActivity {
         // When compressTask is done, load preview into preview imageview
         // and remove progressbars and overlay.
         // then allow user to retry
-        AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay));
+        brightenOverlay(findViewById(R.id.drawable_overlay));
         ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
         Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr),
@@ -309,11 +323,17 @@ public class OcrActivity extends AppCompatActivity {
      */
     public void closeSearchResults() {
         View rootView = findViewById(R.id.activity_ocr);
-        Button searchButton = (Button) rootView.findViewById(R.id.start_search);
+        View containerView = findViewById(R.id.search_frag_container);
+        if (containerView.getTranslationY() == 0) {
+            AnimUtils.containerSlideDown(containerView,
+                    new AnimatingListener(rootView),
+                    containerTransY);
+        }
+        Button searchButton = (Button) findViewById(R.id.searchbar_start_search);
         searchButton.setEnabled(true);
-        AnimUtils.containerSlideDown(rootView,
-                new AnimatingListener(rootView),
-                containerTransY);
+        ImageButton translateCloseBtn = (ImageButton) findViewById(R.id.searchbar_translate_close);
+        translateCloseBtn.performClick();
+        brightenOverlay(rootView.findViewById(R.id.drawable_overlay));
     }
 
     public void openPhotoView(View itemView, String contentUrl, String thumbUrl, int position) {
@@ -340,11 +360,11 @@ public class OcrActivity extends AppCompatActivity {
      * @param searchParam String to be searched for
      */
     private void searchImageResponse(final Context context, final String searchParam) {
-        AnimUtils.containerSlideDown(findViewById(R.id.activity_ocr),
+        AnimUtils.containerSlideDown(findViewById(R.id.search_frag_container),
                 new AnimatingListener(findViewById(R.id.activity_ocr)),
                 containerTransY);
         AnimUtils.darkenOverlay(findViewById(R.id.drawable_overlay));
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.search_progress);
+        ProgressBar progressBar = (ProgressBar) findViewById(R.id.searchbar_progress);
         progressBar.setVisibility(View.VISIBLE);
 
         database.child("images").child(searchParam).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -478,6 +498,7 @@ public class OcrActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            SearchBarFragment searchBarFragment = (SearchBarFragment) fm.findFragmentByTag(SEARCH_BAR_TAG);
             if (searchResponseDB == null) {
                 //persist search result to DB
                 imgDAO.persistImage(searchResponse);
@@ -486,12 +507,11 @@ public class OcrActivity extends AppCompatActivity {
             insightsCount = 0;
             //in the case where the database has the image but doesn't have the imageinsights.
             searchFragment.finalizeRecycler();//searchResponseDB.getTranslatedQuery());
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.searchbar_progress);
             progressBar.setVisibility(View.GONE);
             Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
-            AnimUtils.containerSlideUp(context, rootView,
-                    new AnimUtils.displaySearchListener(rootView.findViewById(R.id.translation_card),
-                            mTranslatedText));
+            searchBarFragment.setTranslatedText(mTranslatedText);
+            AnimUtils.containerSlideUp(context, rootView, null);
         }
     }
 
@@ -535,13 +555,8 @@ public class OcrActivity extends AppCompatActivity {
             }
             insightsCount = 0;
             // Failed to get the IMAGE_KEY insights so display snackbar error dialog
-            Log.e(LOG_TAG, t.getMessage());
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
-            progressBar.setVisibility(View.GONE);
-            AnimUtils.brightenOverlay(rootView.findViewById(R.id.drawable_overlay));
-            Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.insights_search_fail,
-                    Snackbar.LENGTH_LONG)
-                    .show();
+            new CompleteTask(context, rootView, fm)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -585,10 +600,10 @@ public class OcrActivity extends AppCompatActivity {
                     searchImageInsights(context, imgVal);
                 }
             } else {
-                ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
+                ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.searchbar_progress);
                 progressBar.setVisibility(View.GONE);
                 FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                AnimUtils.brightenOverlay(drawableOverlay);
+                brightenOverlay(drawableOverlay);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
 
@@ -600,10 +615,10 @@ public class OcrActivity extends AppCompatActivity {
             Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.image_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
+            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.searchbar_progress);
             progressBar.setVisibility(View.GONE);
             FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-            AnimUtils.brightenOverlay(drawableOverlay);
+            brightenOverlay(drawableOverlay);
             Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
         }
     }
@@ -647,17 +662,19 @@ public class OcrActivity extends AppCompatActivity {
         public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
             BingOcrResponse bingOcrResponse = response.body();
             List<Line> lines = bingOcrResponse.getAllLines();
+            findViewById(R.id.drawable_overlay).setClickable(true);
             mDrawableView.drawBoxes(rootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
-            AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay));
+            brightenOverlay(findViewById(R.id.drawable_overlay));
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
         }
 
         @Override
         public void onFailure(Call<BingOcrResponse> call, Throwable t) {
-            AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay));
+            brightenOverlay(findViewById(R.id.drawable_overlay));
+            findViewById(R.id.drawable_overlay).setClickable(false);
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
             AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
             Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.OCRFailed,
@@ -722,7 +739,9 @@ public class OcrActivity extends AppCompatActivity {
             String searchParam = mDrawableView.getmLineTexts().get(i).toLowerCase();
             searchParam = searchParam.substring(0, 1).toUpperCase() + searchParam.substring(1);
             View searchBar = findViewById(R.id.search_bar_container);
-            AnimUtils.showSearchBar(context, searchBar, searchParam);
+            if (!animating || searchBar.getTranslationY() == 0) {
+                AnimUtils.showSearchBar(rootView, searchBar, searchParam, new AnimatingListener(rootView));
+            }
         }
     }
 

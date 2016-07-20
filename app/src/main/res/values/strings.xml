@@ -2,7 +2,6 @@
     <string name="app_name">FoodSearch</string>
     <string name="searchbar_text">Tap on a green box to search</string>
     <string name="camFrag">camFragment</string>
-    <string name="search">Search</string>
 
     <string name="title_activity_ocr_exp">OcrExpActivity</string>
     <string name="title_activity_fullscreen">Camera</string>
@@ -26,6 +25,8 @@
     <string name="translate">Translate</string>
     <string name="undo">Undo Translate</string>
     <string name="retry">Retry</string>
+    <string name="copy">Copy</string>
+    <string name="search">Search</string>
     <string name="ocr_start">OCR start</string>
     <string name="debug_start">DEBUG</string>
 
@@ -57,10 +58,65 @@
     <string name="settings_tab">Settings</string>
 
 
-    <string name="fab_menu_behavior">orbital.com.foodsearch.FloatingActionMenuBehavior</string>
-    <string name="searchbar_behavior">orbital.com.foodsearch.SearchbarBehavior</string>
+    <string name="fab_menu_behavior">orbital.com.foodsearch.Misc.FloatingActionMenuBehavior</string>
+    <string name="searchbar_behavior">orbital.com.foodsearch.Misc.SearchbarBehavior</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="fullscreen_transition_name">zoom</string>
+    <string name="fullscreen_transition_name">fullscreen_transition</string>
+    <string name="translation">Translation:</string>
+
+    <!--String for languages-->
+    <string name="Afrikaans">Afrikaans</string>
+    <string name="Arabic">Arabic</string>
+    <string name="Bosnian">Bosnian (Latin)</string>
+    <string name="Bulgarian">Bulgarian</string>
+    <string name="Catalan">Catalan</string>
+    <string name="ChiSimplified">Chinese Simplified</string>
+    <string name="ChiTrad">Chinese Traditional</string>
+    <string name="Croatian">Croatian</string>
+    <string name="Czech">Czech</string>
+    <string name="Danish">Danish</string>
+    <string name="Dutch">Dutch</string>
+    <string name="English">English</string>
+    <string name="Estonian">Estonian</string>
+    <string name="Finnish">Finnish</string>
+    <string name="French">French</string>
+    <string name="German">German</string>
+    <string name="Greek">Greek</string>
+    <string name="Haitian">Haitian Creole</string>
+    <string name="Hebrew">Hebrew</string>
+    <string name="Hindi">Hindi</string>
+    <string name="HmongDaw">Hmong Daw</string>
+    <string name="Hungarian">Hungarian</string>
+    <string name="Indonesian">Indonesian</string>
+    <string name="Japanese">Japanese</string>
+    <string name="Kiswahili">Kiswahili</string>
+    <string name="Klingon">Klingon</string>
+    <string name="KlingonPIQAD">Klingon (pIqaD)</string>
+    <string name="Korean">Korean</string>
+    <string name="Latvian">Latvian</string>
+    <string name="Lithuanian">Lithuanian</string>
+    <string name="Malay">Malay</string>
+    <string name="Maltese">Maltese</string>
+    <string name="Norwegian">Norwegian</string>
+    <string name="Persian">Persian</string>
+    <string name="Polish">Polish</string>
+    <string name="Portuguese">Portuguese</string>
+    <string name="Queretaro">Querétaro Otomi</string>
+    <string name="Romanian">Romanian</string>
+    <string name="Russian">Russian</string>
+    <string name="SerbianCyrillic">Serbian (Cyrillic)</string>
+    <string name="SerbianLatin">Serbian (Latin)</string>
+    <string name="Slovak">Slovak</string>
+    <string name="Slovenian">Slovenian</string>
+    <string name="Spanish">Spanish</string>
+    <string name="Swedish">Swedish</string>
+    <string name="Thai">Thai</string>
+    <string name="Turkish">Turkish</string>
+    <string name="Ukrainian">Ukrainian</string>
+    <string name="Urdu">Urdu</string>
+    <string name="Vietnamese">Vietnamese</string>
+    <string name="Welsh">Welsh</string>
+    <string name="YucatecMaya">Yucatec Maya</string>
 </resources>

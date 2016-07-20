@@ -1,24 +1,21 @@
-package orbital.com.foodsearch;
+package orbital.com.foodsearch.Misc;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPropertyAnimatorListener;
-import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.github.clans.fab.FloatingActionMenu;
+
 import java.util.List;
 
-/**
- * Created by Abel on 7/19/2016.
- */
-
-public class SearchbarBehavior extends CoordinatorLayout.Behavior {
+public class FloatingActionMenuBehavior extends CoordinatorLayout.Behavior {
     private float mTranslationY;
 
-    public SearchbarBehavior(Context context, AttributeSet attrs) {
+    public FloatingActionMenuBehavior(Context context, AttributeSet attrs) {
         super();
     }
 
@@ -29,7 +26,7 @@ public class SearchbarBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
-        if (child instanceof CardView && dependency instanceof Snackbar.SnackbarLayout) {
+        if (child instanceof FloatingActionMenu && dependency instanceof Snackbar.SnackbarLayout) {
             this.updateTranslation(parent, child, dependency);
         }
 
@@ -38,14 +35,14 @@ public class SearchbarBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public void onDependentViewRemoved(CoordinatorLayout parent, View child, View dependency) {
-        if (child instanceof CardView && dependency instanceof Snackbar.SnackbarLayout) {
+        if (child instanceof FloatingActionMenu && dependency instanceof Snackbar.SnackbarLayout) {
             this.updateTranslation(parent, child, dependency);
         }
     }
 
     private void updateTranslation(CoordinatorLayout parent, View child, View dependency) {
         float translationY = this.getTranslationY(parent, child);
-        if (child.getTranslationY() <= 0 && translationY != this.mTranslationY) {
+        if (translationY != this.mTranslationY) {
             ViewCompat.animate(child)
                     .cancel();
             if (Math.abs(translationY - this.mTranslationY) == (float) dependency.getHeight()) {

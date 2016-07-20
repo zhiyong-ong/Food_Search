@@ -25,4 +25,18 @@ public class BingTranslate {
         Log.e(LOG_TAG, "Translated text from: " + txt + "  to: " + translation);
         return translation;
     }
+
+    public static String getTranslatedText(String txt, String language) {
+        Translate.setClientId("foodies1");
+        Translate.setClientSecret(OcrActivity.TRANSLATE_KEY);
+        String translation = null;
+        try {
+            //2nd param is translate from, 3rd param is translate to
+            translation = Translate.execute(txt, language);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Log.e(LOG_TAG, "Translated text from: " + txt + "  to: " + translation);
+        return translation;
+    }
 }

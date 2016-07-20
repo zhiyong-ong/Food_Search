@@ -1,4 +1,4 @@
-package orbital.com.foodsearch;
+package orbital.com.foodsearch.Misc;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,6 +8,8 @@ import android.os.Build;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Transformation;
+
+import orbital.com.foodsearch.R;
 
 /**
  * Created by Abel on 6/15/2016.

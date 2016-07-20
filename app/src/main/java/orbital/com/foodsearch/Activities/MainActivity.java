@@ -37,7 +37,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
 import java.util.Iterator;
@@ -48,7 +47,7 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
 
 public class MainActivity extends AppCompatActivity {
-    static final String MyPREFERENCES = "Preferences";
+    public static final String MyPREFERENCES = "Preferences";
     static final String IMAGE_KEY = "ImageKey";
     static final String TRANSLATE_KEY = "TranslateKey";
     static final String OCR_KEY = "OCRKey";
@@ -397,7 +396,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void startCropActivity(Intent data) {
         CropImage.activity(data.getData())
-                .setScaleType(CropImageView.ScaleType.CENTER_CROP)
                 .setFixAspectRatio(true)
                 .setAspectRatio(3, 5)
                 .setAllowRotation(false)

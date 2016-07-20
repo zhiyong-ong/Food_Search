@@ -11,15 +11,16 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.TextView;
 
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -36,11 +37,13 @@ public class AnimUtils {
     public static final int RESULTS_UP_DURATION = 550;
     public static final int RESULTS_DOWN_DURATION = 400;
     public static final int OVERLAY_DURATION = 400;
+    public static final int OVERLAY_EXIT_DURATION = 300;
     public static final int FAB_OVERLAY_DURATION = 150;
     public static final int TRANSLATE_REVEAL_DURATION = 600;
     public static final int SEARCH_BAR_RAISE = 450;
     public static final int SEARCH_BAR_DROP = 400;
-    public static final int TRANSLATE_SHOW = 400;
+    public static final int TEXT_UPDATE = 400;
+    public static final int FAST_FADE = 200;
 
     public static void brightenOverlay(final View overlay) {
         int currentColor = ((ColorDrawable) overlay.getBackground()).getColor();
@@ -85,7 +88,7 @@ public class AnimUtils {
         int currentColor = ((ColorDrawable) overlay.getBackground()).getColor();
         ValueAnimator darkenAnim = ValueAnimator.ofObject(new ArgbEvaluator(),
                 currentColor,
-                Color.parseColor("#9F000000"));
+                Color.parseColor("#BF000000"));
         darkenAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
@@ -97,17 +100,13 @@ public class AnimUtils {
         darkenAnim.start();
     }
 
-    public static void containerSlideDown(View rootView, Animator.AnimatorListener animListener,
-                                    int containerTransY) {
-        FrameLayout resultsContainer = (FrameLayout)rootView.findViewById(R.id.search_frag_container);
-        ObjectAnimator anim = ObjectAnimator.ofFloat(resultsContainer,
+    public static void containerSlideDown(View containerView, Animator.AnimatorListener animListener,
+                                          int containerTransY) {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(containerView,
                 View.TRANSLATION_Y, containerTransY);
         anim.addListener(animListener);
         anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.setDuration(RESULTS_DOWN_DURATION);
-        if (resultsContainer.getTranslationY() != containerTransY){
-            brightenOverlay(rootView.findViewById(R.id.drawable_overlay));
-        }
         anim.start();
     }
 
@@ -117,35 +116,37 @@ public class AnimUtils {
                 View.TRANSLATION_Y, 0);
         anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.setDuration(RESULTS_UP_DURATION);
-        anim.addListener(listener);
+        if (listener != null) {
+            anim.addListener(listener);
+        }
         anim.start();
     }
 
-    public static void showSearchBar(Context context, View searchBar, String searchParam) {
+    public static void showSearchBar(View rootView, View searchBar, String searchParam, Animator.AnimatorListener listener) {
         searchBar.animate().translationY(0)
                 .setInterpolator(new FastOutSlowInInterpolator())
                 .setDuration(SEARCH_BAR_SHOW)
+                .setListener(listener)
                 .start();
-        EditText editText = (EditText)searchBar.findViewById(R.id.edit_text);
+        ImageButton translateBtn = (ImageButton) rootView.findViewById(R.id.searchbar_translate_btn);
+        AnimUtils.fadeOut(translateBtn, AnimUtils.FAST_FADE);
+        EditText editText = (EditText) searchBar.findViewById(R.id.searchbar_edit_text);
         editText.setText(searchParam);
         editText.clearFocus();
-        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_search);
-        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel_search));
     }
 
-    public static void hideSearchBar(View searchBar, int searchbarTrans){
+    public static void hideSearchBar(View searchBar, int searchbarTrans) {
         searchBar.animate().translationY(searchbarTrans)
                 .setDuration(SEARCH_BAR_HIDE)
                 .start();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void enterReveal(View startView, final View revealView, View filledView, Animator.AnimatorListener listener) {
+    public static void circularReveal(View startView, final View revealView, View filledView, Animator.AnimatorListener listener) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-            AnimUtils.darkenOverlay(revealView);
+            AnimUtils.fadeIn(revealView, OVERLAY_DURATION);
             return;
         }
-
         // get the center for the clipping circle
         int cx = startView.getLeft() + startView.getWidth() / 2;
         int cy = startView.getTop() + startView.getHeight() / 2;
@@ -166,14 +167,39 @@ public class AnimUtils {
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void exitReveal(final View exitView, View startView) {
+    public static void enterReveal(View enterView, Animator.AnimatorListener listener) {
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-            AnimUtils.brightenOverlay(exitView);
+            AnimUtils.fadeIn(enterView, OVERLAY_DURATION);
             return;
         }
         // get the center for the clipping circle
-        int cx = startView.getLeft() + startView.getMeasuredWidth() / 2;
-        int cy = startView.getTop() + startView.getMeasuredHeight() / 2;
+        int cx = (int) enterView.getPivotX();
+        int cy = (int) enterView.getPivotY();
+
+        // get the final radius for the clipping circle
+        int finalRadius = (int) Math.hypot(enterView.getWidth(), enterView.getHeight());
+
+        // create the animator for this view (the start radius is zero)
+        Animator anim = ViewAnimationUtils.createCircularReveal(enterView, cx, cy, 0, finalRadius);
+
+        // make the view visible and start the animation
+        anim.setDuration(TRANSLATE_REVEAL_DURATION);
+        enterView.setVisibility(View.VISIBLE);
+        if (listener != null) {
+            anim.addListener(listener);
+        }
+        anim.start();
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void exitReveal(final View exitView, View endView, Animator.AnimatorListener listener) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+            AnimUtils.fadeOut(exitView, OVERLAY_DURATION);
+            return;
+        }
+        // get the center for the clipping circle
+        int cx = endView.getLeft() + endView.getMeasuredWidth() / 2;
+        int cy = endView.getTop() + endView.getMeasuredHeight() / 2;
 
         // get the initial radius for the clipping circle
         int initialRadius = exitView.getWidth() / 2;
@@ -182,6 +208,7 @@ public class AnimUtils {
         Animator anim =
                 null;
         anim = ViewAnimationUtils.createCircularReveal(exitView, cx, cy, initialRadius, 0);
+        anim.setInterpolator(new AccelerateDecelerateInterpolator());
 
         // make the view invisible when the animation is done
         anim.addListener(new AnimatorListenerAdapter() {
@@ -191,6 +218,10 @@ public class AnimUtils {
                 exitView.setVisibility(View.GONE);
             }
         });
+        if (listener != null) {
+            anim.addListener(listener);
+        }
+        anim.setDuration(OVERLAY_EXIT_DURATION);
 
         // start the animation
         anim.start();
@@ -202,6 +233,18 @@ public class AnimUtils {
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1);
         animator.setDuration(duration);
         animator.start();
+    }
+
+    public static void flashColor(EditText editText, int flashColor) {
+        int originalColor = editText.getCurrentTextColor();
+        editText.setShadowLayer(2, 2, 2, flashColor);
+        ObjectAnimator anim = ObjectAnimator.ofInt(editText, "shadowColor", originalColor, flashColor);
+        ObjectAnimator animBack = ObjectAnimator.ofInt(editText, "shadowColor", flashColor, originalColor);
+        anim.setDuration(FAST_FADE);
+        animBack.setDuration(FAST_FADE);
+        AnimatorSet flasher = new AnimatorSet();
+        flasher.playSequentially(anim, animBack);
+        flasher.start();
     }
 
     public static void setFabMenuIcon(Context context, final FloatingActionMenu fam) {
@@ -239,9 +282,9 @@ public class AnimUtils {
                 .setInterpolator(new FastOutSlowInInterpolator())
                 .setDuration(SEARCH_BAR_RAISE)
                 .start();
-        EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
+        EditText editText = (EditText) searchBar.findViewById(R.id.searchbar_edit_text);
         editText.clearFocus();
-        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_search);
+        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_searchbar);
         cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_drop_search));
     }
 
@@ -253,10 +296,10 @@ public class AnimUtils {
                 .setInterpolator(new FastOutSlowInInterpolator())
                 .setDuration(SEARCH_BAR_DROP)
                 .start();
-        EditText editText = (EditText) searchBar.findViewById(R.id.edit_text);
+        EditText editText = (EditText) searchBar.findViewById(R.id.searchbar_edit_text);
         editText.clearFocus();
-        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_search);
-        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel_search));
+        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_searchbar);
+        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel));
     }
 
     public static void fadeOut(final View view, int duration) {
@@ -288,11 +331,11 @@ public class AnimUtils {
         animator.start();
     }
 
-    public static class circularFadeOutListener implements Animator.AnimatorListener {
-        View overlay;
+    public static class resultsAnimListener implements Animator.AnimatorListener {
+        private View translationCard;
 
-        public circularFadeOutListener(View overlay) {
-            this.overlay = overlay;
+        public resultsAnimListener(View translationViiew) {
+            this.translationCard = translationViiew;
         }
 
         @Override
@@ -302,37 +345,13 @@ public class AnimUtils {
 
         @Override
         public void onAnimationEnd(Animator animation) {
-            fadeOut(overlay, OVERLAY_DURATION);
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
-
-        }
-    }
-
-    public static class displaySearchListener implements Animator.AnimatorListener {
-        View cardView;
-
-        public displaySearchListener(View cardView, String translatedText) {
-            this.cardView = cardView;
-            TextView tv = (TextView) cardView.findViewById(R.id.translated_textview);
-            tv.setText(translatedText);
-        }
-
-        @Override
-        public void onAnimationStart(Animator animation) {
-
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            // enterReveal(cardView, cardView, cardView);
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    enterReveal(translationCard, null);
+                }
+            }, 900);
         }
 
         @Override
