@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -40,6 +41,7 @@ import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;
 import java.util.Iterator;
+import java.util.Locale;
 
 import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.Fragments.SettingFragment;
@@ -59,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = "FOODIES";
     private static final String PHOTO_FILE_NAME = "photo.jpg";
     private static final String DEBUG_FILE_NAME = "debug.jpg";
+    public static String BASE_LANGUAGE;
+    private static SharedPreferences sharedPreferencesSettings;
     private SharedPreferences sharedpreferences;
     private Uri sourceFileUri = null;
     private Uri destFileUri = null;
@@ -81,6 +85,20 @@ public class MainActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance().getReference();
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+
+        sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
+        String[] langValues = getResources().getStringArray(R.array.listLanguagesValues);
+        String sysLang = Locale.getDefault().getLanguage();
+        // Run through language values, if matching found for locale then set it to preferences
+        String defaultLang = "en";
+        for (String langValue : langValues) {
+            if ((langValue.equals(sysLang))) {
+                defaultLang = langValue;
+                break;
+            }
+        }
+        BASE_LANGUAGE = sharedPreferencesSettings.getString(
+                getResources().getString(R.string.select_lang_key), defaultLang);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {

@@ -100,13 +100,14 @@ public class AnimUtils {
         darkenAnim.start();
     }
 
-    public static void containerSlideDown(View containerView, Animator.AnimatorListener animListener,
+    public static void containerSlideDown(View rootView, Animator.AnimatorListener animListener,
                                           int containerTransY) {
-        ObjectAnimator anim = ObjectAnimator.ofFloat(containerView,
+        ObjectAnimator anim = ObjectAnimator.ofFloat(rootView.findViewById(R.id.search_frag_container),
                 View.TRANSLATION_Y, containerTransY);
         anim.addListener(animListener);
         anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.setDuration(RESULTS_DOWN_DURATION);
+        fadeIn(rootView.findViewById(R.id.drawable_view), OVERLAY_DURATION);
         anim.start();
     }
 
@@ -119,6 +120,7 @@ public class AnimUtils {
         if (listener != null) {
             anim.addListener(listener);
         }
+        fadeOut(rootView.findViewById(R.id.drawable_view), OVERLAY_DURATION);
         anim.start();
     }
 

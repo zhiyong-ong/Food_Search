@@ -69,7 +69,6 @@ public class SearchResultsFragment extends Fragment {
         mRecyclerView.setLayoutManager(layoutMgr);
         mAdapter = new BingImageAdapter(getActivity(), mImageValues);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setItemAnimator(null);
     }
 
     /**
@@ -86,6 +85,10 @@ public class SearchResultsFragment extends Fragment {
     }
     public void finalizeRecycler() {
         mRecyclerView.scrollToPosition(0);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public void notifyRecycler() {
         mAdapter.notifyDataSetChanged();
     }
 

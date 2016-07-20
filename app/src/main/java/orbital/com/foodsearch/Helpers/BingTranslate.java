@@ -2,6 +2,7 @@ package orbital.com.foodsearch.Helpers;
 
 import android.util.Log;
 
+import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Helpers.BingTranslateMemetix.translate.Translate;
 
@@ -18,7 +19,7 @@ public class BingTranslate {
         String translation = null;
         try {
             //2nd param is translate from, 3rd param is translate to
-            translation = Translate.execute(txt, OcrActivity.BASE_LANGUAGE);
+            translation = Translate.execute(txt, MainActivity.BASE_LANGUAGE);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -63,7 +63,7 @@ import retrofit2.Response;
 
 import static orbital.com.foodsearch.Utils.AnimUtils.brightenOverlay;
 
-public class OcrActivity extends AppCompatActivity {
+public class OcrActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     static final String DEST_FILE_PATH = "DESTFILEPATH";
     static final String SOURCE_FILE_PATH = "SOURCEFILEPATH";
@@ -73,12 +73,10 @@ public class OcrActivity extends AppCompatActivity {
     public static String IMAGE_KEY;
     public static String OCR_KEY;
     public static String TRANSLATE_KEY;
-    public static String BASE_LANGUAGE;
     public static int IMAGES_COUNT;
     private static volatile int insightsCount = 0;
     private static String mTranslatedText = null;
     private static AsyncTask<Void, Void, String> translateTask;
-    private static int barMarginTop = 0;
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
     private static ImageSearchResponse searchResponseDB;
@@ -116,6 +114,19 @@ public class OcrActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        String langKey = getString(R.string.select_lang_key);
+        if (langKey.equals(s)) {
+            MainActivity.BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
+            SearchResultsFragment frag = (SearchResultsFragment) getSupportFragmentManager().findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            if (frag != null) {
+                frag.notifyRecycler();
+            }
+        }
+    }
+
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
@@ -138,7 +149,8 @@ public class OcrActivity extends AppCompatActivity {
         TRANSLATE_KEY = sharedPreferences.getString(MainActivity.TRANSLATE_KEY, null);
 
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        BASE_LANGUAGE = sharedPreferencesSettings.getString(getResources().getString(R.string.select_lang_key), "test");
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
+
         IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
         IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
         Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
@@ -166,7 +178,6 @@ public class OcrActivity extends AppCompatActivity {
             public boolean onPreDraw() {
                 searchBarContainer.getViewTreeObserver().removeOnPreDrawListener(this);
                 searchBarTrans = 2 * searchBarContainer.getHeight();
-                barMarginTop = getResources().getDimensionPixelSize(R.dimen.activity_half_margin);
                 searchBarContainer.setTranslationY(searchBarTrans);
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
                 ft.replace(R.id.search_bar_container, SearchBarFragment.newInstance(searchBarTrans), SEARCH_BAR_TAG);
@@ -300,6 +311,7 @@ public class OcrActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (findViewById(R.id.search_frag_container).getTranslationY() != 0) {
+            sharedPreferencesSettings.unregisterOnSharedPreferenceChangeListener(this);
             super.onBackPressed();
         } else {
             closeSearchResults();
@@ -325,7 +337,7 @@ public class OcrActivity extends AppCompatActivity {
         View rootView = findViewById(R.id.activity_ocr);
         View containerView = findViewById(R.id.search_frag_container);
         if (containerView.getTranslationY() == 0) {
-            AnimUtils.containerSlideDown(containerView,
+            AnimUtils.containerSlideDown(rootView,
                     new AnimatingListener(rootView),
                     containerTransY);
         }
@@ -360,7 +372,7 @@ public class OcrActivity extends AppCompatActivity {
      * @param searchParam String to be searched for
      */
     private void searchImageResponse(final Context context, final String searchParam) {
-        AnimUtils.containerSlideDown(findViewById(R.id.search_frag_container),
+        AnimUtils.containerSlideDown(findViewById(R.id.activity_ocr),
                 new AnimatingListener(findViewById(R.id.activity_ocr)),
                 containerTransY);
         AnimUtils.darkenOverlay(findViewById(R.id.drawable_overlay));

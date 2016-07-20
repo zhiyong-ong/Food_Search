@@ -1,5 +1,6 @@
 package orbital.com.foodsearch.Activities;
 
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.percent.PercentRelativeLayout;
@@ -9,6 +10,8 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.squareup.picasso.Callback;
@@ -34,6 +37,12 @@ public class PhotoViewActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             postponeEnterTransition();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(Color.BLACK);
         }
         initialize();
     }
