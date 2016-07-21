@@ -107,7 +107,6 @@ public class AnimUtils {
         anim.addListener(animListener);
         anim.setInterpolator(new FastOutSlowInInterpolator());
         anim.setDuration(RESULTS_DOWN_DURATION);
-        fadeIn(rootView.findViewById(R.id.drawable_view), OVERLAY_DURATION);
         anim.start();
     }
 
@@ -120,7 +119,6 @@ public class AnimUtils {
         if (listener != null) {
             anim.addListener(listener);
         }
-        fadeOut(rootView.findViewById(R.id.drawable_view), OVERLAY_DURATION);
         anim.start();
     }
 

@@ -339,19 +339,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * This method starts the camera by checking permissions for api > 23
-     * and if api < 23 it just dispatches Camera Intent
-     */
-    @TargetApi(Build.VERSION_CODES.M)
-    private void startDebug() {
-        Intent intent = new Intent(this, OcrActivity.class);
-        generateDebugUri();
-        intent.putExtra(OcrActivity.SOURCE_FILE_PATH, sourceFileUri.getPath());
-        intent.putExtra(OcrActivity.DEST_FILE_PATH, sourceFileUri.getPath());
-        startActivity(intent);
-    }
-
     public void goSearch(View view) {
         Intent intent = new Intent(this, GoogleSearchActivity.class);
         startActivity(intent);
@@ -445,22 +432,6 @@ public class MainActivity extends AppCompatActivity {
         }
         sourceFileUri = destFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
                 + File.separator + PHOTO_FILE_NAME));
-    }
-
-    /**
-     * This method generates the Uri and saves it as the member variable
-     */
-    private void generateDebugUri() {
-        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                , "FoodSearch");
-        // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists()) {
-            if (!mediaStorageDir.mkdirs()) {
-                Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
-            }
-        }
-        destFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
-                + File.separator + DEBUG_FILE_NAME));
     }
 
     @Override

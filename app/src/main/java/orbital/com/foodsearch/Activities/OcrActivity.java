@@ -56,6 +56,7 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
 import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.NetworkUtils;
+import orbital.com.foodsearch.Utils.ViewUtils;
 import orbital.com.foodsearch.Views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -74,6 +75,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     public static String OCR_KEY;
     public static String TRANSLATE_KEY;
     public static int IMAGES_COUNT;
+    public static int imageResultSize;
     private static volatile int insightsCount = 0;
     private static String mTranslatedText = null;
     private static AsyncTask<Void, Void, String> translateTask;
@@ -113,6 +115,16 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
     }
 
+    /**
+     * This is attached to sharedpreferencessettings. It checks if changed key is
+     * equal to language key. If it is then we update BASE_LANGUAGE accordingly and
+     * notify recycler accordingly so as to maintain same translation language
+     * with search results card.
+     * update
+     *
+     * @param sharedPreferences sharedpreferencessettings
+     * @param s                 Key for the changed value
+     */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         String langKey = getString(R.string.select_lang_key);
@@ -168,6 +180,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         setupSearchBar();
     }
 
+    /**
+     * This method attaches a viewtreeobserver to get the appropriate translation y for
+     * searchbar container.
+     */
     private void setupSearchBar() {
         final FrameLayout searchBarContainer = (FrameLayout) findViewById(R.id.search_bar_container);
         ViewTreeObserver vto = searchBarContainer.getViewTreeObserver();
@@ -187,6 +203,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         });
     }
 
+    /**
+     * This method attaches a viewtreeobserver to get the appropriate translation y for
+     * search results container.
+     */
     private void setupSearchContainer() {
         final View rootView = findViewById(R.id.activity_ocr);
         final FrameLayout recyclerContainer = (FrameLayout) findViewById(R.id.search_frag_container);
@@ -237,24 +257,19 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     /**
      * This method puts bing ocr connect on hold with a snackbar for user to retry connection.
-     *
      * @param compressedImage compressed image to be sent for ocr service
      */
     private void onHoldBingOcrConnect(final byte[] compressedImage) {
         // When compressTask is done, load preview into preview imageview
         // and remove progressbars and overlay.
         // then allow user to retry
-        brightenOverlay(findViewById(R.id.drawable_overlay));
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
-        Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr),
-                R.string.internet_error_text, Snackbar.LENGTH_INDEFINITE);
+        final View rootView = findViewById(R.id.activity_ocr);
+        ViewUtils.finishOcrProgress(rootView);
+        Snackbar snackbar = Snackbar.make(rootView, R.string.internet_error_text, Snackbar.LENGTH_INDEFINITE);
         snackbar.setAction(R.string.retry, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AnimUtils.darkenOverlay(findViewById(R.id.drawable_overlay));
-                ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-                AnimUtils.fadeIn(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
+                ViewUtils.startOcrProgress(rootView);
                 if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
                     Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                     // Enqueue the method to the call and wait for callback (Asynchronous call)
@@ -323,29 +338,38 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * This method closes both search bar and search results.
      */
     public void cancelSearch() {
-        View searchBarContainer = findViewById(R.id.search_bar_container);
         closeSearchResults();
-        AnimUtils.hideSearchBar(searchBarContainer,
+        AnimUtils.hideSearchBar(findViewById(R.id.search_bar_container),
                 searchBarTrans);
     }
 
     /**
      * Method called by clicking on close button in cards item.
-     * It only closes the search results fragment.
+     * Also invoked by other methods to close search results fragment.
+     * Invokes close other elements at the end.
      */
     public void closeSearchResults() {
         View rootView = findViewById(R.id.activity_ocr);
         View containerView = findViewById(R.id.search_frag_container);
+        // If container is at the center position, slide it down t0 containerTransY.
         if (containerView.getTranslationY() == 0) {
             AnimUtils.containerSlideDown(rootView,
-                    new AnimatingListener(rootView),
+                    new IsAnimatingListener(rootView),
                     containerTransY);
         }
+        closeOtherElements();
+    }
+
+    /**
+     * This method sets the properties of other views to state when search results
+     * are closed.
+     */
+    private void closeOtherElements() {
         Button searchButton = (Button) findViewById(R.id.searchbar_start_search);
         searchButton.setEnabled(true);
         ImageButton translateCloseBtn = (ImageButton) findViewById(R.id.searchbar_translate_close);
         translateCloseBtn.performClick();
-        brightenOverlay(rootView.findViewById(R.id.drawable_overlay));
+        brightenOverlay(findViewById(R.id.drawable_overlay));
     }
 
     public void openPhotoView(View itemView, String contentUrl, String thumbUrl, int position) {
@@ -372,12 +396,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * @param searchParam String to be searched for
      */
     private void searchImageResponse(final Context context, final String searchParam) {
-        AnimUtils.containerSlideDown(findViewById(R.id.activity_ocr),
-                new AnimatingListener(findViewById(R.id.activity_ocr)),
-                containerTransY);
-        AnimUtils.darkenOverlay(findViewById(R.id.drawable_overlay));
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.searchbar_progress);
-        progressBar.setVisibility(View.VISIBLE);
+        final View rootView = findViewById(R.id.activity_ocr);
+        AnimUtils.containerSlideDown(rootView, new IsAnimatingListener(rootView), containerTransY);
+        ViewUtils.startSearchProgress(rootView);
+        insightsCount = 0;
 
         database.child("images").child(searchParam).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -388,9 +410,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 if (searchResponseDB == null) {
                     enqueueSearch(searchParam);
                 } else {
+                    // Expected result size is the minimum of the max count and the size.
+                    imageResultSize = Math.min(searchResponseDB.getImageValues().size(), IMAGES_COUNT);
                     SearchResultsFragment searchFragment = (SearchResultsFragment) FRAGMENT_MANAGER.findFragmentByTag(SEARCH_FRAGMENT_TAG);
                     searchFragment.clearRecycler();
-                    for (int i = 0; i < IMAGES_COUNT; i++) {
+                    for (int i = 0; i < imageResultSize; i++) {
                         ImageValue imgVal = searchResponseDB.getImageValues().get(i);
                         searchFragment.updateRecyclerList(imgVal);
                         searchImageInsights(context, imgVal);
@@ -402,9 +426,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(LOG_TAG, "getUser:onCancelled", databaseError.toException());
+                ViewUtils.endSearchProgress(rootView);
 //                enqueueSearch(searchParam);
 //                enqueueTranslate(searchParam);
-            }
+        }
         });
     }
 
@@ -427,7 +452,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     imgVal.setInsightsResponse(imgInsightsDB);
                     insightsCount++;
                     Log.e(LOG_TAG, "Insights DB count: " + insightsCount);
-                    if (insightsCount < IMAGES_COUNT) {
+                    if (insightsCount < imageResultSize) {
                         return;
                     }
                     new CompleteTask(context, rootView, FRAGMENT_MANAGER)
@@ -437,7 +462,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                insightsCount = 0;
                 Log.w(LOG_TAG, "getUser:onCancelled", databaseError.toException());
                 enqueueImageInsightCall(imgVal);
             }
@@ -450,12 +474,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * @param searchParam parameter string to be searched for
      */
     private void enqueueSearch(String searchParam) {
-        Log.d(LOG_TAG, "Search String: " + searchParam);
         BingSearch bingImg = new BingSearch(searchParam, String.valueOf(IMAGES_COUNT_MAX));
         Call<ImageSearchResponse> call = bingImg.buildCall();
         call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
     }
 
+    /**
+     * This method creates a translte call with search param and executes it on translateTask.
+     * @param searchParam string parameter to translate
+     */
     private void enqueueTranslate(final String searchParam) {
         mTranslatedText = searchParam;
         translateTask = new translateTask(searchParam).executeOnExecutor(
@@ -469,7 +496,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      *               Multiple calls.
      */
     private void enqueueImageInsightCall(ImageValue imgVal) {
-
         ImageInsights imageInsights = new ImageInsights(imgVal.getImageInsightsToken(), "");
         Call<ImageInsightsResponse> call = imageInsights.buildCall();
         call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
@@ -491,8 +517,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         @Override
         protected Void doInBackground(Void... params) {
             int count = 0;
+            // Wait 10 seconds for translate task to be done
             while (!translateTask.getStatus().equals(Status.FINISHED)) {
-                if (count == 10) {
+                if (count == 20) {
                     Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
                     return null;
                 }
@@ -509,20 +536,17 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            SearchBarFragment searchBarFragment = (SearchBarFragment) fm.findFragmentByTag(SEARCH_BAR_TAG);
             if (searchResponseDB == null) {
                 //persist search result to DB
                 imgDAO.persistImage(searchResponse);
-                //mTranslatedText is the translated text here.
             }
-            insightsCount = 0;
-            //in the case where the database has the image but doesn't have the imageinsights.
-            searchFragment.finalizeRecycler();//searchResponseDB.getTranslatedQuery());
+            Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
+            SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            SearchBarFragment searchBarFragment = (SearchBarFragment) fm.findFragmentByTag(SEARCH_BAR_TAG);
+            searchFragment.finalizeRecycler();
+            searchBarFragment.setTranslatedText(mTranslatedText);
             ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.searchbar_progress);
             progressBar.setVisibility(View.GONE);
-            Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
-            searchBarFragment.setTranslatedText(mTranslatedText);
             AnimUtils.containerSlideUp(context, rootView, null);
         }
     }
@@ -551,7 +575,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             imgDAO.persistImageInsight(insightsResponse);
             insightsCount++;
             Log.e(LOG_TAG, "Insights callback count: " + insightsCount);
-            if (insightsCount < IMAGES_COUNT) {
+            if (insightsCount < imageResultSize) {
                 return;
             }
             // Once we have collated X imageinsights count, start CompleteTask to synchronize all tasks
@@ -561,11 +585,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
-            if (insightsCount < IMAGES_COUNT) {
-                insightsCount++;
+            insightsCount++;
+            if (insightsCount < imageResultSize) {
                 return;
             }
-            insightsCount = 0;
             // Failed to get the IMAGE_KEY insights so display snackbar error dialog
             new CompleteTask(context, rootView, fm)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -604,18 +627,16 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             // IMAGE_KEY search results received, now enqueueImageInsightCall with received value
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
+                // Expected result size is the minimum of the max count and the size.
+                imageResultSize = Math.min(searchResponseDB.getImageValues().size(), IMAGES_COUNT);
                 searchFragment.clearRecycler();
-                int resultSize = imageValues.size();
-                for (int i = 0; i < resultSize && i < IMAGES_COUNT; i++) {
+                for (int i = 0; i < imageResultSize; i++) {
                     ImageValue imgVal = imageValues.get(i);
                     searchFragment.updateRecyclerList(imgVal);
                     searchImageInsights(context, imgVal);
                 }
             } else {
-                ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.searchbar_progress);
-                progressBar.setVisibility(View.GONE);
-                FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                brightenOverlay(drawableOverlay);
+                ViewUtils.endSearchProgress(rootView);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
 
@@ -627,33 +648,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.image_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.searchbar_progress);
-            progressBar.setVisibility(View.GONE);
-            FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-            brightenOverlay(drawableOverlay);
+            ViewUtils.endSearchProgress(rootView);
             Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
         }
     }
-
-    private class translateTask extends AsyncTask<Void, Void, String> {
-        String searchParam;
-
-        translateTask(String searchParam) {
-            this.searchParam = searchParam;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            return BingTranslate.getTranslatedText(searchParam);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            mTranslatedText = result;
-            super.onPostExecute(result);
-        }
-    }
-
 
     /**
      * Callback class that implements callback method to be used for when a
@@ -674,47 +672,21 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
             BingOcrResponse bingOcrResponse = response.body();
             List<Line> lines = bingOcrResponse.getAllLines();
-            findViewById(R.id.drawable_overlay).setClickable(true);
             mDrawableView.drawBoxes(rootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
-            brightenOverlay(findViewById(R.id.drawable_overlay));
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-            AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
+            ViewUtils.finishOcrProgress(rootView);
         }
 
         @Override
         public void onFailure(Call<BingOcrResponse> call, Throwable t) {
-            brightenOverlay(findViewById(R.id.drawable_overlay));
-            findViewById(R.id.drawable_overlay).setClickable(false);
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-            AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
+            ViewUtils.finishOcrProgress(rootView);
             Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.OCRFailed,
                     Snackbar.LENGTH_LONG)
                     .show();
             Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
         }
     }
-
-    /**
-     * This async task is used to compress the IMAGE_KEY to be sent in the
-     * background thread using ImageUtils.compressImage
-     */
-    private class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {
-        Context mContext = null;
-        View mRootView = null;
-
-        CompressAsyncTask(Context context, View rootView) {
-            mContext = context;
-            mRootView = rootView;
-        }
-
-        @Override
-        protected byte[] doInBackground(String... params) {
-            return ImageUtils.compressImage(params[0], params[1]);
-        }
-    }
-
 
     private class DrawableTouchListener implements View.OnTouchListener {
         private Context context;
@@ -738,32 +710,71 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             for (int i = 0; i < rects.size(); i++) {
                 Rect rect = rects.get(i);
                 if (rect.contains(x, y)) {
-                    selectRect(i);
+                    chooseRect(i);
                     return true;
                 }
             }
             return v.performClick();
         }
 
-        private void selectRect(int i) {
-            mDrawableView.updateSelection(i);
+        private void chooseRect(int i) {
+            mDrawableView.chooseRect(i);
             // Display the string in a snackbar and allow for search
             String searchParam = mDrawableView.getmLineTexts().get(i).toLowerCase();
             searchParam = searchParam.substring(0, 1).toUpperCase() + searchParam.substring(1);
             View searchBar = findViewById(R.id.search_bar_container);
+            // if !Animating or searchbar is already up, show searchbar with new search param.
             if (!animating || searchBar.getTranslationY() == 0) {
-                AnimUtils.showSearchBar(rootView, searchBar, searchParam, new AnimatingListener(rootView));
+                AnimUtils.showSearchBar(rootView, searchBar, searchParam, new IsAnimatingListener(rootView));
             }
+        }
+    }
+
+    private class translateTask extends AsyncTask<Void, Void, String> {
+        String searchParam;
+
+        translateTask(String searchParam) {
+            this.searchParam = searchParam;
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            return BingTranslate.getTranslatedText(searchParam);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            mTranslatedText = result;
+            super.onPostExecute(result);
+        }
+    }
+
+    /**
+     * This async task is used to compress the IMAGE_KEY to be sent in the
+     * background thread using ImageUtils.compressImage
+     */
+    private class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {
+        Context mContext = null;
+        View mRootView = null;
+
+        CompressAsyncTask(Context context, View rootView) {
+            mContext = context;
+            mRootView = rootView;
+        }
+
+        @Override
+        protected byte[] doInBackground(String... params) {
+            return ImageUtils.compressImage(params[0], params[1]);
         }
     }
 
     /**
      * Listener to set boolean value for animating so that we can track it
      */
-    private class AnimatingListener implements Animator.AnimatorListener {
+    private class IsAnimatingListener implements Animator.AnimatorListener {
         View rootView = null;
 
-        AnimatingListener(View rootView) {
+        IsAnimatingListener(View rootView) {
             this.rootView = rootView;
         }
 

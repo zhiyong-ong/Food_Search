@@ -211,8 +211,8 @@ public class SearchBarFragment extends Fragment {
 
     /**
      * Call this method to set new translated text on search bar fragment from other
-     * activities. A fade in animation is performed to notify that translation is done.
-     *
+     * activities. A fade in anima on translate button is performed to notify
+     * that translation is done.
      * @param translatedText
      */
     public void setTranslatedText(String translatedText) {
