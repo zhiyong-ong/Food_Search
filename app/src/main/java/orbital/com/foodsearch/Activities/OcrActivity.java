@@ -628,7 +628,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
                 // Expected result size is the minimum of the max count and the size.
-                imageResultSize = Math.min(searchResponseDB.getImageValues().size(), IMAGES_COUNT);
+                imageResultSize = Math.min(imageValues.size(), IMAGES_COUNT);
                 searchFragment.clearRecycler();
                 for (int i = 0; i < imageResultSize; i++) {
                     ImageValue imgVal = imageValues.get(i);

@@ -40,7 +40,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.Locale;
 
 import orbital.com.foodsearch.Fragments.RecentsFragment;
@@ -111,9 +110,7 @@ public class MainActivity extends AppCompatActivity {
                     database.child("APIKEY").addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            Iterator<DataSnapshot> iter = dataSnapshot.getChildren().iterator();
-                            while (iter.hasNext()) {
-                                DataSnapshot next = iter.next();
+                            for (DataSnapshot next : dataSnapshot.getChildren()) {
                                 if (next.getKey().equals("OCP_APIM_KEY")) {
                                     editor.putString(IMAGE_KEY, next.getChildren().iterator().next().getValue(String.class));
                                 } else if (next.getKey().equals("OCR_KEY")) {
@@ -122,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
                                     editor.putString(TRANSLATE_KEY, next.getChildren().iterator().next().getValue(String.class));
                                 }
                             }
-                            editor.commit();
+                            editor.apply();
                         }
 
                         @Override
