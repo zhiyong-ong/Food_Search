@@ -60,7 +60,7 @@
         app:menu_colorPressed="@color/colorPrimaryLighter"
         app:menu_colorRipple="@color/colorPrimary"
         app:menu_fab_label="@string/camera_fab_label"
-        app:menu_icon="@drawable/ic_camera_iris"
+        app:menu_icon="@drawable/ic_camera_iris_white"
         app:menu_labels_colorNormal="@android:color/black"
         app:menu_labels_colorPressed="@color/colorGrey"
         app:menu_labels_textColor="@android:color/white">
@@ -69,7 +69,7 @@
             android:id="@+id/start_image_pick_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_folder_image"
+            android:src="@drawable/ic_folder_image_white"
             app:fab_colorNormal="@color/colorFabPick"
             app:fab_colorPressed="@color/colorFabPicked"
             app:fab_label="@string/image_pick_fab_label"

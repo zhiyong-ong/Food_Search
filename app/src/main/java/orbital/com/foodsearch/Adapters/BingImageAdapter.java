@@ -215,7 +215,7 @@ public class BingImageAdapter
                     undoTranslate();
                     break;
                 case R.id.close_button:
-                    ((OcrActivity) mContext).closeSearchResults();
+                    ((OcrActivity) mContext).onBackPressed();
                     break;
                 case R.id.fullscrn_button:
                     ((OcrActivity) mContext).openPhotoView(itemView, imageUrl, thumbUrl, getAdapterPosition());

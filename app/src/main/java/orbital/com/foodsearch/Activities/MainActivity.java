@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,7 +38,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.theartofdev.edmodo.cropper.CropImage;
 
 import java.io.File;
 import java.util.Locale;
@@ -56,12 +56,15 @@ public class MainActivity extends AppCompatActivity {
     private static final int OCR_CAMERA_INTENT_REQUEST_CODE = 100;
     private static final int READ_STORAGE_PERMISSION_REQUEST_CODE = 2;
     private static final int IMAGE_PICK_INTENT_REQUEST_CODE = 200;
+    private static final int CAMERA_CROP_INTENT_REQUEST_CODE = 300;
+    private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
     private static final String SAVED_URI = "savedUri";
     private static final String LOG_TAG = "FOODIES";
     private static final String PHOTO_FILE_NAME = "photo.jpg";
     private static final String DEBUG_FILE_NAME = "debug.jpg";
     public static String BASE_LANGUAGE;
     private static SharedPreferences sharedPreferencesSettings;
+    private final String DEFAULT_LANG_KEY = "DEFAULT_LANG_KEY";
     private SharedPreferences sharedpreferences;
     private Uri sourceFileUri = null;
     private Uri destFileUri = null;
@@ -72,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference database;
     private FrameLayout mFabOverlay;
     private FloatingActionMenu mFabMenu;
+    private String defaultLang;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,21 +88,9 @@ public class MainActivity extends AppCompatActivity {
 
         database = FirebaseDatabase.getInstance().getReference();
         sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        String[] langValues = getResources().getStringArray(R.array.listLanguagesValues);
-        String sysLang = Locale.getDefault().getLanguage();
-        // Run through language values, if matching found for locale then set it to preferences
-        String defaultLang = "en";
-        for (String langValue : langValues) {
-            if ((langValue.equals(sysLang))) {
-                defaultLang = langValue;
-                break;
-            }
-        }
-        BASE_LANGUAGE = sharedPreferencesSettings.getString(
-                getResources().getString(R.string.select_lang_key), defaultLang);
-
+        PreferenceManager.setDefaultValues(this, R.xml.settings_preference, false);
+        getBaseLanguage();
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -373,36 +365,53 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case OCR_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    startOcrActivity();
-                } else {
-                    break;
+                    ExifInterface exif;
+                    try {
+                        exif = new ExifInterface(sourceFileUri.getPath());
+                        int width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 1);
+                        int length = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0);
+                        if (width > length) {
+                            startCropActivity(sourceFileUri, true);
+                        } else {
+                            startOcrActivity();
+                        }
+                    } catch (Exception e) {
+                        Log.e(LOG_TAG, e.getMessage());
+                        Snackbar.make(findViewById(R.id.coord_main_layout), R.string.no_photo_text, Snackbar.LENGTH_LONG);
+                    }
                 }
-                return;
+                break;
             case IMAGE_PICK_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    startCropActivity(data);
-                } else {
-                    break;
+                    startCropActivity(data.getData(), false);
                 }
-                return;
-            case CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE:
-                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                break;
+            case CAMERA_CROP_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     startOcrActivity();
-                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                    Log.e("HELLO", result.getError().getMessage());
+                } else if (resultCode == RESULT_CANCELED) {
+                    dispatchCameraIntent();
                 }
-                return;
+                break;
+            case GALLERY_CROP_INTENT_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    startOcrActivity();
+                } else if (resultCode == RESULT_CANCELED) {
+                    dispatchGalleryIntent();
+                }
+                break;
         }
     }
 
-    private void startCropActivity(Intent data) {
-        CropImage.activity(data.getData())
-                .setFixAspectRatio(true)
-                .setAspectRatio(3, 5)
-                .setAllowRotation(false)
-                .setOutputUri(destFileUri)
-                .start(this);
+    private void startCropActivity(Uri uri, boolean isCamera) {
+        Intent intent = new Intent(this, CropActivity.class);
+        intent.putExtra(CropActivity.SOURCE_URI, uri);
+        intent.putExtra(CropActivity.OUTPUT_URI, destFileUri);
+        if (isCamera) {
+            startActivityForResult(intent, CAMERA_CROP_INTENT_REQUEST_CODE);
+        } else {
+            startActivityForResult(intent, GALLERY_CROP_INTENT_REQUEST_CODE);
+        }
     }
 
     /**
@@ -413,6 +422,40 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(OcrActivity.SOURCE_FILE_PATH, sourceFileUri.getPath());
         intent.putExtra(OcrActivity.DEST_FILE_PATH, destFileUri.getPath());
         startActivity(intent);
+    }
+
+    /**
+     * This method checks if we already registered a default language. If not,
+     * we will check through system language until we find one that tallies and
+     * set it as default lang. BASE_LANGUAGE is then set to this default.
+     * If already registered default then we simply load for shared preference settings.
+     */
+    private void getBaseLanguage() {
+        defaultLang = sharedpreferences.getString(DEFAULT_LANG_KEY, null);
+        if (defaultLang == null) {
+            String[] langValues = getResources().getStringArray(R.array.listLanguagesValues);
+            String sysLang = Locale.getDefault().getLanguage();
+            // Run through language values, if matching found for locale then set it to preferences
+            for (String langValue : langValues) {
+                if ((langValue.equals(sysLang))) {
+                    defaultLang = langValue;
+                    break;
+                } else if (sysLang.equals("zh")) {
+                    // TODO: Fix locales with country
+                    defaultLang = "zh-CHS";
+                    break;
+                }
+            }
+            if (defaultLang == null) {
+                defaultLang = "en";
+            }
+            sharedPreferencesSettings.edit().putString(getString(R.string.select_lang_key), defaultLang).apply();
+            sharedpreferences.edit().putString(DEFAULT_LANG_KEY, defaultLang).apply();
+            BASE_LANGUAGE = defaultLang;
+        } else {
+            BASE_LANGUAGE = sharedPreferencesSettings.getString(
+                    getResources().getString(R.string.select_lang_key), defaultLang);
+        }
     }
 
     /**

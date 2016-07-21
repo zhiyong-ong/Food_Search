@@ -14,7 +14,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,29 +38,16 @@ import orbital.com.foodsearch.Utils.AnimUtils;
  */
 public class SearchBarFragment extends Fragment {
 
-    private static final String SEARCH_BAR_TRANS = "searchBarTrans";
-    private SharedPreferences sharedPreferences = null;
+    private SharedPreferences sharedPreferencesSettings = null;
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
-    private int searchBarTrans;
 
     public SearchBarFragment() {
     }
 
-    public static SearchBarFragment newInstance(int searchBarTrans) {
-        Bundle args = new Bundle();
-        args.putInt(SEARCH_BAR_TRANS, searchBarTrans);
-        SearchBarFragment fragment = new SearchBarFragment();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Bundle args = getArguments();
-        searchBarTrans = args.getInt(SEARCH_BAR_TRANS);
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_search_bar, container, false);
     }
@@ -68,7 +55,7 @@ public class SearchBarFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         initializeBar();
-        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(getActivity());
         super.onViewCreated(view, savedInstanceState);
     }
 
@@ -210,19 +197,6 @@ public class SearchBarFragment extends Fragment {
     }
 
     /**
-     * Call this method to set new translated text on search bar fragment from other
-     * activities. A fade in anima on translate button is performed to notify
-     * that translation is done.
-     * @param translatedText
-     */
-    public void setTranslatedText(String translatedText) {
-        TextView textView = (TextView) getView().findViewById(R.id.searchbar_translate_text);
-        textView.setText(translatedText);
-        ImageButton translateBtn = (ImageButton) getView().findViewById(R.id.searchbar_translate_btn);
-        AnimUtils.fadeIn(translateBtn, AnimUtils.OVERLAY_DURATION);
-    }
-
-    /**
      * Find out whats the current index and set that item to a checkbox.
      * Then setup and show the popup menu.
      *
@@ -233,20 +207,19 @@ public class SearchBarFragment extends Fragment {
             langValuesArr = getActivity().getResources().getStringArray(R.array.listLanguagesValues);
             langKeysArr = getActivity().getResources().getStringArray(R.array.listLanguages);
         }
-        String currentLang = sharedPreferences.getString(getActivity().getString(R.string.select_lang_key), "en");
-        int currentIndex = 0;
-        for (int i = 0; i < langValuesArr.length; i++) {
-            if (langValuesArr[i].equals(currentLang)) {
-                currentIndex = i;
-                break;
+        PopupMenu popup = new PopupMenu(getActivity(), anchoredView);
+        popup.setOnMenuItemClickListener(new LanguageMenuListener());
+        anchoredView.setOnTouchListener(popup.getDragToOpenListener());
+        Menu menu = popup.getMenu();
+        String currentLangValue = sharedPreferencesSettings.getString(getActivity().getString(R.string.select_lang_key), "en");
+        for (int i = 0; i < langKeysArr.length; i++) {
+            String key = langKeysArr[i];
+            String value = langValuesArr[i];
+            MenuItem item = menu.add(Menu.NONE, i, i, key);
+            if (value.equals(currentLangValue)) {
+                item.setCheckable(true).setChecked(true);
             }
         }
-        PopupMenu popup = new PopupMenu(getActivity(), anchoredView);
-        anchoredView.setOnTouchListener(popup.getDragToOpenListener());
-        MenuInflater inflater = popup.getMenuInflater();
-        inflater.inflate(R.menu.language_menu, popup.getMenu());
-        popup.getMenu().getItem(currentIndex).setCheckable(true).setChecked(true);
-        popup.setOnMenuItemClickListener(new LanguageMenuListener());
         popup.show();
     }
 
@@ -262,23 +235,23 @@ public class SearchBarFragment extends Fragment {
                 langValuesArr = getActivity().getResources().getStringArray(R.array.listLanguagesValues);
                 langKeysArr = getActivity().getResources().getStringArray(R.array.listLanguages);
             }
-            String selectedKey = menuItem.getTitle().toString();
-            int selectedIndex = -1;
-            for (int i = 0; i < langKeysArr.length; i++) {
-                if (langKeysArr[i].equals(selectedKey)) {
-                    selectedIndex = i;
-                    break;
-                }
-            }
-            String selectedValue = langValuesArr[selectedIndex];
+//            String selectedKey = menuItem.getTitle().toString();
+//            int selectedIndex = -1;
+//            for (int i = 0; i < langKeysArr.length; i++) {
+//                if (langKeysArr[i].equals(selectedKey)) {
+//                    selectedIndex = i;
+//                    break;
+//                }
+//            }
+            String selectedValue = langValuesArr[menuItem.getItemId()];
             EditText editText = (EditText) getView().findViewById(R.id.searchbar_edit_text);
             TranslateTask task = new TranslateTask(getView());
             task.execute(editText.getText().toString(), selectedValue);
-            sharedPreferences.edit()
+            sharedPreferencesSettings.edit()
                     .putString(getActivity().getString(R.string.select_lang_key), selectedValue)
                     .apply();
             getView().findViewById(R.id.searchbar_translate_btn).setEnabled(false);
-            return false;
+            return true;
         }
     }
 

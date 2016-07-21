@@ -12,7 +12,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -42,7 +41,7 @@ public class AnimUtils {
     public static final int TRANSLATE_REVEAL_DURATION = 600;
     public static final int SEARCH_BAR_RAISE = 450;
     public static final int SEARCH_BAR_DROP = 400;
-    public static final int TEXT_UPDATE = 400;
+    public static final int TEXT_UPDATE = 500;
     public static final int FAST_FADE = 200;
 
     public static void brightenOverlay(final View overlay) {
@@ -110,7 +109,7 @@ public class AnimUtils {
         anim.start();
     }
 
-    public static void containerSlideUp(final Context context, final View rootView, Animator.AnimatorListener listener) {
+    public static void containerSlideUp(final View rootView, Animator.AnimatorListener listener) {
         FrameLayout resultsContainer = (FrameLayout) rootView.findViewById(R.id.search_frag_container);
         ObjectAnimator anim = ObjectAnimator.ofFloat(resultsContainer,
                 View.TRANSLATION_Y, 0);
@@ -266,7 +265,7 @@ public class AnimUtils {
             @Override
             public void onAnimationStart(Animator animation) {
                 fam.getMenuIconView().setImageResource(fam.isOpened()
-                        ? R.drawable.ic_camera_iris : R.drawable.ic_camera);
+                        ? R.drawable.ic_camera_iris_white : R.drawable.ic_camera_white);
             }
         });
 
@@ -275,31 +274,6 @@ public class AnimUtils {
         set.setInterpolator(new OvershootInterpolator(2));
 
         fam.setIconToggleAnimatorSet(set);
-    }
-
-    public static void raiseSearchBar(Context context, View searchBar, int marginTopPx) {
-        searchBar.animate().y(marginTopPx)
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .setDuration(SEARCH_BAR_RAISE)
-                .start();
-        EditText editText = (EditText) searchBar.findViewById(R.id.searchbar_edit_text);
-        editText.clearFocus();
-        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_searchbar);
-        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_drop_search));
-    }
-
-    public static void dropSearchBar(Context context, View searchBar) {
-        if (searchBar.getTranslationY() > 0) {
-            return;
-        }
-        searchBar.animate().translationY(0)
-                .setInterpolator(new FastOutSlowInInterpolator())
-                .setDuration(SEARCH_BAR_DROP)
-                .start();
-        EditText editText = (EditText) searchBar.findViewById(R.id.searchbar_edit_text);
-        editText.clearFocus();
-        ImageButton cancelBtn = (ImageButton) searchBar.findViewById(R.id.cancel_searchbar);
-        cancelBtn.setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_cancel));
     }
 
     public static void fadeOut(final View view, int duration) {

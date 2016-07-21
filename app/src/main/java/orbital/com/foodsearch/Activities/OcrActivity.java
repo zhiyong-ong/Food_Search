@@ -22,11 +22,8 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -62,8 +59,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static orbital.com.foodsearch.Utils.AnimUtils.brightenOverlay;
-
 public class OcrActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     static final String DEST_FILE_PATH = "DESTFILEPATH";
@@ -88,7 +83,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private DatabaseReference database;
     private boolean animating = false;
-    private int containerTransY;
     private int searchBarTrans;
     private String destFilePath = null;
     private String sourceFilePath = null;
@@ -152,7 +146,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(Color.BLACK);
         }
-        findViewById(R.id.drawable_overlay).setClickable(true);
         database = FirebaseDatabase.getInstance().getReference();
         imgDAO = new BingImageDAO();
         sharedPreferences = getSharedPreferences(MainActivity.MyPREFERENCES, MODE_PRIVATE);
@@ -196,7 +189,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 searchBarTrans = 2 * searchBarContainer.getHeight();
                 searchBarContainer.setTranslationY(searchBarTrans);
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
-                ft.replace(R.id.search_bar_container, SearchBarFragment.newInstance(searchBarTrans), SEARCH_BAR_TAG);
+                ft.replace(R.id.search_bar_container, new SearchBarFragment(), SEARCH_BAR_TAG);
                 ft.commit();
                 return true;
             }
@@ -217,8 +210,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             @Override
             public boolean onPreDraw() {
                 recyclerContainer.getViewTreeObserver().removeOnPreDrawListener(this);
-                containerTransY = rootView.getHeight();
-                recyclerContainer.setTranslationY(containerTransY);
+                recyclerContainer.setTranslationY(rootView.getHeight());
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
                 ft.replace(R.id.search_frag_container, new SearchResultsFragment(), SEARCH_FRAGMENT_TAG);
                 ft.commit();
@@ -329,7 +321,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             sharedPreferencesSettings.unregisterOnSharedPreferenceChangeListener(this);
             super.onBackPressed();
         } else {
-            closeSearchResults();
+            View rootView = findViewById(R.id.activity_ocr);
+            ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
         }
     }
 
@@ -338,38 +331,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * This method closes both search bar and search results.
      */
     public void cancelSearch() {
-        closeSearchResults();
+        View rootView = findViewById(R.id.activity_ocr);
+        ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
         AnimUtils.hideSearchBar(findViewById(R.id.search_bar_container),
                 searchBarTrans);
-    }
-
-    /**
-     * Method called by clicking on close button in cards item.
-     * Also invoked by other methods to close search results fragment.
-     * Invokes close other elements at the end.
-     */
-    public void closeSearchResults() {
-        View rootView = findViewById(R.id.activity_ocr);
-        View containerView = findViewById(R.id.search_frag_container);
-        // If container is at the center position, slide it down t0 containerTransY.
-        if (containerView.getTranslationY() == 0) {
-            AnimUtils.containerSlideDown(rootView,
-                    new IsAnimatingListener(rootView),
-                    containerTransY);
-        }
-        closeOtherElements();
-    }
-
-    /**
-     * This method sets the properties of other views to state when search results
-     * are closed.
-     */
-    private void closeOtherElements() {
-        Button searchButton = (Button) findViewById(R.id.searchbar_start_search);
-        searchButton.setEnabled(true);
-        ImageButton translateCloseBtn = (ImageButton) findViewById(R.id.searchbar_translate_close);
-        translateCloseBtn.performClick();
-        brightenOverlay(findViewById(R.id.drawable_overlay));
     }
 
     public void openPhotoView(View itemView, String contentUrl, String thumbUrl, int position) {
@@ -397,7 +362,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      */
     private void searchImageResponse(final Context context, final String searchParam) {
         final View rootView = findViewById(R.id.activity_ocr);
-        AnimUtils.containerSlideDown(rootView, new IsAnimatingListener(rootView), containerTransY);
+        AnimUtils.containerSlideDown(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
         ViewUtils.startSearchProgress(rootView);
         insightsCount = 0;
 
@@ -426,7 +391,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(LOG_TAG, "getUser:onCancelled", databaseError.toException());
-                ViewUtils.endSearchProgress(rootView);
+                ViewUtils.terminateSearchProgress(rootView);
 //                enqueueSearch(searchParam);
 //                enqueueTranslate(searchParam);
         }
@@ -542,12 +507,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             }
             Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            SearchBarFragment searchBarFragment = (SearchBarFragment) fm.findFragmentByTag(SEARCH_BAR_TAG);
             searchFragment.finalizeRecycler();
-            searchBarFragment.setTranslatedText(mTranslatedText);
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.searchbar_progress);
-            progressBar.setVisibility(View.GONE);
-            AnimUtils.containerSlideUp(context, rootView, null);
+            ViewUtils.showSearchResults(rootView, mTranslatedText);
         }
     }
 
@@ -636,7 +597,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     searchImageInsights(context, imgVal);
                 }
             } else {
-                ViewUtils.endSearchProgress(rootView);
+                ViewUtils.terminateSearchProgress(rootView);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
 
@@ -648,7 +609,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.image_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
-            ViewUtils.endSearchProgress(rootView);
+            ViewUtils.terminateSearchProgress(rootView);
             Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
         }
     }
@@ -701,7 +662,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (!animating) {
-                closeSearchResults();
+                ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
             }
             mDrawableView = (DrawableView) v;
             List<Rect> rects = mDrawableView.getmRects();

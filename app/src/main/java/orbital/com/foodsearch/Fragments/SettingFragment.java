@@ -19,4 +19,8 @@ public class SettingFragment extends PreferenceFragment {
         addPreferencesFromResource(R.xml.settings_preference);
     }
 
+    @Override
+    public void onResume() {
+        onCreate(null);
+    }
 }

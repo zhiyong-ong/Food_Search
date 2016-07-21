@@ -3,10 +3,10 @@
     <string name="searchbar_text">Tap on a green box to search</string>
     <string name="camFrag">camFragment</string>
 
-    <string name="title_activity_ocr_exp">OcrExpActivity</string>
     <string name="title_activity_fullscreen">Camera</string>
     <string name="title_activity_google_search">Google search</string>
     <string name="title_activity_ocr">OCR</string>
+    <string name="title_activity_crop">Crop menu</string>
 
     <!--String values for error messages in snackbars-->
     <string name="no_photo_text">Photo was not taken</string>
@@ -56,7 +56,7 @@
 
     <string name="recents_tab">Recents</string>
     <string name="settings_tab">Settings</string>
-
+    <string name="crop_rotate">Rotate</string>
 
     <string name="fab_menu_behavior">orbital.com.foodsearch.Misc.FloatingActionMenuBehavior</string>
     <string name="searchbar_behavior">orbital.com.foodsearch.Misc.SearchbarBehavior</string>
