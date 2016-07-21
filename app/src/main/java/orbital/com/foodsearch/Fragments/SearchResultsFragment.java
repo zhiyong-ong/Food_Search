@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
@@ -69,6 +70,7 @@ public class SearchResultsFragment extends Fragment {
         mRecyclerView.setLayoutManager(layoutMgr);
         mAdapter = new BingImageAdapter(getActivity(), mImageValues);
         mRecyclerView.setAdapter(mAdapter);
+        OverScrollDecoratorHelper.setUpOverScroll(mRecyclerView, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL);
     }
 
     /**
