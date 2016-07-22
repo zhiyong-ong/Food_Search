@@ -15,7 +15,8 @@ public class PhotoViewActivity extends AppCompatActivity {
     public static final String URL = "url";
     public static final String POSITION = "position";
     public static final String THUMBURL = "thumburl";
-
+    public static final String PATH = "path";
+    public static final String RESPONSE = "response";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +25,7 @@ public class PhotoViewActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_photo_view);
         initialize();
+
     }
 
     @Override
@@ -52,4 +54,5 @@ public class PhotoViewActivity extends AppCompatActivity {
                     }
                 });
     }
+
 }

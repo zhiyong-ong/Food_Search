@@ -10,12 +10,10 @@
         android:layout_height="match_parent"
         android:background="@android:color/black" />
 
-    <TextView
+    <orbital.com.foodsearch.Views.DrawableView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_below="@id/photo_view"
-        android:background="@android:color/white"
-        android:text="test"
-        android:textSize="@dimen/url_font_size" />
+        android:layout_height="match_parent"
+        android:id="@+id/box_drawable_view"
+        />
+
 </android.support.percent.PercentRelativeLayout>

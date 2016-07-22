@@ -112,6 +112,10 @@ public class Main2Activity extends AppCompatActivity {
             }
         };
         signInFirebase();
+//        PhotosDBHelper mDbHelper = new PhotosDBHelper(this);
+//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+//        db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
+//        mDbHelper.onCreate(db);
     }
 
     private void setBottomNavigationBar() {
@@ -279,7 +283,7 @@ public class Main2Activity extends AppCompatActivity {
             case OCR_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     Intent intent = new Intent(this, OcrActivity.class);
-                    intent.putExtra("filePath", photoFileUri.getPath());
+                    intent.putExtra(OcrActivity.PATH, photoFileUri.getPath());
                     startActivity(intent);
                 }
                 break;
@@ -335,5 +339,12 @@ public class Main2Activity extends AppCompatActivity {
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+    }
+
+    public void openRecentPhoto(String path, String data) {
+        Intent intent = new Intent(this, OcrActivity.class);
+        intent.putExtra(OcrActivity.PATH, path);
+        intent.putExtra(OcrActivity.RESPONSE, data);
+        startActivity(intent);
     }
 }
