@@ -37,7 +37,7 @@
         android:fontFamily="sans-serif-condensed"
         android:hint="@string/searchbar_text"
         android:imeOptions="actionSearch"
-        android:inputType="textNoSuggestions|textCapSentences" />
+        android:inputType="textAutoCorrect|textNoSuggestions|textCapSentences" />
 
     <ImageButton
         android:id="@id/searchbar_translate_btn"

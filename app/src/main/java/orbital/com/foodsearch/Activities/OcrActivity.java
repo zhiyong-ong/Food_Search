@@ -131,7 +131,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,7 +153,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         TRANSLATE_KEY = sharedPreferences.getString(MainActivity.TRANSLATE_KEY, null);
 
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
 
         IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
         IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
@@ -171,6 +169,18 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         initializeDrawView();
         setupSearchContainer();
         setupSearchBar();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
     }
 
     /**
@@ -248,6 +258,30 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
     /**
+     * Method that compresses the IMAGE_KEY before sending it to BingOcrService
+     */
+    private void bingOcrConnect() {
+        View root = findViewById(R.id.activity_ocr);
+        CompressAsyncTask compressTask = new CompressAsyncTask(this, root) {
+            @Override
+            protected void onPostExecute(byte[] compressedImage) {
+                // When compressTask is done, invoke dispatchCall for POST call
+                Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
+                // Enqueue the method to the call and wait for callback (Asynchronous call)
+                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
+                // After call is dispatched, load full res IMAGE_KEY into preview
+                ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
+                Picasso.with(mContext).load("file://" + destFilePath)
+                        .noPlaceholder()
+                        .fit()
+                        .memoryPolicy(MemoryPolicy.NO_CACHE)
+                        .into(previewImageView);
+            }
+        };
+        compressTask.execute(sourceFilePath, destFilePath);
+    }
+
+    /**
      * This method puts bing ocr connect on hold with a snackbar for user to retry connection.
      * @param compressedImage compressed image to be sent for ocr service
      */
@@ -291,29 +325,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
     }
 
-    /**
-     * Method that compresses the IMAGE_KEY before sending it to BingOcrService
-     */
-    private void bingOcrConnect() {
-        View root = findViewById(R.id.activity_ocr);
-        CompressAsyncTask compressTask = new CompressAsyncTask(this, root) {
-            @Override
-            protected void onPostExecute(byte[] compressedImage) {
-                // When compressTask is done, invoke dispatchCall for POST call
-                Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
-                // Enqueue the method to the call and wait for callback (Asynchronous call)
-                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
-                // After call is dispatched, load full res IMAGE_KEY into preview
-                ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                Picasso.with(mContext).load("file://" + destFilePath)
-                        .noPlaceholder()
-                        .fit()
-                        .memoryPolicy(MemoryPolicy.NO_CACHE)
-                        .into(previewImageView);
-            }
-        };
-        compressTask.execute(sourceFilePath, destFilePath);
-    }
 
     @Override
     public void onBackPressed() {

@@ -32,6 +32,7 @@ public class CropActivity extends AppCompatActivity implements CropImageView.OnS
         mCropImageView = (CropImageView) findViewById(R.id.crop_image_view);
         mCropImageView.setFixedAspectRatio(true);
         mCropImageView.setAspectRatio(3, 5);
+        mCropImageView.setAutoZoomEnabled(false);
         mCropImageView.setShowProgressBar(false);
         mCropImageView.setImageUriAsync((Uri) getIntent().getParcelableExtra(SOURCE_URI));
         mOutputUri = getIntent().getParcelableExtra(OUTPUT_URI);

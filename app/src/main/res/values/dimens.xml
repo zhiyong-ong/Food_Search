@@ -8,6 +8,7 @@
 
     <dimen name="card_image_height">280dp</dimen>
     <dimen name="search_results_top">70dp</dimen>
+    <dimen name="dots_top_margin">-28dp</dimen>
 
     <dimen name="headline_font_size">24sp</dimen>
     <dimen name="title_font_size">20sp</dimen>

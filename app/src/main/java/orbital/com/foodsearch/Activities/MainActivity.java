@@ -47,7 +47,7 @@ import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String MyPREFERENCES = "Preferences";
     static final String IMAGE_KEY = "ImageKey";
     static final String TRANSLATE_KEY = "TranslateKey";
@@ -129,6 +129,14 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         signInFirebase();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        String langKey = getString(R.string.select_lang_key);
+        if (langKey.equals(s)) {
+            MainActivity.BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
+        }
     }
 
     private void setBottomNavigationBar() {
@@ -478,6 +486,7 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
         mAuth.addAuthStateListener(mAuthListener);
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -486,5 +495,6 @@ public class MainActivity extends AppCompatActivity {
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
     }
 }

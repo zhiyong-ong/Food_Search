@@ -1,12 +1,18 @@
 package orbital.com.foodsearch.Fragments;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +30,10 @@ public class SearchResultsFragment extends Fragment {
     private ArrayList<ImageValue> mImageValues;
     private BingImageAdapter mAdapter;
     private SnappyRecyclerView mRecyclerView;
+    private int mDotsCount = 0;
+    private int accentColor = Color.WHITE;
+    private ArrayList<TextView> mDotsTexts;
+    private LinearLayout mDotsLayout;
 
     public SearchResultsFragment() {
         // Required empty public constructor
@@ -62,14 +72,18 @@ public class SearchResultsFragment extends Fragment {
     }
 
     private void initializeRecycler(View view) {
+        mDotsLayout = (LinearLayout) view.findViewById(R.id.dots_layout);
         mRecyclerView = (SnappyRecyclerView) view.findViewById(R.id.recycler_view);
+        accentColor = ContextCompat.getColor(getActivity(), R.color.colorAccent);
         mImageValues = new ArrayList<>(IMAGE_COUNT);
+        mDotsTexts = new ArrayList<>(IMAGE_COUNT);
         LinearLayoutManager layoutMgr = new LinearLayoutManager(getActivity());
         layoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutMgr);
         mAdapter = new BingImageAdapter(getActivity(), mImageValues);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnScrollListener(new DotsOnScrollListener());
         OverScrollDecoratorHelper.setUpOverScroll(mRecyclerView, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL);
     }
 
@@ -83,11 +97,29 @@ public class SearchResultsFragment extends Fragment {
     }
 
     public void clearRecycler() {
+        mDotsTexts.clear();
+        mDotsLayout.removeAllViewsInLayout();
         mImageValues.clear();
     }
+
     public void finalizeRecycler() {
+        setupCustomScroll();
         mRecyclerView.scrollToPosition(0);
         mAdapter.notifyDataSetChanged();
+    }
+
+    private void setupCustomScroll() {
+        mDotsCount = mImageValues.size();
+        for (int i = 0; i < mDotsCount; i++) {
+            TextView dot = new TextView(getActivity());
+            dot.setText(".");
+            dot.setTextSize(45);
+            dot.setTypeface(null, Typeface.BOLD);
+            dot.setTextColor(android.graphics.Color.GRAY);
+            mDotsLayout.addView(dot);
+            mDotsTexts.add(dot);
+        }
+        mDotsTexts.get(0).setTextColor(accentColor);
     }
 
     public void notifyRecycler() {
@@ -100,5 +132,20 @@ public class SearchResultsFragment extends Fragment {
             urls.add(imageValue.getContentUrl());
         }
         return urls;
+    }
+
+    private class DotsOnScrollListener extends RecyclerView.OnScrollListener {
+        @Override
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            int scrollX = recyclerView.computeHorizontalScrollOffset();
+            int range = recyclerView.computeHorizontalScrollRange();
+            float scrollPercentage = (float) scrollX / (float) range;
+            int newPosition = Math.round(scrollPercentage * mImageValues.size());
+            for (int i = 0; i < mDotsCount; i++) {
+                mDotsTexts.get(i).setTextColor(Color.GRAY);
+            }
+            mDotsTexts.get(newPosition).setTextColor(accentColor);
+            super.onScrolled(recyclerView, dx, dy);
+        }
     }
 }

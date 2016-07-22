@@ -119,7 +119,7 @@ public class BingImageAdapter
         holder.undoBtn.setTextColor(accentColor);
         // Set overlay color with 0.9 opacity for better effect
         holder.overlay.setBackgroundColor(accentColor);
-        holder.overlay.setAlpha(0.9f);
+        holder.overlay.setAlpha(0.85f);
     }
 
     /**

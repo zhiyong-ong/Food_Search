@@ -35,6 +35,7 @@ public class ViewUtils {
             @Override
             public void onAnimationEnd(Animator animator) {
                 rootView.findViewById(R.id.drawable_overlay).setClickable(false);
+                rootView.findViewById(R.id.searchbar_translate_btn).performClick();
             }
 
             @Override
