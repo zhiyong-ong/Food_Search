@@ -129,6 +129,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         };
         signInFirebase();
+        //        PhotosDBHelper mDbHelper = new PhotosDBHelper(this);
+//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+//        db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
+//        mDbHelper.onCreate(db);
     }
 
     @Override
@@ -496,5 +500,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             mAuth.removeAuthStateListener(mAuthListener);
         }
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
+    }
+
+    public void openRecentPhoto(String path, String data) {
+        Intent intent = new Intent(this, OcrActivity.class);
+        intent.putExtra(OcrActivity.DEST_FILE_PATH, path);
+        intent.putExtra(OcrActivity.RESPONSE, data);
+        startActivity(intent);
     }
 }
