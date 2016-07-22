@@ -9,7 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Adapters.BingImageAdapter;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
@@ -59,13 +61,6 @@ public class SearchResultsFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mRecyclerView = (SnappyRecyclerView) getView().findViewById(R.id.recycler_view);
-        mRecyclerView.setAdapter(mAdapter);
-    }
-
     private void initializeRecycler(View view) {
         mRecyclerView = (SnappyRecyclerView) view.findViewById(R.id.recycler_view);
         mImageValues = new ArrayList<>(IMAGE_COUNT);
@@ -75,7 +70,7 @@ public class SearchResultsFragment extends Fragment {
         mRecyclerView.setLayoutManager(layoutMgr);
         mAdapter = new BingImageAdapter(getActivity(), mImageValues);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setItemAnimator(null);
+        OverScrollDecoratorHelper.setUpOverScroll(mRecyclerView, OverScrollDecoratorHelper.ORIENTATION_HORIZONTAL);
     }
 
     /**
@@ -95,4 +90,15 @@ public class SearchResultsFragment extends Fragment {
         mAdapter.notifyDataSetChanged();
     }
 
+    public void notifyRecycler() {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public List<String> getUrls() {
+        List<String> urls = new ArrayList<>();
+        for (ImageValue imageValue : mImageValues) {
+            urls.add(imageValue.getContentUrl());
+        }
+        return urls;
+    }
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/crop_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/crop_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ToolbarTheme" />
+
+    <com.theartofdev.edmodo.cropper.CropImageView
+        android:id="@+id/crop_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:background="@android:color/black" />
+
+    <com.github.clans.fab.FloatingActionButton
+        android:id="@+id/crop_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:src="@drawable/ic_check_white"
+        app:fab_colorNormal="@color/colorPrimaryLighter"
+        app:fab_colorPressed="@color/colorPrimaryLighter"
+        app:fab_colorRipple="@color/colorPrimary"
+        app:layout_anchor="@id/crop_image_view"
+        app:layout_anchorGravity="bottom|right|end"
+        app:layout_behavior="@string/fab_menu_behavior" />
+</android.support.design.widget.CoordinatorLayout>

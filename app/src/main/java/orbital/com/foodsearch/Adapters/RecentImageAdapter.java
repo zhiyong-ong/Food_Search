@@ -16,7 +16,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import orbital.com.foodsearch.Activities.Main2Activity;
+import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.R;
@@ -89,7 +89,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         return filePaths.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         private ImageView recentImage;
         private TextView timeStamp;
         private PercentRelativeLayout layoutView;
@@ -108,8 +108,13 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
             String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_DATA));
             Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
             Log.e(LOG_TAG, "adapter pos: " + getAdapterPosition());
-            ((Main2Activity)mContext).openRecentPhoto(filePaths.get(getAdapterPosition()), data);
+            ((MainActivity)mContext).openRecentPhoto(filePaths.get(getAdapterPosition()), data);
 
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            return false;
         }
     }
 }

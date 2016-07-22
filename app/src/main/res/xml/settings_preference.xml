@@ -2,19 +2,19 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
         android:key="pref_key_translation_settings"
-        android:title="Translations">
+        android:title="@string/translation_cat_title">
         <ListPreference
             android:defaultValue="en"
             android:entries="@array/listLanguages"
             android:entryValues="@array/listLanguagesValues"
             android:key="@string/select_lang_key"
             android:summary="@string/select_lang_summary"
-            android:title="@string/select_lang" />
+            android:title="@string/select_lang_title" />
     </PreferenceCategory>
 
     <PreferenceCategory
         android:key="pref_key_search_settings"
-        android:title="Search">
+        android:title="@string/search_cat_title">
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/search_immediately_key"
@@ -26,8 +26,8 @@
             android:entries="@array/listNumber"
             android:entryValues="@array/listNumber"
             android:key="@string/num_images_key"
-            android:summary="@string/number_of_images_summary"
-            android:title="@string/number_of_images" />
+            android:summary="@string/num_images_summary"
+            android:title="@string/num_images_title" />
 
     </PreferenceCategory>
 
@@ -37,16 +37,16 @@
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="@string/save_recents_key"
-            android:summary="@string/save_recents_check_summary"
-            android:title="@string/save_menus_check" />
+            android:summary="@string/save_recents_summary"
+            android:title="@string/save_recents_title" />
 
         <ListPreference
             android:defaultValue="1"
-            android:dependency="save_photos"
+            android:dependency="@string/save_recents_key"
             android:entries="@array/listNumber"
             android:entryValues="@array/listNumber"
-            android:key="@string/num_photos_key"
-            android:summary="@string/keep_photos_summary"
-            android:title="@string/keep_photos" />
+            android:key="@string/num_recents_key"
+            android:summary="@string/num_recents_summary"
+            android:title="@string/num_recents_title" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -25,12 +25,6 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".Activities.Main2Activity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -49,6 +43,11 @@
         <activity
             android:name=".Activities.PhotoViewActivity"
             android:parentActivityName=".Activities.OcrActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activities.CropActivity"
+            android:label="@string/crop_image_activity_title"
+            android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait" />
     </application>
 

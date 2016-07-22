@@ -99,7 +99,7 @@ public class DrawableView extends FrameLayout {
         invalidate();
     }
 
-    public void updateSelection(int selectedIndex) {
+    public void chooseRect(int selectedIndex) {
         this.selectedIndex = selectedIndex;
         this.invalidate();
     }

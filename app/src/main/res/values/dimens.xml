@@ -7,18 +7,18 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <dimen name="card_image_height">280dp</dimen>
+    <dimen name="search_results_top">70dp</dimen>
 
     <dimen name="headline_font_size">24sp</dimen>
     <dimen name="title_font_size">20sp</dimen>
+    <dimen name="edit_font_size">18sp</dimen>
     <dimen name="subhead_font_size">16sp</dimen>
     <dimen name="url_font_size">14sp</dimen>
 
     <dimen name="button_text_padding">16dp</dimen>
     <dimen name="button_margin">8dp</dimen>
 
-    <dimen name="search_bar_elevation">8dp</dimen>
+    <dimen name="search_bar_elevation">6dp</dimen>
     <dimen name="search_bar_height">50dp</dimen>
     <dimen name="translation_card_height">40dp</dimen>
-    <dimen name="translation_margin_top">58dp</dimen>
-
 </resources>

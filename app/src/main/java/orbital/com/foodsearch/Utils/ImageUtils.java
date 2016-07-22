@@ -22,12 +22,12 @@ public class ImageUtils {
     private static final float maxHeight = 1280.0f;
     private static final float maxWidth = 1280.0f;
 
-    public static byte[] compressImage(String imagePath) {
+    public static byte[] compressImage(String sourcePath, String destPath) {
         Bitmap scaledBitmap = null;
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        Bitmap bmp = BitmapFactory.decodeFile(imagePath, options);
+        Bitmap bmp = BitmapFactory.decodeFile(sourcePath, options);
 
         int actualHeight = options.outHeight;
         int actualWidth = options.outWidth;
@@ -56,7 +56,7 @@ public class ImageUtils {
         options.inTempStorage = new byte[16 * 1024];
 
         try {
-            bmp = BitmapFactory.decodeFile(imagePath, options);
+            bmp = BitmapFactory.decodeFile(sourcePath, options);
         } catch (OutOfMemoryError exception) {
             exception.printStackTrace();
 
@@ -81,7 +81,7 @@ public class ImageUtils {
 
         ExifInterface exif;
         try {
-            exif = new ExifInterface(imagePath);
+            exif = new ExifInterface(sourcePath);
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
             Matrix matrix = new Matrix();
             if (orientation == 6) {
@@ -102,7 +102,7 @@ public class ImageUtils {
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out);
         byte[] coloredResult = out.toByteArray();
         try {
-            writeFile(coloredResult, imagePath);
+            writeFile(coloredResult, destPath);
         } catch (IOException e) {
             e.printStackTrace();
         }

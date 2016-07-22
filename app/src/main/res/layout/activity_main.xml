@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/coord_main_layout"
@@ -7,56 +7,72 @@
     android:layout_height="match_parent"
     tools:mContext="orbital.com.foodsearch.Activities.MainActivity">
 
-    <include layout="@layout/toolbar_layout"
-        android:theme="@style/Theme.AppCompat.Main" />
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/main_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:theme="@style/ToolbarTheme" />
 
     <FrameLayout
-        android:id="@+id/main_frame"
+        android:id="@+id/nav_frag_container"
         android:layout_width="match_parent"
-        app:layout_heightPercent="80%">
-    </FrameLayout>
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?android:attr/actionBarSize"
+        android:layout_marginTop="?attr/actionBarSize" />
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/fab_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="?android:attr/actionBarSize"
+        android:layout_marginTop="?attr/actionBarSize"
+        android:background="@color/colorFabOverlay"
+        android:clickable="false"
+        android:visibility="gone" />
+
+    <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/main_frame">
-        <Button
-            android:id="@+id/ocr_button"
-            style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_gravity="bottom" />
+
+    <FrameLayout
+        android:id="@+id/fab_anchor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="132dp"
+        android:clickable="false"
+        android:visibility="gone" />
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/start_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        app:fabSize="normal"
+        app:layout_anchor="@id/fab_anchor"
+        app:layout_anchorGravity="bottom|right|end"
+        app:layout_behavior="@string/fab_menu_behavior"
+        app:menu_colorNormal="@color/colorPrimaryLighter"
+        app:menu_colorPressed="@color/colorPrimaryLighter"
+        app:menu_colorRipple="@color/colorPrimary"
+        app:menu_fab_label="@string/camera_fab_label"
+        app:menu_icon="@drawable/ic_camera_iris_white"
+        app:menu_labels_colorNormal="@android:color/black"
+        app:menu_labels_colorPressed="@color/colorGrey"
+        app:menu_labels_textColor="@android:color/white">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/start_image_pick_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="startOcr"
-            android:text="@string/ocr_start"/>
-
-        <Button
-            android:id="@+id/settings_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/ocr_button"
-            android:onClick="startOcr"
-            android:text="Settings" />
-
-        <Button
-            android:id="@+id/search_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/settings_button"
-            android:onClick="goSearch"
-            android:text="@string/search" />
-
-        <Button
-            android:id="@+id/debug_button"
-            style="@style/Widget.AppCompat.Button.Colored"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/search_button"
-            android:onClick="startDebug"
-            android:text="@string/debug_start" />
-
-    </RelativeLayout>
-</android.support.percent.PercentRelativeLayout>
+            android:src="@drawable/ic_folder_image_white"
+            app:fab_colorNormal="@color/colorFabPick"
+            app:fab_colorPressed="@color/colorFabPicked"
+            app:fab_label="@string/image_pick_fab_label"
+            app:fab_size="mini" />
+    </com.github.clans.fab.FloatingActionMenu>
+</android.support.design.widget.CoordinatorLayout>

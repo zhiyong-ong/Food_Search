@@ -8,22 +8,29 @@ import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.Button;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -59,26 +66,28 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
 import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.NetworkUtils;
+import orbital.com.foodsearch.Utils.ViewUtils;
 import orbital.com.foodsearch.Views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class OcrActivity extends AppCompatActivity {
+public class OcrActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
+    static final String DEST_FILE_PATH = "DESTFILEPATH";
+    static final String SOURCE_FILE_PATH = "SOURCEFILEPATH";
+    public static final String RESPONSE = "dataResponse";
     private static final String LOG_TAG = "FOODIES";
-    private static final String SAVED_FILE_PATH = "SAVEDFILEPATH";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
     private static final String SEARCH_BAR_TAG = "SEARCHBARTAG";
     public static String IMAGE_KEY;
     public static String OCR_KEY;
     public static String TRANSLATE_KEY;
-    public static String BASE_LANGUAGE;
     public static int IMAGES_COUNT;
+    public static int imageResultSize;
     private static volatile int insightsCount = 0;
     private static String mTranslatedText = null;
     private static AsyncTask<Void, Void, String> translateTask;
-    private static int barMarginTop = 0;
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
     private static ImageSearchResponse searchResponseDB;
@@ -88,18 +97,20 @@ public class OcrActivity extends AppCompatActivity {
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private DatabaseReference database;
     private boolean animating = false;
-    private int containerTransY;
     private int searchBarTrans;
-    private String filePath = null;
+    private String destFilePath = null;
+    private String sourceFilePath = null;
+
     private String currentTime;
     private ArrayList<Long> IDArrayList;
     private Context context;
-    public static final String PATH = "filePath";
-    public static final String RESPONSE = "dataResponse";
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (filePath != null) {
-            outState.putString(SAVED_FILE_PATH, filePath);
+        if (destFilePath != null) {
+            outState.putString(DEST_FILE_PATH, destFilePath);
+        }
+        if (sourceFilePath != null) {
+            outState.putString(SOURCE_FILE_PATH, sourceFilePath);
         }
         super.onSaveInstanceState(outState);
     }
@@ -107,19 +118,52 @@ public class OcrActivity extends AppCompatActivity {
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.containsKey(SAVED_FILE_PATH)) {
-            filePath = savedInstanceState.getString(SAVED_FILE_PATH);
+        if (savedInstanceState.containsKey(DEST_FILE_PATH)) {
+            destFilePath = savedInstanceState.getString(DEST_FILE_PATH);
+        }
+        if (savedInstanceState.containsKey(SOURCE_FILE_PATH)) {
+            sourceFilePath = savedInstanceState.getString(SOURCE_FILE_PATH);
         }
     }
+
+    /**
+     * This is attached to sharedpreferencessettings. It checks if changed key is
+     * equal to language key. If it is then we update BASE_LANGUAGE accordingly and
+     * notify recycler accordingly so as to maintain same translation language
+     * with search results card.
+     * update
+     *
+     * @param sharedPreferences sharedpreferencessettings
+     * @param s                 Key for the changed value
+     */
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        String langKey = getString(R.string.select_lang_key);
+        if (langKey.equals(s)) {
+            MainActivity.BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
+            SearchResultsFragment frag = (SearchResultsFragment) getSupportFragmentManager().findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            if (frag != null) {
+                frag.notifyRecycler();
+            }
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ocr_exp);
-        if (filePath == null) {
-            filePath = getIntent().getStringExtra(PATH);
+        setContentView(R.layout.activity_ocr);
+        if (destFilePath == null) {
+            destFilePath = getIntent().getStringExtra(DEST_FILE_PATH);
+            sourceFilePath = getIntent().getStringExtra(SOURCE_FILE_PATH);
         }
-        context = this;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(Color.BLACK);
+        }
+
         database = FirebaseDatabase.getInstance().getReference();
         imgDAO = new BingImageDAO();
         sharedPreferences = getSharedPreferences(MainActivity.MyPREFERENCES, MODE_PRIVATE);
@@ -128,9 +172,15 @@ public class OcrActivity extends AppCompatActivity {
         TRANSLATE_KEY = sharedPreferences.getString(MainActivity.TRANSLATE_KEY, null);
 
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        BASE_LANGUAGE = sharedPreferencesSettings.getString(getResources().getString(R.string.select_lang_key), "test");
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
+
         IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
         IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
+        Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
+        context = this;
+        // Load a placeholder low res image first, resized to 30x48
+        ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
+
 
         IDArrayList = new ArrayList<>();
         //current time
@@ -139,30 +189,33 @@ public class OcrActivity extends AppCompatActivity {
                 + String.valueOf(cal.get(Calendar.YEAR)) + "_" + String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + ":"
                 + String.valueOf(cal.get(Calendar.MINUTE)) + ":" + String.valueOf(cal.get(Calendar.SECOND)) + ".jpg";
 
-        ImageView imgView = (ImageView) findViewById(R.id.preview_image_view);
         String data = getIntent().getStringExtra(RESPONSE);
         initializeDrawView();
         setupSearchContainer();
         setupSearchBar();
         if(data == null) {
-            Picasso.with(this).load("file://" + filePath)
+            Picasso.with(this).load("file://" + destFilePath)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .resize(30, 48)
-                    .into(imgView);
+                    .into(previewImageView);
             startOcrService();
             Log.e(LOG_TAG, "COMPRESS!  " + data);
         }
         else {
-            Picasso.with(this).load("file://" + filePath)
+            Picasso.with(this).load("file://" + destFilePath)
                     .noPlaceholder()
                     .fit()
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
-                    .into(imgView);
-            drawBoxesRecentImage(data, filePath, findViewById(R.id.activity_ocr_exp));
+                    .into(previewImageView);
+            drawBoxesRecentImage(data, destFilePath, findViewById(R.id.activity_ocr));
         }
     }
 
+    /**
+     * This method attaches a viewtreeobserver to get the appropriate translation y for
+     * searchbar container.
+     */
     private void setupSearchBar() {
         final FrameLayout searchBarContainer = (FrameLayout) findViewById(R.id.search_bar_container);
         ViewTreeObserver vto = searchBarContainer.getViewTreeObserver();
@@ -173,18 +226,21 @@ public class OcrActivity extends AppCompatActivity {
             public boolean onPreDraw() {
                 searchBarContainer.getViewTreeObserver().removeOnPreDrawListener(this);
                 searchBarTrans = 2 * searchBarContainer.getHeight();
-                barMarginTop = getResources().getDimensionPixelSize(R.dimen.activity_half_margin);
                 searchBarContainer.setTranslationY(searchBarTrans);
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
-                ft.replace(R.id.search_bar_container, SearchBarFragment.newInstance(searchBarTrans), SEARCH_BAR_TAG);
+                ft.replace(R.id.search_bar_container, new SearchBarFragment(), SEARCH_BAR_TAG);
                 ft.commit();
                 return true;
             }
         });
     }
 
+    /**
+     * This method attaches a viewtreeobserver to get the appropriate translation y for
+     * search results container.
+     */
     private void setupSearchContainer() {
-        final View rootView = findViewById(R.id.activity_ocr_exp);
+        final View rootView = findViewById(R.id.activity_ocr);
         final FrameLayout recyclerContainer = (FrameLayout) findViewById(R.id.search_frag_container);
         ViewTreeObserver vto = recyclerContainer.getViewTreeObserver();
         // To move recyclerContainer out of the screen
@@ -193,8 +249,7 @@ public class OcrActivity extends AppCompatActivity {
             @Override
             public boolean onPreDraw() {
                 recyclerContainer.getViewTreeObserver().removeOnPreDrawListener(this);
-                containerTransY = rootView.getHeight();
-                recyclerContainer.setTranslationY(containerTransY);
+                recyclerContainer.setTranslationY(rootView.getHeight());
                 android.support.v4.app.FragmentTransaction ft = FRAGMENT_MANAGER.beginTransaction();
                 ft.replace(R.id.search_frag_container, new SearchResultsFragment(), SEARCH_FRAGMENT_TAG);
                 ft.commit();
@@ -205,30 +260,65 @@ public class OcrActivity extends AppCompatActivity {
 
     private void initializeDrawView() {
         final DrawableView drawableView = (DrawableView) findViewById(R.id.drawable_view);
-        drawableView.setOnTouchListener(new DrawableTouchListener(this, findViewById(R.id.activity_ocr_exp)));
+        drawableView.setOnTouchListener(new DrawableTouchListener(this, findViewById(R.id.activity_ocr)));
     }
 
+    // Checks for internet connection, if available then just start service. Otherwise,
+    // create snackbar fall user to retry. Compressed full res image also loaded into preview.
     private void startOcrService() {
         if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
             bingOcrConnect();
         } else {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr_exp),
-                    R.string.internet_error_text, Snackbar.LENGTH_LONG);
-            snackbar.setAction(R.string.retry, new View.OnClickListener() {
+            // Compress firsty then put bing connect on hold.
+            CompressAsyncTask compressTask = new CompressAsyncTask(this, findViewById(R.id.activity_ocr)) {
                 @Override
-                public void onClick(View v) {
-                    startOcrService();
+                protected void onPostExecute(byte[] compressedImage) {
+                    ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
+                    Picasso.with(mContext).load("file://" + destFilePath)
+                            .noPlaceholder()
+                            .fit()
+                            .memoryPolicy(MemoryPolicy.NO_CACHE)
+                            .into(previewImageView);
+                    onHoldBingOcrConnect(compressedImage);
                 }
-            });
-            snackbar.show();
+            };
+            compressTask.execute(sourceFilePath, destFilePath);
         }
+    }
+
+    /**
+     * This method puts bing ocr connect on hold with a snackbar for user to retry connection.
+     * @param compressedImage compressed image to be sent for ocr service
+     */
+    private void onHoldBingOcrConnect(final byte[] compressedImage) {
+        // When compressTask is done, load preview into preview imageview
+        // and remove progressbars and overlay.
+        // then allow user to retry
+        final View rootView = findViewById(R.id.activity_ocr);
+        ViewUtils.finishOcrProgress(rootView);
+        Snackbar snackbar = Snackbar.make(rootView, R.string.internet_error_text, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.retry, new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ViewUtils.startOcrProgress(rootView);
+                if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
+                    Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
+                    // Enqueue the method to the call and wait for callback (Asynchronous call)
+                    call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
+                } else {
+                    onHoldBingOcrConnect(compressedImage);
+                }
+
+            }
+        });
+        snackbar.show();
     }
 
     public void startBingImageSearch(final Context context, final String searchParam) {
         if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
             searchImageResponse(context, searchParam);
         } else {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr_exp),
+            Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr),
                     R.string.internet_error_text, Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.retry, new View.OnClickListener() {
                 @Override
@@ -244,72 +334,63 @@ public class OcrActivity extends AppCompatActivity {
      * Method that compresses the IMAGE_KEY before sending it to BingOcrService
      */
     private void bingOcrConnect() {
-        View root = findViewById(R.id.activity_ocr_exp);
+        View root = findViewById(R.id.activity_ocr);
         CompressAsyncTask compressTask = new CompressAsyncTask(this, root) {
             @Override
             protected void onPostExecute(byte[] compressedImage) {
                 // When compressTask is done, invoke dispatchCall for POST call
                 Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
-                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr_exp), filePath));
+                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
                 // After call is dispatched, load full res IMAGE_KEY into preview
                 ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                Picasso.with(mContext).load("file://" + filePath)
+                Picasso.with(mContext).load("file://" + destFilePath)
                         .noPlaceholder()
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .into(previewImageView);
             }
         };
-        compressTask.execute(filePath);
+        compressTask.execute(sourceFilePath, destFilePath);
     }
 
     @Override
     public void onBackPressed() {
         if (findViewById(R.id.search_frag_container).getTranslationY() != 0) {
+            sharedPreferencesSettings.unregisterOnSharedPreferenceChangeListener(this);
             super.onBackPressed();
         } else {
-            closeSearchResults();
+            View rootView = findViewById(R.id.activity_ocr);
+            ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
         }
     }
 
     /**
-     * Method called by cancel button on search bar
+     * Method called by cancel button on search bar.
+     * This method closes both search bar and search results.
      */
     public void cancelSearch() {
-        View searchBarContainer = findViewById(R.id.search_bar_container);
-        AnimUtils.hideSearchBar(searchBarContainer,
+        View rootView = findViewById(R.id.activity_ocr);
+        ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
+        AnimUtils.hideSearchBar(findViewById(R.id.search_bar_container),
                 searchBarTrans);
     }
 
-    /**
-     * Closes search results cards and drops the search bar
-     */
-    public void closeSearchResults() {
-        View rootView = findViewById(R.id.activity_ocr_exp);
-        Button searchButton = (Button) rootView.findViewById(R.id.start_search);
-        searchButton.setEnabled(true);
-        AnimUtils.containerSlideDown(rootView,
-                new AnimatingListener(rootView),
-                containerTransY);
-    }
-
-
-    /**
-     * Opens photo view activity to view the high resolution photo
-     *
-     * @param view     View in which button was clicked on, gives us the exact card position
-     * @param imageUrl String of the high res IMAGE_KEY url
-     * @param thumbUrl String of the thumbnail IMAGE_KEY url for placeholder
-     * @param position position of the card so that we can assign the correct transition name
-     */
-    public void openPhotoView(View view, String imageUrl, String thumbUrl, int position) {
-        Intent intent = new Intent(this, PhotoViewActivity.class);
-        intent.putExtra(PhotoViewActivity.POSITION, position);
-        intent.putExtra(PhotoViewActivity.URL, imageUrl);
+    public void openPhotoView(View itemView, String contentUrl, String thumbUrl, int position) {
+        final Intent intent = new Intent(this, PhotoViewActivity.class);
+        intent.putExtra(PhotoViewActivity.URL, contentUrl);
         intent.putExtra(PhotoViewActivity.THUMBURL, thumbUrl);
-        // TODO: Set ZOOM anims here by Abel
-        startActivity(intent);
+        intent.putExtra(PhotoViewActivity.POSITION, position);
+        intent.putExtra(PhotoViewActivity.TITLE,
+                ((TextView) itemView.findViewById(R.id.card_title)).getText());
+        String htmlText = Html.toHtml(((TextView) findViewById(R.id.card_hostpage)).getEditableText());
+        intent.putExtra(PhotoViewActivity.FORMATTED_URL, htmlText);
+        ImageView cardImage = (ImageView) findViewById(R.id.card_image);
+        String transName = getString(R.string.fullscreen_transition_name);
+        ViewCompat.setTransitionName(cardImage, transName);
+        ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, cardImage, transName);
+        startActivity(intent, options.toBundle());
     }
 
     /**
@@ -319,12 +400,10 @@ public class OcrActivity extends AppCompatActivity {
      * @param searchParam String to be searched for
      */
     private void searchImageResponse(final Context context, final String searchParam) {
-        AnimUtils.containerSlideDown(findViewById(R.id.activity_ocr_exp),
-                new AnimatingListener(findViewById(R.id.activity_ocr_exp)),
-                containerTransY);
-        AnimUtils.darkenOverlay(findViewById(R.id.drawable_overlay));
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.search_progress);
-        progressBar.setVisibility(View.VISIBLE);
+        final View rootView = findViewById(R.id.activity_ocr);
+        AnimUtils.containerSlideDown(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
+        ViewUtils.startSearchProgress(rootView);
+        insightsCount = 0;
 
         database.child("images").child(searchParam).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -335,9 +414,11 @@ public class OcrActivity extends AppCompatActivity {
                 if (searchResponseDB == null) {
                     enqueueSearch(searchParam);
                 } else {
+                    // Expected result size is the minimum of the max count and the size.
+                    imageResultSize = Math.min(searchResponseDB.getImageValues().size(), IMAGES_COUNT);
                     SearchResultsFragment searchFragment = (SearchResultsFragment) FRAGMENT_MANAGER.findFragmentByTag(SEARCH_FRAGMENT_TAG);
                     searchFragment.clearRecycler();
-                    for (int i = 0; i < IMAGES_COUNT; i++) {
+                    for (int i = 0; i < imageResultSize; i++) {
                         ImageValue imgVal = searchResponseDB.getImageValues().get(i);
                         searchFragment.updateRecyclerList(imgVal);
                         searchImageInsights(context, imgVal);
@@ -349,9 +430,10 @@ public class OcrActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(LOG_TAG, "getUser:onCancelled", databaseError.toException());
+                ViewUtils.terminateSearchProgress(rootView);
 //                enqueueSearch(searchParam);
 //                enqueueTranslate(searchParam);
-            }
+        }
         });
     }
 
@@ -362,7 +444,7 @@ public class OcrActivity extends AppCompatActivity {
      */
     private void searchImageInsights(final Context context, final ImageValue imgVal) {
         String insightsToken = imgVal.getImageInsightsToken();
-        final View rootView = findViewById(R.id.activity_ocr_exp);
+        final View rootView = findViewById(R.id.activity_ocr);
         database.child("imageinsights").child(insightsToken).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -374,7 +456,7 @@ public class OcrActivity extends AppCompatActivity {
                     imgVal.setInsightsResponse(imgInsightsDB);
                     insightsCount++;
                     Log.e(LOG_TAG, "Insights DB count: " + insightsCount);
-                    if (insightsCount < IMAGES_COUNT) {
+                    if (insightsCount < imageResultSize) {
                         return;
                     }
                     new CompleteTask(context, rootView, FRAGMENT_MANAGER)
@@ -384,7 +466,6 @@ public class OcrActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                insightsCount = 0;
                 Log.w(LOG_TAG, "getUser:onCancelled", databaseError.toException());
                 enqueueImageInsightCall(imgVal);
             }
@@ -397,12 +478,15 @@ public class OcrActivity extends AppCompatActivity {
      * @param searchParam parameter string to be searched for
      */
     private void enqueueSearch(String searchParam) {
-        Log.d(LOG_TAG, "Search String: " + searchParam);
         BingSearch bingImg = new BingSearch(searchParam, String.valueOf(IMAGES_COUNT_MAX));
         Call<ImageSearchResponse> call = bingImg.buildCall();
-        call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr_exp), FRAGMENT_MANAGER, searchParam));
+        call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
     }
 
+    /**
+     * This method creates a translte call with search param and executes it on translateTask.
+     * @param searchParam string parameter to translate
+     */
     private void enqueueTranslate(final String searchParam) {
         mTranslatedText = searchParam;
         translateTask = new translateTask(searchParam).executeOnExecutor(
@@ -416,10 +500,9 @@ public class OcrActivity extends AppCompatActivity {
      *               Multiple calls.
      */
     private void enqueueImageInsightCall(ImageValue imgVal) {
-
         ImageInsights imageInsights = new ImageInsights(imgVal.getImageInsightsToken(), "");
         Call<ImageInsightsResponse> call = imageInsights.buildCall();
-        call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr_exp),
+        call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
                 FRAGMENT_MANAGER,
                 imgVal));
     }
@@ -437,10 +520,10 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... params) {
-
             int count = 0;
+            // Wait 10 seconds for translate task to be done
             while (!translateTask.getStatus().equals(Status.FINISHED)) {
-                if (count == 10) {
+                if (count == 20) {
                     Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
                     return null;
                 }
@@ -457,22 +540,14 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (searchResponseDB == null) {
                 //persist search result to DB
                 imgDAO.persistImage(searchResponse);
-                //mTranslatedText is the translated text here.
             }
-            insightsCount = 0;
-            //in the case where the database has the image but doesn't have the imageinsights.
-            searchFragment.finalizeRecycler();//searchResponseDB.getTranslatedQuery());
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
-            progressBar.setVisibility(View.GONE);
             Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
-            AnimUtils.containerSlideUp(context, rootView,
-                    new AnimUtils.displaySearchListener(rootView.findViewById(R.id.translation_card),
-                            mTranslatedText));
-            Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
+            SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            searchFragment.finalizeRecycler();
+            ViewUtils.showSearchResults(rootView, mTranslatedText);
         }
     }
 
@@ -500,7 +575,7 @@ public class OcrActivity extends AppCompatActivity {
             imgDAO.persistImageInsight(insightsResponse);
             insightsCount++;
             Log.e(LOG_TAG, "Insights callback count: " + insightsCount);
-            if (insightsCount < IMAGES_COUNT) {
+            if (insightsCount < imageResultSize) {
                 return;
             }
             // Once we have collated X imageinsights count, start CompleteTask to synchronize all tasks
@@ -510,19 +585,13 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
-            if (insightsCount < IMAGES_COUNT) {
-                insightsCount++;
+            insightsCount++;
+            if (insightsCount < imageResultSize) {
                 return;
             }
-            insightsCount = 0;
             // Failed to get the IMAGE_KEY insights so display snackbar error dialog
-            Log.e(LOG_TAG, t.getMessage());
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
-            progressBar.setVisibility(View.GONE);
-            AnimUtils.brightenOverlay(rootView.findViewById(R.id.drawable_overlay));
-            Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.insights_search_fail,
-                    Snackbar.LENGTH_LONG)
-                    .show();
+            new CompleteTask(context, rootView, fm)
+                    .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
 
@@ -558,17 +627,16 @@ public class OcrActivity extends AppCompatActivity {
             // IMAGE_KEY search results received, now enqueueImageInsightCall with received value
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
+                // Expected result size is the minimum of the max count and the size.
+                imageResultSize = Math.min(imageValues.size(), IMAGES_COUNT);
                 searchFragment.clearRecycler();
-                for (int i = 0; i < IMAGES_COUNT; i++) {
+                for (int i = 0; i < imageResultSize; i++) {
                     ImageValue imgVal = imageValues.get(i);
                     searchFragment.updateRecyclerList(imgVal);
                     searchImageInsights(context, imgVal);
                 }
             } else {
-                ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
-                progressBar.setVisibility(View.GONE);
-                FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-                AnimUtils.brightenOverlay(drawableOverlay);
+                ViewUtils.terminateSearchProgress(rootView);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
 
@@ -577,36 +645,13 @@ public class OcrActivity extends AppCompatActivity {
         @Override
         public void onFailure(Call<ImageSearchResponse> call, Throwable t) {
             Log.e(LOG_TAG, t.getMessage());
-            Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.image_search_fail,
+            Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.image_search_fail,
                     Snackbar.LENGTH_LONG)
                     .show();
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.search_progress);
-            progressBar.setVisibility(View.GONE);
-            FrameLayout drawableOverlay = (FrameLayout) rootView.findViewById(R.id.drawable_overlay);
-            AnimUtils.brightenOverlay(drawableOverlay);
+            ViewUtils.terminateSearchProgress(rootView);
             Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
         }
     }
-
-    private class translateTask extends AsyncTask<Void, Void, String> {
-        String searchParam;
-
-        translateTask(String searchParam) {
-            this.searchParam = searchParam;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            return BingTranslate.getTranslatedText(searchParam);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            mTranslatedText = result;
-            super.onPostExecute(result);
-        }
-    }
-
 
     /**
      * Callback class that implements callback method to be used for when a
@@ -637,19 +682,15 @@ public class OcrActivity extends AppCompatActivity {
             mDrawableView.drawBoxes(rootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
-            AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay));
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-            AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
+            ViewUtils.finishOcrProgress(rootView);
             SavePhotoOCR(bingOcrResponse);
-            SaveImage(BitmapFactory.decodeFile(filePath));
+            SaveImage(BitmapFactory.decodeFile(mFilePath));
         }
 
         @Override
         public void onFailure(Call<BingOcrResponse> call, Throwable t) {
-            AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay));
-            ProgressBar progressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
-            AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
-            Snackbar.make(rootView.findViewById(R.id.activity_ocr_exp), R.string.OCRFailed,
+            ViewUtils.finishOcrProgress(rootView);
+            Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.OCRFailed,
                     Snackbar.LENGTH_LONG)
                     .show();
             Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
@@ -747,7 +788,7 @@ public class OcrActivity extends AppCompatActivity {
 
         @Override
         protected byte[] doInBackground(String... params) {
-            return ImageUtils.compressImage(params[0]);
+            return ImageUtils.compressImage(params[0], params[1]);
         }
     }
 
@@ -765,7 +806,7 @@ public class OcrActivity extends AppCompatActivity {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
             if (!animating) {
-                closeSearchResults();
+                ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
             }
             mDrawableView = (DrawableView) v;
             List<Rect> rects = mDrawableView.getmRects();
@@ -774,30 +815,53 @@ public class OcrActivity extends AppCompatActivity {
             for (int i = 0; i < rects.size(); i++) {
                 Rect rect = rects.get(i);
                 if (rect.contains(x, y)) {
-                    selectRect(i);
+                    chooseRect(i);
                     return true;
                 }
             }
             return v.performClick();
         }
 
-        private void selectRect(int i) {
-            mDrawableView.updateSelection(i);
+        private void chooseRect(int i) {
+            mDrawableView.chooseRect(i);
             // Display the string in a snackbar and allow for search
             String searchParam = mDrawableView.getmLineTexts().get(i).toLowerCase();
             searchParam = searchParam.substring(0, 1).toUpperCase() + searchParam.substring(1);
             View searchBar = findViewById(R.id.search_bar_container);
-            AnimUtils.showSearchBar(context, searchBar, searchParam);
+            // if !Animating or searchbar is already up, show searchbar with new search param.
+            if (!animating || searchBar.getTranslationY() == 0) {
+                AnimUtils.showSearchBar(rootView, searchBar, searchParam, new IsAnimatingListener(rootView));
+            }
         }
     }
+
+    private class translateTask extends AsyncTask<Void, Void, String> {
+        String searchParam;
+
+        translateTask(String searchParam) {
+            this.searchParam = searchParam;
+        }
+
+        @Override
+        protected String doInBackground(Void... params) {
+            return BingTranslate.getTranslatedText(searchParam);
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            mTranslatedText = result;
+            super.onPostExecute(result);
+        }
+    }
+
 
     /**
      * Listener to set boolean value for animating so that we can track it
      */
-    private class AnimatingListener implements Animator.AnimatorListener {
+    private class IsAnimatingListener implements Animator.AnimatorListener {
         View rootView = null;
 
-        AnimatingListener(View rootView) {
+        IsAnimatingListener(View rootView) {
             this.rootView = rootView;
         }
 
