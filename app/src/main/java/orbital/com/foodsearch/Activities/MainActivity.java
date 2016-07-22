@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public static String BASE_LANGUAGE;
     private static SharedPreferences sharedPreferencesSettings;
     private final String DEFAULT_LANG_KEY = "DEFAULT_LANG_KEY";
+    private final String foodSearch = "FoodSearch";
     private SharedPreferences sharedpreferences;
     private Uri sourceFileUri = null;
     private Uri destFileUri = null;
@@ -475,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
      */
     private void generateUri() {
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                , "FoodSearch");
+                , foodSearch);
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {

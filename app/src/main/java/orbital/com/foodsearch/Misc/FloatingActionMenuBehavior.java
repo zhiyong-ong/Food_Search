@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPropertyAnimatorListener;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.github.clans.fab.FloatingActionMenu;
 
 import java.util.List;
@@ -21,12 +22,14 @@ public class FloatingActionMenuBehavior extends CoordinatorLayout.Behavior {
 
     @Override
     public boolean layoutDependsOn(CoordinatorLayout parent, View child, View dependency) {
-        return dependency instanceof Snackbar.SnackbarLayout;
+        return dependency instanceof Snackbar.SnackbarLayout || dependency instanceof AHBottomNavigation;
     }
 
     @Override
     public boolean onDependentViewChanged(CoordinatorLayout parent, View child, View dependency) {
         if (child instanceof FloatingActionMenu && dependency instanceof Snackbar.SnackbarLayout) {
+            this.updateTranslation(parent, child, dependency);
+        } else if (child instanceof FloatingActionMenu && dependency instanceof AHBottomNavigation) {
             this.updateTranslation(parent, child, dependency);
         }
 
@@ -37,7 +40,10 @@ public class FloatingActionMenuBehavior extends CoordinatorLayout.Behavior {
     public void onDependentViewRemoved(CoordinatorLayout parent, View child, View dependency) {
         if (child instanceof FloatingActionMenu && dependency instanceof Snackbar.SnackbarLayout) {
             this.updateTranslation(parent, child, dependency);
+        } else if (child instanceof FloatingActionMenu && dependency instanceof AHBottomNavigation) {
+            this.updateTranslation(parent, child, dependency);
         }
+
     }
 
     private void updateTranslation(CoordinatorLayout parent, View child, View dependency) {
@@ -65,7 +71,8 @@ public class FloatingActionMenuBehavior extends CoordinatorLayout.Behavior {
 
         for (int z = dependencies.size(); i < z; ++i) {
             View view = (View) dependencies.get(i);
-            if (view instanceof Snackbar.SnackbarLayout && parent.doViewsOverlap(child, view)) {
+            if (view instanceof Snackbar.SnackbarLayout || view instanceof AHBottomNavigation
+                    && parent.doViewsOverlap(child, view)) {
                 minOffset = Math.min(minOffset, ViewCompat.getTranslationY(view) - (float) view.getHeight());
             }
         }
