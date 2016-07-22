@@ -29,7 +29,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
@@ -74,9 +73,8 @@ import retrofit2.Response;
 
 public class OcrActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-    static final String DEST_FILE_PATH = "DESTFILEPATH";
-    static final String SOURCE_FILE_PATH = "SOURCEFILEPATH";
     public static final String RESPONSE = "dataResponse";
+    static final String FILE_PATH = "FILEPATH";
     private static final String LOG_TAG = "FOODIES";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
     private static final String SEARCH_BAR_TAG = "SEARCHBARTAG";
@@ -98,19 +96,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private DatabaseReference database;
     private boolean animating = false;
     private int searchBarTrans;
-    private String destFilePath = null;
-    private String sourceFilePath = null;
+    private String mFilePath = null;
 
     private String currentTime;
     private ArrayList<Long> IDArrayList;
     private Context context;
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (destFilePath != null) {
-            outState.putString(DEST_FILE_PATH, destFilePath);
-        }
-        if (sourceFilePath != null) {
-            outState.putString(SOURCE_FILE_PATH, sourceFilePath);
+        if (mFilePath != null) {
+            outState.putString(FILE_PATH, mFilePath);
         }
         super.onSaveInstanceState(outState);
     }
@@ -118,11 +112,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.containsKey(DEST_FILE_PATH)) {
-            destFilePath = savedInstanceState.getString(DEST_FILE_PATH);
-        }
-        if (savedInstanceState.containsKey(SOURCE_FILE_PATH)) {
-            sourceFilePath = savedInstanceState.getString(SOURCE_FILE_PATH);
+        if (savedInstanceState.containsKey(FILE_PATH)) {
+            mFilePath = savedInstanceState.getString(FILE_PATH);
         }
     }
 
@@ -152,9 +143,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
-        if (destFilePath == null) {
-            destFilePath = getIntent().getStringExtra(DEST_FILE_PATH);
-            sourceFilePath = getIntent().getStringExtra(SOURCE_FILE_PATH);
+        if (mFilePath == null) {
+            mFilePath = getIntent().getStringExtra(FILE_PATH);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -187,26 +177,34 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 + String.valueOf(cal.get(Calendar.YEAR)) + "_" + String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + ":"
                 + String.valueOf(cal.get(Calendar.MINUTE)) + ":" + String.valueOf(cal.get(Calendar.SECOND)) + ".jpg";
 
-        String data = getIntent().getStringExtra(RESPONSE);
+        final String data = getIntent().getStringExtra(RESPONSE);
         initializeDrawView();
         setupSearchContainer();
         setupSearchBar();
         if(data == null) {
-            Picasso.with(this).load("file://" + destFilePath)
+            Picasso.with(this).load("file://" + mFilePath)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .resize(30, 48)
                     .into(previewImageView);
             startOcrService();
             Log.e(LOG_TAG, "COMPRESS!  " + data);
-        }
-        else {
-            Picasso.with(this).load("file://" + destFilePath)
+        } else {
+            Picasso.with(this).load("file://" + mFilePath)
                     .noPlaceholder()
                     .fit()
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
-                    .into(previewImageView);
-            drawBoxesRecentImage(data, destFilePath, findViewById(R.id.activity_ocr));
+                    .into(previewImageView, new com.squareup.picasso.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            drawBoxesRecentImage(data, mFilePath, findViewById(R.id.activity_ocr));
+                        }
+
+                        @Override
+                        public void onError() {
+
+                        }
+                    });
         }
     }
 
@@ -284,7 +282,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 @Override
                 protected void onPostExecute(byte[] compressedImage) {
                     ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                    Picasso.with(mContext).load("file://" + destFilePath)
+                    Picasso.with(mContext).load("file://" + mFilePath)
                             .noPlaceholder()
                             .fit()
                             .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -292,7 +290,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     onHoldBingOcrConnect(compressedImage);
                 }
             };
-            compressTask.execute(sourceFilePath, destFilePath);
+            compressTask.execute(mFilePath, mFilePath);
         }
     }
 
@@ -307,17 +305,17 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 // When compressTask is done, invoke dispatchCall for POST call
                 Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                 // Enqueue the method to the call and wait for callback (Asynchronous call)
-                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
+                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), mFilePath));
                 // After call is dispatched, load full res IMAGE_KEY into preview
                 ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                Picasso.with(mContext).load("file://" + destFilePath)
+                Picasso.with(mContext).load("file://" + mFilePath)
                         .noPlaceholder()
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .into(previewImageView);
             }
         };
-        compressTask.execute(sourceFilePath, destFilePath);
+        compressTask.execute(mFilePath, mFilePath);
     }
 
     /**
@@ -338,7 +336,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
                     Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
                     // Enqueue the method to the call and wait for callback (Asynchronous call)
-                    call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), destFilePath));
+                    call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), mFilePath));
                 } else {
                     onHoldBingOcrConnect(compressedImage);
                 }
@@ -516,6 +514,82 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
                 FRAGMENT_MANAGER,
                 imgVal));
+    }
+
+    /**
+     * saves the ocr response into the local db in the form of json, with the key being
+     * the current time
+     *
+     * @param response
+     */
+    private void SavePhotoOCR(BingOcrResponse response) {
+
+        Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
+        //save the lines to local DB
+        Gson gson = new Gson();
+        String json = gson.toJson(response);
+        PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
+        SQLiteDatabase db = mDBHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        // Create a new map of values, where column names are the keys
+        values.put(PhotosEntry.COLUMN_NAME_ENTRY_TIME, currentTime);
+        values.put(PhotosEntry.COLUMN_NAME_TITLE, "Photo_Data");
+        values.put(PhotosEntry.COLUMN_NAME_DATA, json);
+        // Insert the new row, returning the primary key value of the new row
+        long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
+        IDArrayList.add(newRowID);
+        Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
+    }
+
+    /**
+     * Saves a duplicate of the image into the recent images folder.
+     * Name of the image would be the timestamp.
+     *
+     * @param finalBitmap
+     */
+    private void SaveImage(Bitmap finalBitmap) {
+        String root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString();
+        File myDir = new File(root + "/Recent_Images");
+        if (!myDir.exists()) {
+            if (!myDir.mkdirs()) {
+                Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
+            }
+        }
+
+        String fname = currentTime;
+        File file = new File(myDir, fname);
+        if (file.exists()) file.delete();
+        try {
+            FileOutputStream out = new FileOutputStream(file);
+            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            out.flush();
+            out.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Draw boxes onto the image that have been saved.
+     *
+     * @param response  JSON data for the boxes
+     * @param mFilePath file path of the image
+     * @param rootView  view in which the layout exists
+     */
+    private void drawBoxesRecentImage(String response, String mFilePath, View rootView) {
+        DrawableView mDrawableView = (DrawableView) findViewById(R.id.drawable_view);
+        Gson gson = new Gson();
+        Log.e(LOG_TAG, "RESPONSE: " + response);
+        Log.e(LOG_TAG, "response length " + response.length());
+        Log.e(LOG_TAG, "file path: " + mFilePath);
+        Log.e(LOG_TAG, "view: " + rootView.toString());
+        BingOcrResponse responseData = gson.fromJson(response, BingOcrResponse.class);
+        List<Line> lines = responseData.getAllLines();
+        mDrawableView.drawBoxes(rootView, mFilePath, lines,
+                responseData.getTextAngle().floatValue(),
+                responseData.getLanguage());
+        ViewUtils.finishOcrProgress(rootView);
     }
 
     private static class CompleteTask extends AsyncTask<Void, Void, Void> {
@@ -706,82 +780,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     .show();
             Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
         }
-    }
-
-    /**
-     * saves the ocr response into the local db in the form of json, with the key being
-     * the current time
-     * @param response
-     */
-    private void SavePhotoOCR(BingOcrResponse response) {
-
-        Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
-        //save the lines to local DB
-        Gson gson = new Gson();
-        String json = gson.toJson(response);
-        PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
-        SQLiteDatabase db = mDBHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        // Create a new map of values, where column names are the keys
-        values.put(PhotosEntry.COLUMN_NAME_ENTRY_TIME, currentTime);
-        values.put(PhotosEntry.COLUMN_NAME_TITLE, "Photo_Data");
-        values.put(PhotosEntry.COLUMN_NAME_DATA, json);
-        // Insert the new row, returning the primary key value of the new row
-        long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
-        IDArrayList.add(newRowID);
-        Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
-    }
-
-    /**
-     * Saves a duplicate of the image into the recent images folder.
-     * Name of the image would be the timestamp.
-     * @param finalBitmap
-     */
-    private void SaveImage(Bitmap finalBitmap) {
-        String root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString();
-        File myDir = new File(root + "/Recent_Images");
-        if (!myDir.exists()) {
-            if (!myDir.mkdirs()) {
-                Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
-            }
-        }
-
-        String fname = currentTime;
-        File file = new File (myDir, fname);
-        if (file.exists ()) file.delete ();
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            out.flush();
-            out.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Draw boxes onto the image that have been saved.
-     * @param response JSON data for the boxes
-     * @param mFilePath file path of the image
-     * @param rootView view in which the layout exists
-     */
-    private void drawBoxesRecentImage(String response, String mFilePath, View rootView) {
-        DrawableView mDrawableView = (DrawableView) findViewById(R.id.drawable_view);
-        Gson gson = new Gson();
-        Log.e(LOG_TAG, "RESPONSE: " + response);
-        Log.e(LOG_TAG, "response length " + response.length());
-        Log.e(LOG_TAG, "file path: " + mFilePath);
-        Log.e(LOG_TAG, "view: " + rootView.toString());
-        BingOcrResponse responseData = gson.fromJson(response, BingOcrResponse.class);
-        List<Line> lines = responseData.getAllLines();
-        mDrawableView.drawBoxes(rootView, mFilePath, lines,
-                responseData.getTextAngle().floatValue(),
-                responseData.getLanguage());
-        mDrawableView.setVisibility(View.VISIBLE);
-        AnimUtils.brightenOverlay(findViewById(R.id.drawable_overlay));
-        ProgressBar progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        AnimUtils.fadeOut(progressBar, AnimUtils.PROGRESS_BAR_DURATION);
     }
 
     /**

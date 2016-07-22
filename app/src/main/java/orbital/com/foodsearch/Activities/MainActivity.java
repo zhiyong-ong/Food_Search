@@ -67,8 +67,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private final String DEFAULT_LANG_KEY = "DEFAULT_LANG_KEY";
     private final String foodSearch = "FoodSearch";
     private SharedPreferences sharedpreferences;
-    private Uri sourceFileUri = null;
-    private Uri destFileUri = null;
+    private Uri fileUri = null;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private String user = "foodies@firebase.com";
@@ -266,8 +265,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (sourceFileUri != null) {
-            outState.putString(SAVED_URI, sourceFileUri.toString());
+        if (fileUri != null) {
+            outState.putString(SAVED_URI, fileUri.toString());
         }
         super.onSaveInstanceState(outState);
     }
@@ -276,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.containsKey(SAVED_URI)) {
-            sourceFileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
+            fileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
         }
     }
 
@@ -351,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
      */
     private void dispatchCameraIntent() {
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, sourceFileUri);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
         startActivityForResult(cameraIntent, OCR_CAMERA_INTENT_REQUEST_CODE);
     }
 
@@ -380,11 +379,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 if (resultCode == RESULT_OK) {
                     ExifInterface exif;
                     try {
-                        exif = new ExifInterface(sourceFileUri.getPath());
+                        exif = new ExifInterface(fileUri.getPath());
                         int width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 1);
                         int length = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0);
                         if (width > length) {
-                            startCropActivity(sourceFileUri, true);
+                            startCropActivity(fileUri, true);
                         } else {
                             startOcrActivity();
                         }
@@ -419,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private void startCropActivity(Uri uri, boolean isCamera) {
         Intent intent = new Intent(this, CropActivity.class);
         intent.putExtra(CropActivity.SOURCE_URI, uri);
-        intent.putExtra(CropActivity.OUTPUT_URI, destFileUri);
+        intent.putExtra(CropActivity.OUTPUT_URI, fileUri);
         if (isCamera) {
             startActivityForResult(intent, CAMERA_CROP_INTENT_REQUEST_CODE);
         } else {
@@ -432,8 +431,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
      */
     private void startOcrActivity() {
         Intent intent = new Intent(this, OcrActivity.class);
-        intent.putExtra(OcrActivity.SOURCE_FILE_PATH, sourceFileUri.getPath());
-        intent.putExtra(OcrActivity.DEST_FILE_PATH, destFileUri.getPath());
+        intent.putExtra(OcrActivity.FILE_PATH, fileUri.getPath());
+        startActivity(intent);
+    }
+
+    public void openRecentPhoto(String path, String data) {
+        Intent intent = new Intent(this, OcrActivity.class);
+        intent.putExtra(OcrActivity.FILE_PATH, path);
+        intent.putExtra(OcrActivity.RESPONSE, data);
         startActivity(intent);
     }
 
@@ -483,7 +488,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
             }
         }
-        sourceFileUri = destFileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
+        fileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
                 + File.separator + PHOTO_FILE_NAME));
     }
 
@@ -501,12 +506,5 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             mAuth.removeAuthStateListener(mAuthListener);
         }
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
-    }
-
-    public void openRecentPhoto(String path, String data) {
-        Intent intent = new Intent(this, OcrActivity.class);
-        intent.putExtra(OcrActivity.DEST_FILE_PATH, path);
-        intent.putExtra(OcrActivity.RESPONSE, data);
-        startActivity(intent);
     }
 }

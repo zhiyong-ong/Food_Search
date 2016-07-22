@@ -88,9 +88,15 @@ public class RecentsFragment extends android.app.Fragment {
 
     @Override
     public void onResume() {
-        String root = getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString() + "/Recent_Images";
-        File[] files = (new File(root)).listFiles();
-        if(files.length != 0) {
+        File root = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+                , "Recent_Images");
+        if (!root.exists()) {
+            if (!root.mkdirs()) {
+                Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
+            }
+        }
+        File[] files = root.listFiles();
+        if (files.length != 0) {
             clearFiles();
             getFiles();
             mAdapter.notifyDataSetChanged();
