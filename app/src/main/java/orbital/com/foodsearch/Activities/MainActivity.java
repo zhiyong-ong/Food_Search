@@ -81,7 +81,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.main_toolbar));
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
+        setSupportActionBar(toolbar);
         setupFab();
         setBottomNavigationBar();
         generateUri();
