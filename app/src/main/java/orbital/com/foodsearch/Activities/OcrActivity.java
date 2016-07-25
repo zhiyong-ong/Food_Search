@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
@@ -30,7 +31,13 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -43,7 +50,6 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -89,7 +95,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
     private static ImageSearchResponse searchResponseDB;
-    private static SharedPreferences sharedPreferences;
     private static SharedPreferences sharedPreferencesSettings;
     private static int IMAGES_COUNT_MAX;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
@@ -97,10 +102,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private boolean animating = false;
     private int searchBarTrans;
     private String mFilePath = null;
-
     private String currentTime;
-    private ArrayList<Long> IDArrayList;
     private Context context;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseAuth mAuth;
+    private String user = "foodies@firebase.com";
+    private String password = "Orbital123";
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (mFilePath != null) {
@@ -152,25 +160,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(Color.BLACK);
         }
-
-        database = FirebaseDatabase.getInstance().getReference();
         imgDAO = new BingImageDAO();
-        sharedPreferences = getSharedPreferences(MainActivity.MyPREFERENCES, MODE_PRIVATE);
-        IMAGE_KEY = sharedPreferences.getString(MainActivity.IMAGE_KEY, null);
-        OCR_KEY = sharedPreferences.getString(MainActivity.OCR_KEY, null);
-        TRANSLATE_KEY = sharedPreferences.getString(MainActivity.TRANSLATE_KEY, null);
-
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-
         IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
         IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
         Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
         context = this;
         // Load a placeholder low res image first, resized to 30x48
-        ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
+        final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
 
-
-        IDArrayList = new ArrayList<>();
         //current time
         Calendar cal = Calendar.getInstance();
         currentTime = String.valueOf(cal.get(Calendar.DATE)) + "-" + String.valueOf(cal.get(Calendar.MONTH)) + "-"
@@ -181,14 +179,49 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         initializeDrawView();
         setupSearchContainer();
         setupSearchBar();
+
+        database = FirebaseDatabase.getInstance().getReference();
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    database.child("APIKEY").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            for (DataSnapshot next : dataSnapshot.getChildren()) {
+                                if (next.getKey().equals("OCP_APIM_KEY")) {
+                                    IMAGE_KEY = next.getChildren().iterator().next().getValue(String.class);
+                                } else if (next.getKey().equals("OCR_KEY")) {
+                                    OCR_KEY = next.getChildren().iterator().next().getValue(String.class);
+                                    Picasso.with(context).load("file://" + mFilePath)
+                                            //.placeholder(R.color.black_overlay)
+                                            .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                            .resize(30, 48)
+                                            .into(previewImageView);
+                                    startOcrService();
+                                    Log.e(LOG_TAG, "COMPRESS!  " + data);
+                                } else if (next.getKey().equals("TRANSLATE_KEY")) {
+                                    TRANSLATE_KEY = next.getChildren().iterator().next().getValue(String.class);
+                                }
+                            }
+                        }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.e(LOG_TAG, "getUser:onCancelled", databaseError.toException());
+                        }
+                    });
+                    Log.e(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                } else {
+                    // User is signed out
+                    Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
+                }
+            }
+        };
         if(data == null) {
-            Picasso.with(this).load("file://" + mFilePath)
-                    //.placeholder(R.color.black_overlay)
-                    .memoryPolicy(MemoryPolicy.NO_CACHE)
-                    .resize(30, 48)
-                    .into(previewImageView);
-            startOcrService();
-            Log.e(LOG_TAG, "COMPRESS!  " + data);
+            //sign in to firebase to get the api keys and go through ocr service.
+            signInFirebase();
         } else {
             Picasso.with(this).load("file://" + mFilePath)
                     .noPlaceholder()
@@ -207,16 +240,38 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     });
         }
     }
+    private void signInFirebase() {
+        mAuth.signInWithEmailAndPassword(user, password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.e(LOG_TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.e(LOG_TAG, "signInWithEmail", task.getException());
+                            Toast.makeText(OcrActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
+    }
     @Override
     public void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
     }
 
@@ -537,7 +592,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         values.put(PhotosEntry.COLUMN_NAME_DATA, json);
         // Insert the new row, returning the primary key value of the new row
         long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
-        IDArrayList.add(newRowID);
         Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
     }
 

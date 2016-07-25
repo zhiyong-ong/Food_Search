@@ -20,5 +20,7 @@ public class PhotosContract {
         public static final String COLUMN_NAME_TITLE = "photo_data";
         public static final String COLUMN_NAME_DATA = "data";
     }
+
+
 }
 

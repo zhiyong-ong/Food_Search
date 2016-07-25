@@ -2,7 +2,6 @@ package orbital.com.foodsearch.Activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -22,22 +21,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.github.clans.fab.FloatingActionButton;
 import com.github.clans.fab.FloatingActionMenu;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.util.Locale;
@@ -48,10 +36,7 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
-    public static final String MyPREFERENCES = "Preferences";
-    static final String IMAGE_KEY = "ImageKey";
-    static final String TRANSLATE_KEY = "TranslateKey";
-    static final String OCR_KEY = "OCRKey";
+
     private static final int OCR_CAMERA_PERMISSION_REQUEST_CODE = 1;
     private static final int OCR_CAMERA_INTENT_REQUEST_CODE = 100;
     private static final int READ_STORAGE_PERMISSION_REQUEST_CODE = 2;
@@ -66,13 +51,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static SharedPreferences sharedPreferencesSettings;
     private final String DEFAULT_LANG_KEY = "DEFAULT_LANG_KEY";
     private final String foodSearch = "FoodSearch";
-    private SharedPreferences sharedpreferences;
     private Uri fileUri = null;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private FirebaseAuth mAuth;
-    private String user = "foodies@firebase.com";
-    private String password = "Orbital123";
-    private DatabaseReference database;
     private FrameLayout mFabOverlay;
     private FloatingActionMenu mFabMenu;
     private String defaultLang;
@@ -87,49 +66,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setBottomNavigationBar();
         generateUri();
 
-        database = FirebaseDatabase.getInstance().getReference();
-        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         PreferenceManager.setDefaultValues(this, R.xml.settings_preference, false);
         getBaseLanguage();
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    final SharedPreferences.Editor editor = sharedpreferences.edit();
-                    database.child("APIKEY").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot next : dataSnapshot.getChildren()) {
-                                if (next.getKey().equals("OCP_APIM_KEY")) {
-                                    editor.putString(IMAGE_KEY, next.getChildren().iterator().next().getValue(String.class));
-                                } else if (next.getKey().equals("OCR_KEY")) {
-                                    editor.putString(OCR_KEY, next.getChildren().iterator().next().getValue(String.class));
-                                } else if (next.getKey().equals("TRANSLATE_KEY")) {
-                                    editor.putString(TRANSLATE_KEY, next.getChildren().iterator().next().getValue(String.class));
-                                }
-                            }
-                            editor.apply();
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            Log.e(LOG_TAG, "getUser:onCancelled", databaseError.toException());
-                        }
-                    });
-
-                    Log.e(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                } else {
-                    // User is signed out
-                    Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
-                }
-                // ...
-            }
-        };
-        signInFirebase();
         //        PhotosDBHelper mDbHelper = new PhotosDBHelper(this);
 //        SQLiteDatabase db = mDbHelper.getReadableDatabase();
 //        db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
@@ -223,25 +163,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         });
     }
 
-    private void signInFirebase() {
-        mAuth.signInWithEmailAndPassword(user, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.e(LOG_TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.e(LOG_TAG, "signInWithEmail", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
-    }
 
     @Override
     public void onBackPressed() {
@@ -450,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
      * If already registered default then we simply load for shared preference settings.
      */
     private void getBaseLanguage() {
-        defaultLang = sharedpreferences.getString(DEFAULT_LANG_KEY, null);
+        defaultLang = sharedPreferencesSettings.getString(getString(R.string.select_lang_key), null);
         if (defaultLang == null) {
             String[] langValues = getResources().getStringArray(R.array.listLanguagesValues);
             String sysLang = Locale.getDefault().getLanguage();
@@ -469,7 +390,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 defaultLang = "en";
             }
             sharedPreferencesSettings.edit().putString(getString(R.string.select_lang_key), defaultLang).apply();
-            sharedpreferences.edit().putString(DEFAULT_LANG_KEY, defaultLang).apply();
             BASE_LANGUAGE = defaultLang;
         } else {
             BASE_LANGUAGE = sharedPreferencesSettings.getString(
@@ -496,16 +416,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
     }
 }
