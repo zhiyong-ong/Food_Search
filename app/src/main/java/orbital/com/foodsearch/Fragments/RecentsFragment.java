@@ -146,7 +146,7 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
         cursor.moveToFirst();
         String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
         Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
-        ((MainActivity) getActivity()).openRecentPhoto(filePaths.get(idx), data);
+        ((MainActivity) getActivity()).openRecentPhoto(view, filePaths.get(idx), data);
     }
 
     private void myToggleSelection(int idx, View view) {

@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.support.percent.PercentRelativeLayout;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -64,7 +63,13 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         final ImageView recentImageView = holder.recentImage;
         TextView timestamp = holder.timeStamp;
         Log.e(LOG_TAG, "position is: " + position);
-        timestamp.setText(fileTitles.get(position));
+        String title = fileTitles.get(position);
+        timestamp.setText(title);
+
+        Cursor cursor = readDatabase(title);
+        String formattedDate = cursor.getString(cursor.getColumnIndex(PhotosEntry.COLUMN_NAME_FORMATTED_DATE));
+        String formattedString = cursor.getString(cursor.getColumnIndex(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
+
         String path = filePaths.get(position);
         Log.e(LOG_TAG, "path is: " + path);
         Picasso.with(mContext).load("file://" + path)
@@ -93,7 +98,9 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         String[] results = {
                 PhotosEntry._ID,
                 PhotosEntry.COLUMN_NAME_DATA,
-                PhotosEntry.COLUMN_NAME_ENTRY_TIME};
+                PhotosEntry.COLUMN_NAME_ENTRY_TIME,
+                PhotosEntry.COLUMN_NAME_FORMATTED_DATE,
+                PhotosEntry.COLUMN_NAME_FORMATTED_STRING};
         Cursor c = db.query(
                 PhotosEntry.TABLE_NAME,
                 results,
@@ -149,7 +156,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         return items;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         private View itemView;
         private ImageView recentImage;
         private TextView timeStamp;
