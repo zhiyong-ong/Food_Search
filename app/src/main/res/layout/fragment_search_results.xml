@@ -18,7 +18,6 @@
         android:layout_centerHorizontal="true"
         android:background="#00000000"
         android:orientation="horizontal"
-        android:scrollbars="horizontal"
         app:layout_heightPercent="70%" />
 
     <LinearLayout

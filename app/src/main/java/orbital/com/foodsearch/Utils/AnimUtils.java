@@ -11,8 +11,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
-import android.os.Handler;
 import android.support.v4.view.animation.FastOutSlowInInterpolator;
+import android.transition.Transition;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
@@ -56,25 +56,10 @@ public class AnimUtils {
             }
         });
 
-        brightenAnim.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
+        brightenAnim.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 overlay.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
             }
         });
 
@@ -280,61 +265,40 @@ public class AnimUtils {
         final Float originalAlpha = view.getAlpha();
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, originalAlpha, 0);
         animator.setDuration(duration);
-        animator.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
-
-            }
-
+        animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
                 view.setVisibility(View.GONE);
                 view.setAlpha(originalAlpha);
             }
-
-            @Override
-            public void onAnimationCancel(Animator animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animation) {
-
-            }
         });
         animator.start();
     }
 
-    public static class resultsAnimListener implements Animator.AnimatorListener {
-        private View translationCard;
-
-        public resultsAnimListener(View translationViiew) {
-            this.translationCard = translationViiew;
-        }
+    public static class TransitionListenerAdapter implements Transition.TransitionListener {
 
         @Override
-        public void onAnimationStart(Animator animation) {
+        public void onTransitionStart(Transition transition) {
 
         }
 
         @Override
-        public void onAnimationEnd(Animator animation) {
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    enterReveal(translationCard, null);
-                }
-            }, 900);
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
+        public void onTransitionEnd(Transition transition) {
 
         }
 
         @Override
-        public void onAnimationRepeat(Animator animation) {
+        public void onTransitionCancel(Transition transition) {
+
+        }
+
+        @Override
+        public void onTransitionPause(Transition transition) {
+
+        }
+
+        @Override
+        public void onTransitionResume(Transition transition) {
 
         }
     }

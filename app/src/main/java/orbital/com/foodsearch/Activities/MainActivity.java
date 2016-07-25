@@ -15,13 +15,16 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
@@ -58,10 +61,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int IMAGE_PICK_INTENT_REQUEST_CODE = 200;
     private static final int CAMERA_CROP_INTENT_REQUEST_CODE = 300;
     private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
+    private static final String RECENTS_FRAG_TAG = "recentsFrag";
+    private static final String SETTINGS_FRAG_TAG = "settingsFrag";
     private static final String SAVED_URI = "savedUri";
     private static final String LOG_TAG = "FOODIES";
     private static final String PHOTO_FILE_NAME = "photo.jpg";
-    private static final String DEBUG_FILE_NAME = "debug.jpg";
     public static String BASE_LANGUAGE;
     private static SharedPreferences sharedPreferencesSettings;
     private final String DEFAULT_LANG_KEY = "DEFAULT_LANG_KEY";
@@ -76,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private FrameLayout mFabOverlay;
     private FloatingActionMenu mFabMenu;
     private String defaultLang;
+    private RecentsFragment mRecentsFrag;
+    private SettingFragment mSettingFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,27 +163,42 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         bottomNavigation.addItem(settingsItem);
         bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimary));
         bottomNavigation.setForceTitlesDisplay(true);
-        bottomNavigation.setCurrentItem(1);
-
+        android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+        if (getFragmentManager().findFragmentByTag(SETTINGS_FRAG_TAG) == null ||
+                getFragmentManager().findFragmentByTag(RECENTS_FRAG_TAG) == null) {
+            mRecentsFrag = new RecentsFragment();
+            mSettingFrag = new SettingFragment();
+            ft.add(R.id.nav_frag_container, mSettingFrag, SETTINGS_FRAG_TAG);
+            ft.add(R.id.nav_frag_container, mRecentsFrag, RECENTS_FRAG_TAG);
+            ft.hide(mSettingFrag);
+            ft.commit();
+        }
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
-                mFabOverlay.setClickable(false);
-                mFabMenu.close(true);
-                AnimUtils.fadeOut(mFabOverlay, AnimUtils.FAB_OVERLAY_DURATION);
-                if (wasSelected) {
-                    return true;
-                }
+                closeFab();
                 android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
+                if (wasSelected) {
+                    switch (position) {
+                        case 0:
+                            ft.hide(mSettingFrag);
+                            mRecentsFrag.smoothScrollToTop();
+                            return true;
+                    }
+                    return false;
+                }
                 switch (position) {
                     case 0:
-                        ft.replace(R.id.nav_frag_container, new RecentsFragment());
+                        mRecentsFrag.scrollToTop();
+                        ft.show(mRecentsFrag);
+                        ft.hide(mSettingFrag);
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
                         return true;
                     case 1:
-                        ft.replace(R.id.nav_frag_container, new SettingFragment());
+                        ft.show(mSettingFrag);
+                        ft.hide(mRecentsFrag);
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
@@ -186,13 +207,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 return false;
             }
         });
-        bottomNavigation.setCurrentItem(0);
     }
 
     private void setupFab() {
         mFabOverlay = (FrameLayout) findViewById(R.id.fab_overlay);
         mFabMenu = (FloatingActionMenu) findViewById(R.id.start_fab);
-        mFabMenu.setClosedOnTouchOutside(true);
+        mFabMenu.setClosedOnTouchOutside(false);
         AnimUtils.setFabMenuIcon(this, mFabMenu);
         mFabMenu.getIconToggleAnimatorSet();
         mFabOverlay.setOnClickListener(new View.OnClickListener() {
@@ -318,51 +338,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.M)
-    private void startCameraOcr() {
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.CAMERA},
-                    OCR_CAMERA_PERMISSION_REQUEST_CODE);
-        } else {
-            dispatchCameraIntent();
-        }
-    }
-
-    @TargetApi(Build.VERSION_CODES.M)
-    private void startImagePick() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    READ_STORAGE_PERMISSION_REQUEST_CODE);
-        } else {
-            dispatchGalleryIntent();
-        }
-    }
-
-    public void goSearch(View view) {
-        Intent intent = new Intent(this, GoogleSearchActivity.class);
-        startActivity(intent);
-    }
-
-    /**
-     * This method dispatches the camera intent
-     */
-    private void dispatchCameraIntent() {
-        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
-        startActivityForResult(cameraIntent, OCR_CAMERA_INTENT_REQUEST_CODE);
-    }
-
-    /**
-     * This method dispatches the image pick intent
-     */
-    private void dispatchGalleryIntent() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        startActivityForResult(intent, IMAGE_PICK_INTENT_REQUEST_CODE);
-    }
-
     /**
      * This method is called after user takes or selected a photo.
      * The image is then cropped and sent directly to ocr activity.
@@ -435,11 +410,20 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         startActivity(intent);
     }
 
-    public void openRecentPhoto(String path, String data) {
+    public void openRecentPhoto(View itemView, String path, String data) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setExitTransition(null);
+            getWindow().setEnterTransition(null);
+        }
         Intent intent = new Intent(this, OcrActivity.class);
         intent.putExtra(OcrActivity.FILE_PATH, path);
         intent.putExtra(OcrActivity.RESPONSE, data);
-        startActivity(intent);
+        ImageView recentsImage = (ImageView) itemView.findViewById(R.id.recent_image_view);
+        String transName = getString(R.string.recents_transition_name);
+        ViewCompat.setTransitionName(recentsImage, transName);
+        ActivityOptionsCompat options = ActivityOptionsCompat
+                .makeSceneTransitionAnimation(this, recentsImage, transName);
+        startActivity(intent, options.toBundle());
     }
 
     /**
@@ -474,6 +458,51 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             BASE_LANGUAGE = sharedPreferencesSettings.getString(
                     getResources().getString(R.string.select_lang_key), defaultLang);
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void startCameraOcr() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.CAMERA},
+                    OCR_CAMERA_PERMISSION_REQUEST_CODE);
+        } else {
+            dispatchCameraIntent();
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    private void startImagePick() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    READ_STORAGE_PERMISSION_REQUEST_CODE);
+        } else {
+            dispatchGalleryIntent();
+        }
+    }
+
+    public void goSearch(View view) {
+        Intent intent = new Intent(this, GoogleSearchActivity.class);
+        startActivity(intent);
+    }
+
+    /**
+     * This method dispatches the camera intent
+     */
+    private void dispatchCameraIntent() {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+        startActivityForResult(cameraIntent, OCR_CAMERA_INTENT_REQUEST_CODE);
+    }
+
+    /**
+     * This method dispatches the image pick intent
+     */
+    private void dispatchGalleryIntent() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(intent, IMAGE_PICK_INTENT_REQUEST_CODE);
     }
 
     /**

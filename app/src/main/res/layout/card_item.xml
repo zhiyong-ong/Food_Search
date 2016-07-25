@@ -21,6 +21,7 @@
             android:layout_width="match_parent"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
+            android:scaleType="centerCrop"
             app:layout_heightPercent="60%" />
 
         <TextView

@@ -12,7 +12,6 @@
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
         android:background="@android:color/black"
-        android:scaleType="fitCenter"
         android:transitionName="@string/fullscreen_transition_name" />
 
     <LinearLayout
