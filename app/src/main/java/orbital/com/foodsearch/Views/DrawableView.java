@@ -110,6 +110,8 @@ public class DrawableView extends FrameLayout {
      * @param lines List of line to convert into drawables
      */
     private void addLinesForDraw(List<Line> lines, String lang) {
+        mLineTexts.clear();
+        mRects.clear();
         for (Line line : lines) {
             String text = line.getText(lang);
             if (text.trim().isEmpty()) {

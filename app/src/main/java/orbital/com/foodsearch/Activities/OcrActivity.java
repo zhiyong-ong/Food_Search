@@ -185,7 +185,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 Calendar cal = Calendar.getInstance();
                 currentTime = FileUtils.getDate(cal);
                 Date date = cal.getTime();
-                DateFormat df = SimpleDateFormat.getDateInstance();
+                DateFormat df = SimpleDateFormat.getDateInstance(DateFormat.FULL);
                 DateFormat tf = SimpleDateFormat.getTimeInstance();
                 formattedDate = df.format(date);
                 formattedTime = tf.format(date);
@@ -199,7 +199,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         final String data = getIntent().getStringExtra(RESPONSE);
         final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
         if(data == null) {
-
             Picasso.with(this).load("file://" + mFilePath)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
