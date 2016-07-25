@@ -195,24 +195,23 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                                     IMAGE_KEY = next.getChildren().iterator().next().getValue(String.class);
                                 } else if (next.getKey().equals("OCR_KEY")) {
                                     OCR_KEY = next.getChildren().iterator().next().getValue(String.class);
-                                    Picasso.with(context).load("file://" + mFilePath)
-                                            //.placeholder(R.color.black_overlay)
-                                            .memoryPolicy(MemoryPolicy.NO_CACHE)
-                                            .resize(30, 48)
-                                            .into(previewImageView);
-                                    startOcrService();
-                                    Log.e(LOG_TAG, "COMPRESS!  " + data);
                                 } else if (next.getKey().equals("TRANSLATE_KEY")) {
                                     TRANSLATE_KEY = next.getChildren().iterator().next().getValue(String.class);
                                 }
                             }
+                            Picasso.with(context).load("file://" + mFilePath)
+                                    //.placeholder(R.color.black_overlay)
+                                    .memoryPolicy(MemoryPolicy.NO_CACHE)
+                                    .resize(30, 48)
+                                    .into(previewImageView);
+                            startOcrService();
+                            Log.e(LOG_TAG, "COMPRESS!  " + data);
                         }
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
                             Log.e(LOG_TAG, "getUser:onCancelled", databaseError.toException());
                         }
                     });
-                    Log.e(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                 } else {
                     // User is signed out
                     Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
