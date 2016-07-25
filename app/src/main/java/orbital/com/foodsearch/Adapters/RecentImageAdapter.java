@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -36,8 +37,6 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     private RecentsFragment mRecentsFragment;
     private List<String> filePaths;
     private List<String> fileTitles;
-    private List<String> formattedDates;
-    private List<String> formattedTimes;
     private SparseBooleanArray selectedItems;
     private PhotosDBHelper mDBHelper;
 
@@ -67,7 +66,13 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         final ImageView recentImageView = holder.recentImage;
         TextView timestamp = holder.timeStamp;
         Log.e(LOG_TAG, "position is: " + position);
-        timestamp.setText(fileTitles.get(position));
+        String title = fileTitles.get(position);
+        timestamp.setText(title);
+
+        Cursor cursor = readDatabase(title);
+        String formattedDate = cursor.getString(cursor.getColumnIndex(PhotosEntry.COLUMN_NAME_FORMATTED_DATE));
+        String formattedString = cursor.getString(cursor.getColumnIndex(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
+
         String path = filePaths.get(position);
         Log.e(LOG_TAG, "path is: " + path);
         if (selectedItems.get(position, false)) {
@@ -90,7 +95,9 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         String[] results = {
                 PhotosEntry._ID,
                 PhotosEntry.COLUMN_NAME_DATA,
-                PhotosEntry.COLUMN_NAME_ENTRY_TIME};
+                PhotosEntry.COLUMN_NAME_ENTRY_TIME,
+                PhotosEntry.COLUMN_NAME_FORMATTED_DATE,
+                PhotosEntry.COLUMN_NAME_FORMATTED_STRING};
         Cursor c = db.query(
                 PhotosEntry.TABLE_NAME,
                 results,
