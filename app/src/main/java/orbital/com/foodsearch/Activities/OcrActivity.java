@@ -46,7 +46,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -88,6 +87,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     public static String OCR_KEY = null;
     public static String TRANSLATE_KEY = null;
     public static int IMAGES_COUNT;
+    public static int RECENT_PHOTOS_COUNT;
     public static int imageResultSize;
     private static volatile int insightsCount = 0;
     private static String mTranslatedText = null;
@@ -104,7 +104,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private String mFilePath = null;
     private String currentTime;
     private DatabaseReference database;
-    private ArrayList<Long> IDArrayList;
+
     private String formattedDate;
     private String formattedTime;
 
@@ -177,10 +177,12 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             protected Void doInBackground(Void... voids) {
                 imgDAO = new BingImageDAO();
                 IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
-                IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
-                Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
+                IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_images_key), "1"));
+                RECENT_PHOTOS_COUNT = 0;
+                if(sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
+                    RECENT_PHOTOS_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "1"));
+                }
 
-                IDArrayList = new ArrayList<>();
                 //current time
                 Calendar cal = Calendar.getInstance();
                 currentTime = FileUtils.getDate(cal);
@@ -588,8 +590,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         values.put(PhotosEntry.COLUMN_NAME_DATA, json);
         values.put(PhotosEntry.COLUMN_NAME_FORMATTED_DATE, formattedDate);
         values.put(PhotosEntry.COLUMN_NAME_FORMATTED_STRING, formattedTime);
-        Log.e(LOG_TAG, "formatted date: " + formattedDate);
-        Log.e(LOG_TAG, "formatted time: " +formattedTime);
+
         // Insert the new row, returning the primary key value of the new row
         long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
         Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
@@ -681,6 +682,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             searchFragment.finalizeRecycler();
             ViewUtils.showSearchResults(rootView, mTranslatedText);
+            Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
         }
     }
 

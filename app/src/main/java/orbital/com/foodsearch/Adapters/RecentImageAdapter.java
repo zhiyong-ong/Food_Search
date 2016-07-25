@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -67,13 +68,8 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         Log.e(LOG_TAG, "position is: " + position);
         String title = fileTitles.get(position);
         timestamp.setText(title);
-        Log.e(LOG_TAG, "TITLE is: " + title);
         Cursor cursor = readDatabase(title);
         cursor.moveToFirst();
-        Log.e(LOG_TAG, "col 0 is: " + cursor.getColumnName(0) + "  " + cursor.getString(0));
-        Log.e(LOG_TAG, "col 1 is: " + cursor.getColumnName(1) + "  " + cursor.getString(1));
-        Log.e(LOG_TAG, "col 2 is: " + cursor.getColumnName(2) + "  " + cursor.getString(2));
-        Log.e(LOG_TAG, "col 3 is: " + cursor.getColumnName(3) + "  " + cursor.getString(3));
         String formattedDate = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_DATE));
         String formattedTime = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
         holder.dateView.setText(formattedDate);
@@ -164,6 +160,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
             int currPos = selectedItemKeys.get(i);
             deleteData(currPos);
         }
+        Toast.makeText(mRecentsFragment.getActivity(), selectedItemKeys.size() + " photos delete.", Toast.LENGTH_SHORT).show();
     }
 
     public int getSelectedItemCount() {

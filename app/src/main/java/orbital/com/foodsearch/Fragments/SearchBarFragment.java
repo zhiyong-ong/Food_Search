@@ -249,7 +249,7 @@ public class SearchBarFragment extends Fragment {
             task.execute(editText.getText().toString(), selectedValue);
             sharedPreferencesSettings.edit()
                     .putString(getActivity().getString(R.string.select_lang_key), selectedValue)
-                    .apply();
+                    .commit();
             getView().findViewById(R.id.searchbar_translate_btn).setEnabled(false);
             return true;
         }

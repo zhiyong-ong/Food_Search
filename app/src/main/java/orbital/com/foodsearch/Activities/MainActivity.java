@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -45,6 +46,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.util.Locale;
 
+import orbital.com.foodsearch.DAO.PhotosContract;
+import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.Misc.GlobalVar;
@@ -129,13 +132,15 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
         };
         signInFirebase();
-
-//        PhotosDBHelper mDbHelper = new PhotosDBHelper(this);
-//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-//        db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
-//        mDbHelper.onCreate(db);
     }
 
+    //feeder code... add it into the signing in code if you wanna refresh db.
+    private void refreshDB() {
+        PhotosDBHelper mDbHelper = new PhotosDBHelper(this);
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
+        mDbHelper.onCreate(db);
+    }
     private void signInFirebase() {
         mAuth.signInWithEmailAndPassword(user, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
