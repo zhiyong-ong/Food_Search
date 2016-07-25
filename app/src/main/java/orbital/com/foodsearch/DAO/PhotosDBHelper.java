@@ -20,7 +20,9 @@ public class PhotosDBHelper extends SQLiteOpenHelper {
                     PhotosEntry._ID + " INTEGER PRIMARY KEY," +
                     PhotosEntry.COLUMN_NAME_TITLE + TEXT_TYPE + COMMA_SEP +
                     PhotosEntry.COLUMN_NAME_ENTRY_TIME + TEXT_TYPE + COMMA_SEP +
-                    PhotosEntry.COLUMN_NAME_DATA + TEXT_TYPE +
+                    PhotosEntry.COLUMN_NAME_DATA + TEXT_TYPE + COMMA_SEP +
+                    PhotosEntry.COLUMN_NAME_FORMATTED_DATE + TEXT_TYPE + COMMA_SEP +
+                    PhotosEntry.COLUMN_NAME_FORMATTED_STRING + TEXT_TYPE +
             " )";
     private static final String SQL_DELETE_TABLE =
             "DROP TABLE IF EXISTS " + PhotosEntry.TABLE_NAME;

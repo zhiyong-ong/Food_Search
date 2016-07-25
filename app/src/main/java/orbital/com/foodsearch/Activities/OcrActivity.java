@@ -51,11 +51,8 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import orbital.com.foodsearch.DAO.BingImageDAO;
@@ -110,6 +107,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private int searchBarTrans;
     private String mFilePath = null;
     private String currentTime;
+    private Context context;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private String user = "foodies@firebase.com";
@@ -207,9 +205,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
         if(data == null) {
             if (OCR_KEY == null || IMAGE_KEY == null || TRANSLATE_KEY == null) {
-                mAuth = FirebaseAuth.getInstance();
                 database = FirebaseDatabase.getInstance().getReference();
-                signInFirebase();
+                mAuth = FirebaseAuth.getInstance();
                 mAuthListener = new FirebaseAuth.AuthStateListener() {
                     @Override
                     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -247,6 +244,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         }
                     }
                 };
+                signInFirebase();
             } else {
                 Picasso.with(this).load("file://" + mFilePath)
                         //.placeholder(R.color.black_overlay)
