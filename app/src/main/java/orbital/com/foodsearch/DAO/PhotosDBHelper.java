@@ -3,12 +3,16 @@ package orbital.com.foodsearch.DAO;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
 import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
 /**
  * Created by zhiyong on 19/7/2016.
  */
 
 public class PhotosDBHelper extends SQLiteOpenHelper {
+    // If you change the database schema, you must increment the database version.
+    public static final int DATABASE_VERSION = 2;
+    public static final String DATABASE_NAME = "PhotosData.db";
     private static final String TEXT_TYPE = " TEXT";
     private static final String COMMA_SEP = ",";
     private static final String SQL_CREATE_TABLE =
@@ -18,14 +22,8 @@ public class PhotosDBHelper extends SQLiteOpenHelper {
                     PhotosEntry.COLUMN_NAME_ENTRY_TIME + TEXT_TYPE + COMMA_SEP +
                     PhotosEntry.COLUMN_NAME_DATA + TEXT_TYPE +
             " )";
-
     private static final String SQL_DELETE_TABLE =
             "DROP TABLE IF EXISTS " + PhotosEntry.TABLE_NAME;
-
-
-    // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 2;
-    public static final String DATABASE_NAME = "PhotosData.db";
 
     public PhotosDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

@@ -24,7 +24,7 @@
             android:scaleType="fitXY" />
 
         <TextView
-            android:id="@+id/recent_image_timestamp"
+            android:id="@+id/recent_image_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
@@ -36,6 +36,21 @@
             android:background="@android:color/transparent"
             android:fontFamily="sans-serif-condensed"
             android:textSize="@dimen/title_font_size" />
+
+        <TextView
+            android:id="@+id/recent_image_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/recent_image_date"
+            android:layout_marginBottom="@dimen/activity_vertical_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_toRightOf="@id/recent_image_view"
+            android:background="@android:color/transparent"
+            android:fontFamily="sans-serif-condensed"
+            android:textSize="@dimen/subhead_font_size" />
     </android.support.percent.PercentRelativeLayout>
 
     <ImageView

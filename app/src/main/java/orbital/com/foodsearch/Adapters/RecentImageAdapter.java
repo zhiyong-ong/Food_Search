@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -64,14 +63,16 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final ImageView recentImageView = holder.recentImage;
-        TextView timestamp = holder.timeStamp;
+        TextView timestamp = holder.dateView;
         Log.e(LOG_TAG, "position is: " + position);
         String title = fileTitles.get(position);
         timestamp.setText(title);
 
         Cursor cursor = readDatabase(title);
         String formattedDate = cursor.getString(cursor.getColumnIndex(PhotosEntry.COLUMN_NAME_FORMATTED_DATE));
-        String formattedString = cursor.getString(cursor.getColumnIndex(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
+        String formattedTime = cursor.getString(cursor.getColumnIndex(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
+        holder.dateView.setText(formattedDate);
+        holder.timeView.setText(formattedTime);
 
         String path = filePaths.get(position);
         Log.e(LOG_TAG, "path is: " + path);
@@ -176,15 +177,17 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         private PercentRelativeLayout layoutView;
         private ImageView recentImage;
-        private TextView timeStamp;
+        private TextView dateView;
         private ImageView checkCircle;
+        private TextView timeView;
         public ViewHolder(View itemView) {
             super(itemView);
             layoutView = (PercentRelativeLayout) itemView.findViewById(R.id.recent_image_layout);
             layoutView.setOnClickListener(this);
             layoutView.setOnLongClickListener(this);
             recentImage = (ImageView) itemView.findViewById(R.id.recent_image_view);
-            timeStamp = (TextView) itemView.findViewById(R.id.recent_image_timestamp);
+            dateView = (TextView) itemView.findViewById(R.id.recent_image_date);
+            timeView = (TextView) itemView.findViewById(R.id.recent_image_time);
             checkCircle = (ImageView) itemView.findViewById(R.id.remove_item_checkbox);
             checkCircle.setImageResource(R.drawable.ic_check_circle);
         }

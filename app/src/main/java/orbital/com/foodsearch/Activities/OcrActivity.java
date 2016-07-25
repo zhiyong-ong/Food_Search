@@ -51,8 +51,11 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import orbital.com.foodsearch.DAO.BingImageDAO;
@@ -107,7 +110,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private int searchBarTrans;
     private String mFilePath = null;
     private String currentTime;
-    private Context context;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
     private String user = "foodies@firebase.com";
@@ -170,6 +172,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         onCreateBackground();
+        initializeDrawView();
         setupSearchContainer();
         setupSearchBar();
         setupPreview();
@@ -187,8 +190,12 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 IDArrayList = new ArrayList<>();
                 //current time
                 Calendar cal = Calendar.getInstance();
-                currentTime = FileUtils.getTimeStamp(cal);
-
+                currentTime = FileUtils.getDate(cal);
+                Date date = cal.getTime();
+                DateFormat df = SimpleDateFormat.getDateInstance();
+                DateFormat tf = SimpleDateFormat.getTimeInstance();
+                formattedDate = df.format(date);
+                formattedTime = tf.format(date);
                 return null;
             }
         }.execute();
@@ -200,9 +207,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
         if(data == null) {
             if (OCR_KEY == null || IMAGE_KEY == null || TRANSLATE_KEY == null) {
-                signInFirebase();
-                database = FirebaseDatabase.getInstance().getReference();
                 mAuth = FirebaseAuth.getInstance();
+                database = FirebaseDatabase.getInstance().getReference();
+                signInFirebase();
                 mAuthListener = new FirebaseAuth.AuthStateListener() {
                     @Override
                     public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -220,7 +227,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                                             TRANSLATE_KEY = next.getChildren().iterator().next().getValue(String.class);
                                         }
                                     }
-                                    Picasso.with(context).load("file://" + mFilePath)
+                                    Picasso.with(OcrActivity.this).load("file://" + mFilePath)
                                             //.placeholder(R.color.black_overlay)
                                             .memoryPolicy(MemoryPolicy.NO_CACHE)
                                             .resize(30, 48)
@@ -240,9 +247,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         }
                     }
                 };
-            }
-            else {
-                Picasso.with(context).load("file://" + mFilePath)
+            } else {
+                Picasso.with(this).load("file://" + mFilePath)
                         //.placeholder(R.color.black_overlay)
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .resize(30, 48)
@@ -652,6 +658,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         values.put(PhotosEntry.COLUMN_NAME_ENTRY_TIME, currentTime);
         values.put(PhotosEntry.COLUMN_NAME_TITLE, "Photo_Data");
         values.put(PhotosEntry.COLUMN_NAME_DATA, json);
+        values.put(PhotosEntry.COLUMN_NAME_FORMATTED_DATE, formattedDate);
+        values.put(PhotosEntry.COLUMN_NAME_FORMATTED_STRING, formattedTime);
+
         //TODO: put in the formatted string and date here!!
 
         // Insert the new row, returning the primary key value of the new row
