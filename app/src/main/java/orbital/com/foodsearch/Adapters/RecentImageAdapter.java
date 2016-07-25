@@ -73,7 +73,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         String formattedDate = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_DATE));
         String formattedTime = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
         holder.dateView.setText(formattedDate);
-        holder.timeView.setText(formattedTime);
+        holder.timeView.setText("at " + formattedTime);
 
         String path = filePaths.get(position);
         Log.e(LOG_TAG, "path is: " + path);

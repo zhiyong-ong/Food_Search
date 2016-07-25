@@ -235,14 +235,6 @@ public class SearchBarFragment extends Fragment {
                 langValuesArr = getActivity().getResources().getStringArray(R.array.listLanguagesValues);
                 langKeysArr = getActivity().getResources().getStringArray(R.array.listLanguages);
             }
-//            String selectedKey = menuItem.getTitle().toString();
-//            int selectedIndex = -1;
-//            for (int i = 0; i < langKeysArr.length; i++) {
-//                if (langKeysArr[i].equals(selectedKey)) {
-//                    selectedIndex = i;
-//                    break;
-//                }
-//            }
             String selectedValue = langValuesArr[menuItem.getItemId()];
             EditText editText = (EditText) getView().findViewById(R.id.searchbar_edit_text);
             TranslateTask task = new TranslateTask(getView());
