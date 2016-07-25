@@ -165,6 +165,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(Color.BLACK);
         }
+        context = this;
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         getInfoInBackground();
         initializeDrawView();
@@ -198,7 +199,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
         if(data == null) {
             if (OCR_KEY == null || IMAGE_KEY == null || TRANSLATE_KEY == null) {
-                signInFirebase();
                 database = FirebaseDatabase.getInstance().getReference();
                 mAuth = FirebaseAuth.getInstance();
                 mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -238,6 +238,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         }
                     }
                 };
+                signInFirebase();
             }
             else {
                 Picasso.with(context).load("file://" + mFilePath)

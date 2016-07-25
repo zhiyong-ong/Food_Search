@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
@@ -33,6 +34,8 @@ import com.github.clans.fab.FloatingActionMenu;
 import java.io.File;
 import java.util.Locale;
 
+import orbital.com.foodsearch.DAO.PhotosContract;
+import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.R;
@@ -76,10 +79,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         PreferenceManager.setDefaultValues(this, R.xml.settings_preference, false);
         getBaseLanguage();
 
-        //        PhotosDBHelper mDbHelper = new PhotosDBHelper(this);
-//        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-//        db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
-//        mDbHelper.onCreate(db);
+                PhotosDBHelper mDbHelper = new PhotosDBHelper(this);
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
+        mDbHelper.onCreate(db);
     }
 
     @Override
