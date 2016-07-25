@@ -177,7 +177,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             protected Void doInBackground(Void... voids) {
                 imgDAO = new BingImageDAO();
                 IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
-                IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_images_key), "1"));
+                IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
                 RECENT_PHOTOS_COUNT = 0;
                 if(sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
                     RECENT_PHOTOS_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "1"));

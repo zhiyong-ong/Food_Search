@@ -14,6 +14,7 @@ public class BingTranslate {
 
     private static final String LOG_TAG = "FOODIES";
     public static String getTranslatedText(String txt) {
+        Log.e(LOG_TAG, "MAIN activity base lang: " + MainActivity.BASE_LANGUAGE);
         Translate.setClientId("foodies1");
         Translate.setClientSecret(OcrActivity.TRANSLATE_KEY);
         String translation = null;
