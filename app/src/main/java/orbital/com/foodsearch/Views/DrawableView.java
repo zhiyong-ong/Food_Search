@@ -111,6 +111,11 @@ public class DrawableView extends FrameLayout {
      */
     private void addLinesForDraw(List<Line> lines, String lang) {
         for (Line line : lines) {
+            String text = line.getText(lang);
+            if (text.trim().isEmpty()) {
+                continue;
+            }
+            mLineTexts.add(text);
             String[] bounds = line.getBoundsArray();
             int x = Integer.parseInt(bounds[0]);
             int y = Integer.parseInt(bounds[1]);
@@ -121,8 +126,6 @@ public class DrawableView extends FrameLayout {
             RectF rectF = new RectF(x, y, x + width, y + height);
             scaleRect(drawRect, rectF);
             mRects.add(drawRect);
-            String text = line.getText(lang);
-            mLineTexts.add(text);
         }
     }
 

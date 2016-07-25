@@ -5,11 +5,45 @@
     tools:context="orbital.com.foodsearch.Fragments.RecentsFragment">
 
     <android.support.v7.widget.RecyclerView
+        android:id="@+id/recent_images_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:scrollbars="vertical" />
+
+    <android.support.percent.PercentRelativeLayout
+        android:id="@+id/empty_recents_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/recent_images_recycler"
-        android:scrollbars="vertical"
-        android:orientation="vertical">
-    </android.support.v7.widget.RecyclerView>
+        android:visibility="gone">
+
+        <ImageView
+            android:id="@+id/empty_recents_image"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="150dp"
+            android:src="@drawable/ic_history_grey" />
+
+        <TextView
+            android:id="@+id/empty_recents_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/empty_recents_image"
+            android:layout_centerHorizontal="true"
+            android:text="@string/empty_recents_title_string"
+            android:textColor="@color/colorGrey"
+            android:textSize="@dimen/title_font_size" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/empty_recents_title"
+            android:layout_centerHorizontal="true"
+            android:text="@string/empty_recents_text"
+            android:textAlignment="center"
+            android:textColor="@color/colorGrey"
+            android:textSize="@dimen/subhead_font_size" />
+    </android.support.percent.PercentRelativeLayout>
 
 </FrameLayout>

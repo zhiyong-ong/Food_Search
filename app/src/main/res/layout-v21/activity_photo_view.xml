@@ -3,6 +3,7 @@
     android:id="@+id/photo_view_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="false"
     android:background="@android:color/black">
 
     <uk.co.senab.photoview.PhotoView
@@ -15,11 +16,13 @@
         android:transitionName="@string/fullscreen_transition_name" />
 
     <LinearLayout
+        android:id="@id/photo_view_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/overlayDark"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="invisible">
 
         <TextView
             android:id="@+id/photo_title"

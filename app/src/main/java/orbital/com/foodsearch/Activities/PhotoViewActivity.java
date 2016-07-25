@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
+import android.transition.Fade;
 import android.transition.Transition;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +32,7 @@ public class PhotoViewActivity extends AppCompatActivity {
     public static final String FORMATTED_URL = "formattedUrl";
     public static final String TITLE = "title";
     private boolean finishedEnter = false;
-    private boolean backPressed = false;
+    private boolean leavingActivity = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,7 @@ public class PhotoViewActivity extends AppCompatActivity {
         PhotoView photoView = (PhotoView) findViewById(R.id.photo_view);
         photoView.getLayoutParams().width = PercentRelativeLayout.LayoutParams.MATCH_PARENT;
         photoView.getLayoutParams().height = PercentRelativeLayout.LayoutParams.WRAP_CONTENT;
-        backPressed = true;
+        leavingActivity = true;
         photoView.requestLayout();
     }
 
@@ -74,14 +75,17 @@ public class PhotoViewActivity extends AppCompatActivity {
         urlTextView.setMovementMethod(LinkMovementMethod.getInstance());
         urlTextView.setText(Html.fromHtml(getIntent().getStringExtra(FORMATTED_URL)));
         final PhotoView photoView = (PhotoView) findViewById(R.id.photo_view);
+        final View infoView = findViewById(R.id.photo_view_info);
         photoView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
             @Override
             public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                if (backPressed) {
+                if (leavingActivity) {
                     supportFinishAfterTransition();
                 } else if (finishedEnter) {
+                    AnimUtils.fadeIn(infoView, AnimUtils.FAST_FADE);
                     Picasso.with(PhotoViewActivity.this)
                             .load(getIntent().getStringExtra(URL))
+                            .noFade()
                             .noPlaceholder()
                             .into(photoView);
                 }
@@ -100,6 +104,7 @@ public class PhotoViewActivity extends AppCompatActivity {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             startPostponedEnterTransition();
                         } else {
+                            AnimUtils.fadeIn(infoView, AnimUtils.FAST_FADE);
                             Picasso.with(PhotoViewActivity.this)
                                     .load(url)
                                     .noPlaceholder()
@@ -120,13 +125,18 @@ public class PhotoViewActivity extends AppCompatActivity {
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         window.setStatusBarColor(Color.BLACK);
+        Transition fade = new Fade();
+        fade.excludeTarget(android.R.id.statusBarBackground, true);
+        fade.excludeTarget(android.R.id.navigationBarBackground, true);
+        getWindow().setExitTransition(fade);
+        getWindow().setEnterTransition(fade);
         final Transition sharedElement = getWindow().getSharedElementEnterTransition();
         sharedElement.addListener(new AnimUtils.TransitionListenerAdapter() {
             @Override
             public void onTransitionEnd(Transition transition) {
                 sharedElement.removeListener(this);
-                PhotoView photoView = (PhotoView) findViewById(R.id.photo_view);
                 finishedEnter = true;
+                PhotoView photoView = (PhotoView) findViewById(R.id.photo_view);
                 photoView.getLayoutParams().width = PercentRelativeLayout.LayoutParams.MATCH_PARENT;
                 photoView.getLayoutParams().height = PercentRelativeLayout.LayoutParams.MATCH_PARENT;
                 photoView.requestLayout();

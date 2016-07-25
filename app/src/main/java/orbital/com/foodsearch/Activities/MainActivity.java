@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentTransaction;
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         setupFab();
         setBottomNavigationBar();
@@ -155,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             mFabOverlay = (FrameLayout) findViewById(R.id.fab_overlay);
             mFabMenu = (FloatingActionMenu) findViewById(R.id.start_fab);
         }
-        AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
+        final AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
         AHBottomNavigationItem recentsItem = new AHBottomNavigationItem(R.string.recents_tab, R.drawable.ic_history,
                 R.color.colorPrimary);
         AHBottomNavigationItem settingsItem = new AHBottomNavigationItem(R.string.settings_tab, R.drawable.ic_settings,
@@ -164,16 +165,21 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         bottomNavigation.addItem(settingsItem);
         bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimary));
         bottomNavigation.setForceTitlesDisplay(true);
+        bottomNavigation.setBehaviorTranslationEnabled(false);
+        AppBarLayout appBar = (AppBarLayout) findViewById(R.id.appbar);
+        appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
+            @Override
+            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+                if (verticalOffset < 0) {
+                    bottomNavigation.hideBottomNavigation(true);
+                } else {
+                    bottomNavigation.restoreBottomNavigation(true);
+                }
+            }
+        });
+
         android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
-        if (getFragmentManager().findFragmentByTag(SETTINGS_FRAG_TAG) == null ||
-                getFragmentManager().findFragmentByTag(RECENTS_FRAG_TAG) == null) {
-            mRecentsFrag = new RecentsFragment();
-            mSettingFrag = new SettingFragment();
-            ft.add(R.id.nav_frag_container, mSettingFrag, SETTINGS_FRAG_TAG);
-            ft.add(R.id.nav_frag_container, mRecentsFrag, RECENTS_FRAG_TAG);
-            ft.hide(mSettingFrag);
-            ft.commit();
-        }
+        bottomNavigation.setCurrentItem(1);
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
             public boolean onTabSelected(int position, boolean wasSelected) {
@@ -182,24 +188,28 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 if (wasSelected) {
                     switch (position) {
                         case 0:
-                            ft.hide(mSettingFrag);
-                            mRecentsFrag.smoothScrollToTop();
+                            if (mRecentsFrag == null) {
+                                mRecentsFrag = new RecentsFragment();
+                                ft.replace(R.id.nav_frag_container, mRecentsFrag);
+                                ft.commit();
+                            } else {
+                                mRecentsFrag.smoothScrollToTop();
+                            }
                             return true;
                     }
                     return false;
                 }
                 switch (position) {
                     case 0:
-                        mRecentsFrag.scrollToTop();
-                        ft.show(mRecentsFrag);
-                        ft.hide(mSettingFrag);
+                        mRecentsFrag = new RecentsFragment();
+                        ft.replace(R.id.nav_frag_container, mRecentsFrag);
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
                         return true;
                     case 1:
-                        ft.show(mSettingFrag);
-                        ft.hide(mRecentsFrag);
+                        mSettingFrag = new SettingFragment();
+                        ft.replace(R.id.nav_frag_container, mSettingFrag);
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
@@ -208,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 return false;
             }
         });
+        bottomNavigation.setCurrentItem(0);
     }
 
     private void setupFab() {
@@ -298,6 +309,14 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if (savedInstanceState.containsKey(SAVED_URI)) {
             fileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
         }
+    }
+
+    @Override
+    protected void onResume() {
+        if (mRecentsFrag != null) {
+            mRecentsFrag.scrollToTop();
+        }
+        super.onResume();
     }
 
     @TargetApi(Build.VERSION_CODES.M)

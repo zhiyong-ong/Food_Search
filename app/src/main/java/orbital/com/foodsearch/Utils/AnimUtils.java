@@ -43,6 +43,7 @@ public class AnimUtils {
     public static final int SEARCH_BAR_DROP = 400;
     public static final int TEXT_UPDATE = 500;
     public static final int FAST_FADE = 200;
+    public static final int FASTER_FADE = 100;
 
     public static void brightenOverlay(final View overlay) {
         int currentColor = ((ColorDrawable) overlay.getBackground()).getColor();
@@ -86,7 +87,8 @@ public class AnimUtils {
 
     public static void containerSlideDown(View rootView, Animator.AnimatorListener animListener,
                                           int containerTransY) {
-        ObjectAnimator anim = ObjectAnimator.ofFloat(rootView.findViewById(R.id.search_frag_container),
+        View searchFragContainer = rootView.findViewById(R.id.search_frag_container);
+        ObjectAnimator anim = ObjectAnimator.ofFloat(searchFragContainer,
                 View.TRANSLATION_Y, containerTransY);
         anim.addListener(animListener);
         anim.setInterpolator(new FastOutSlowInInterpolator());
@@ -217,18 +219,6 @@ public class AnimUtils {
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1);
         animator.setDuration(duration);
         animator.start();
-    }
-
-    public static void flashColor(EditText editText, int flashColor) {
-        int originalColor = editText.getCurrentTextColor();
-        editText.setShadowLayer(2, 2, 2, flashColor);
-        ObjectAnimator anim = ObjectAnimator.ofInt(editText, "shadowColor", originalColor, flashColor);
-        ObjectAnimator animBack = ObjectAnimator.ofInt(editText, "shadowColor", flashColor, originalColor);
-        anim.setDuration(FAST_FADE);
-        animBack.setDuration(FAST_FADE);
-        AnimatorSet flasher = new AnimatorSet();
-        flasher.playSequentially(anim, animBack);
-        flasher.start();
     }
 
     public static void setFabMenuIcon(Context context, final FloatingActionMenu fam) {

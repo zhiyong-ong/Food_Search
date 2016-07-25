@@ -123,4 +123,6 @@
     <string name="Welsh">Welsh</string>
     <string name="YucatecMaya">Yucatec Maya</string>
     <string name="title_activity_main2">Main2Activity</string>
+    <string name="empty_recents_title_string">No menus saved yet</string>
+    <string name="empty_recents_text">You haven\'t saved any menus yet\nStart by scanning one</string>
 </resources>

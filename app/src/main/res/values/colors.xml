@@ -3,6 +3,7 @@
     <color name="colorPrimary">#d32f2f</color>
     <color name="colorPrimaryDark">#b71c1c</color>
     <color name="colorAccent">#FF1744</color>
+    <color name="colorSelected">#347a7a7a</color>
 
     <color name="colorLink">#37474f</color>
     <color name="colorOnTap">#0277bd</color>
@@ -11,6 +12,7 @@
     <color name="overlayDark">#Bf000000</color>
     <color name="colorLightGrey">#b2b2b2</color>
     <!--For Floating action buttons-->
+    <color name="colorPrimaryVeryLight">#ef9a9a</color>
     <color name="colorPrimaryLighter">#f44336</color>
     <color name="colorPrimaryLight">#e53935</color>
     <color name="colorFabPick">#1976d2</color>

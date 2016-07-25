@@ -5,13 +5,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:actionModeBackground">@color/colorAccent</item>
+        <item name="android:actionModeBackground">@color/colorPrimary</item>
         <item name="windowActionModeOverlay">true</item>
-
-    </style>
-
-    <style name="MainTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowTranslucentStatus">true</item>
     </style>
 
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless.Colored"></style>

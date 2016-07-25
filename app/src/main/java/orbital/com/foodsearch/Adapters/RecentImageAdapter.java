@@ -1,12 +1,11 @@
 package orbital.com.foodsearch.Adapters;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.support.percent.PercentRelativeLayout;
-import android.support.v7.graphics.Palette;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -16,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -25,6 +23,7 @@ import java.util.List;
 
 import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
+import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.R;
 
 /**
@@ -34,15 +33,19 @@ import orbital.com.foodsearch.R;
 public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.ViewHolder> {
     private static String LOG_TAG = "FOODIES";
     private Context mContext;
+    private RecentsFragment mRecentsFragment;
     private List<String> filePaths;
     private List<String> fileTitles;
+    private List<String> formattedDates;
+    private List<String> formattedTimes;
     private SparseBooleanArray selectedItems;
     private PhotosDBHelper mDBHelper;
 
-    public RecentImageAdapter(Context context, List<String> FilePaths, List<String> TimeStamp) {
+    public RecentImageAdapter(Context context, RecentsFragment recentsFragment, List<String> FilePaths, List<String> TimeStamps) {
         this.filePaths = FilePaths;
-        this.fileTitles = TimeStamp;
+        this.fileTitles = TimeStamps;
         mContext = context;
+        mRecentsFragment = recentsFragment;
         mDBHelper = new PhotosDBHelper(context);
         selectedItems = new SparseBooleanArray();
     }
@@ -67,25 +70,19 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         timestamp.setText(fileTitles.get(position));
         String path = filePaths.get(position);
         Log.e(LOG_TAG, "path is: " + path);
+        if (selectedItems.get(position, false)) {
+            holder.layoutView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorSelected));
+        } else {
+            int[] attrs = new int[]{R.attr.selectableItemBackground};
+            TypedArray typedArray = mContext.obtainStyledAttributes(attrs);
+            int backgroundResource = typedArray.getResourceId(0, 0);
+            holder.layoutView.setBackgroundResource(backgroundResource);
+            typedArray.recycle();
+        }
+
         Picasso.with(mContext).load("file://" + path)
                 .fit()
-                .into(recentImageView, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        BitmapDrawable bmpDrawable = (BitmapDrawable) recentImageView.getDrawable();
-                        Palette.from(bmpDrawable.getBitmap()).generate(new Palette.PaletteAsyncListener() {
-                            @Override
-                            public void onGenerated(Palette palette) {
-                                holder.timeStamp.setTextColor(palette.getVibrantColor(Color.BLACK));
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError() {
-
-                    }
-                });
+                .into(recentImageView);
     }
 
     public Cursor readDatabase(String fileTitle) {
@@ -111,7 +108,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         return filePaths.size();
     }
 
-    public void removeData(int pos) {
+    public void deleteData(int pos) {
         File file = new File(filePaths.get(pos));
         file.delete();
         SQLiteDatabase db = mDBHelper.getReadableDatabase();
@@ -120,16 +117,28 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         fileTitles.remove(pos);
         notifyItemChanged(pos);
     }
-    public void toggleSelection(int pos, View view) {
+
+    public void selectAll() {
+        int total = filePaths.size();
+        for (int pos = 0; pos < total; pos++) {
+            selectedItems.put(pos, true);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void toggleSelection(int pos) {
         if (selectedItems.get(pos, false)) {
             selectedItems.delete(pos);
-            view.findViewById(R.id.remove_item_checkbox).setVisibility(View.INVISIBLE);
-        }
-        else {
+            notifyDataSetChanged();
+            if (selectedItems.size() == 0) {
+                mRecentsFragment.finishActionMode();
+            }
+            //selectedView.findViewById(R.id.remove_item_checkbox).setVisibility(View.INVISIBLE);
+        } else {
             selectedItems.put(pos, true);
-            view.findViewById(R.id.remove_item_checkbox).setVisibility(View.VISIBLE);
+            notifyDataSetChanged();
+            //selectedView.findViewById(R.id.remove_item_checkbox).setVisibility(View.VISIBLE);
         }
-        notifyItemChanged(pos);
     }
 
     public void clearSelections() {
@@ -137,11 +146,19 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         notifyDataSetChanged();
     }
 
+    public void deleteSelections() {
+        List<Integer> selectedItemKeys = getSelectedItemsKeys();
+        for (int i = selectedItemKeys.size() - 1; i >= 0; i--) {
+            int currPos = selectedItemKeys.get(i);
+            deleteData(currPos);
+        }
+    }
+
     public int getSelectedItemCount() {
         return selectedItems.size();
     }
 
-    public List<Integer> getSelectedItems() {
+    public List<Integer> getSelectedItemsKeys() {
         List<Integer> items =
                 new ArrayList<Integer>(selectedItems.size());
         for (int i = 0; i < selectedItems.size(); i++) {
@@ -150,19 +167,31 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         return items;
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
-        private View itemView;
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+        private PercentRelativeLayout layoutView;
         private ImageView recentImage;
         private TextView timeStamp;
         private ImageView checkCircle;
         public ViewHolder(View itemView) {
             super(itemView);
-            this.itemView = itemView;
+            layoutView = (PercentRelativeLayout) itemView.findViewById(R.id.recent_image_layout);
+            layoutView.setOnClickListener(this);
+            layoutView.setOnLongClickListener(this);
             recentImage = (ImageView) itemView.findViewById(R.id.recent_image_view);
             timeStamp = (TextView) itemView.findViewById(R.id.recent_image_timestamp);
             checkCircle = (ImageView) itemView.findViewById(R.id.remove_item_checkbox);
             checkCircle.setImageResource(R.drawable.ic_check_circle);
         }
 
+        @Override
+        public void onClick(View view) {
+            mRecentsFragment.itemClick(view, getAdapterPosition());
+        }
+
+        @Override
+        public boolean onLongClick(View view) {
+            mRecentsFragment.startActionMode(view, getAdapterPosition());
+            return true;
+        }
     }
 }

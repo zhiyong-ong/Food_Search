@@ -7,7 +7,17 @@ import java.util.Calendar;
  */
 
 public class FileUtils {
-    public static String getTimeStamp(Calendar cal) {
+    public static String getDate(Calendar cal) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(cal.get(Calendar.DATE));
+        builder.append('-');
+        builder.append(cal.get(Calendar.MONTH));
+        builder.append('-');
+        builder.append(cal.get(Calendar.YEAR));
+        return builder.toString();
+    }
+
+    public static String getFormattedDate(Calendar cal) {
         StringBuilder builder = new StringBuilder();
         builder.append(cal.get(Calendar.DATE));
         builder.append('-');
@@ -21,6 +31,16 @@ public class FileUtils {
         builder.append(':');
         builder.append(cal.get(Calendar.SECOND));
         builder.append(".jpg");
+        return builder.toString();
+    }
+
+    public static String getTime(Calendar cal) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(cal.get(Calendar.HOUR_OF_DAY));
+        builder.append(':');
+        builder.append(cal.get(Calendar.MINUTE));
+        builder.append(':');
+        builder.append(cal.get(Calendar.SECOND));
         return builder.toString();
     }
 }

@@ -44,8 +44,11 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import orbital.com.foodsearch.DAO.BingImageDAO;
@@ -97,11 +100,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private DatabaseReference database;
     private boolean animating = false;
+    private boolean leavingActivity = false;
     private int searchBarTrans;
     private String mFilePath = null;
 
     private String currentTime;
     private ArrayList<Long> IDArrayList;
+    private String formattedDate;
+    private String formattedTime;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -155,14 +161,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             window.setStatusBarColor(Color.BLACK);
         }
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        getInfoInBackground();
-        initializeDrawView();
+        onCreateBackground();
         setupSearchContainer();
         setupSearchBar();
         setupPreview();
     }
 
-    private void getInfoInBackground() {
+    private void onCreateBackground() {
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -180,7 +185,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 IDArrayList = new ArrayList<>();
                 //current time
                 Calendar cal = Calendar.getInstance();
-                currentTime = FileUtils.getTimeStamp(cal);
+                Date timeF = cal.getTime();
+                String date = FileUtils.getDate(cal);
+                String time = FileUtils.getTime(cal);
+                currentTime = date + '_' + time + ".jpg";
+                DateFormat df = SimpleDateFormat.getDateInstance();
+                DateFormat tf = SimpleDateFormat.getTimeInstance();
+                formattedDate = df.format(timeF);
+                initializeDrawView();
                 return null;
             }
         }.execute();
@@ -211,22 +223,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     @Override
                     public void onTransitionEnd(Transition transition) {
                         sharedElement.removeListener(this);
-                        AnimUtils.fadeIn(findViewById(R.id.drawable_view), AnimUtils.FAST_FADE);
+                        if (!leavingActivity) {
+                            AnimUtils.fadeIn(findViewById(R.id.drawable_view), AnimUtils.FASTER_FADE);
+                        }
                         super.onTransitionEnd(transition);
                     }
                 });
                 postponeEnterTransition();
             }
-            previewImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    previewImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    drawBoxesRecentImage(data, mFilePath, findViewById(R.id.activity_ocr));
-                    return true;
-                }
-            });
             Picasso.with(this).load("file://" + mFilePath)
-                    .fit()
                     .into(previewImageView, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
@@ -237,9 +242,19 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
                         @Override
                         public void onError() {
-
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                startPostponedEnterTransition();
+                            }
                         }
                     });
+            previewImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    previewImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    drawBoxesRecentImage(data, mFilePath, findViewById(R.id.activity_ocr));
+                    return true;
+                }
+            });
         }
     }
 
@@ -403,6 +418,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     public void onBackPressed() {
         if (findViewById(R.id.search_frag_container).getTranslationY() != 0) {
             sharedPreferencesSettings.unregisterOnSharedPreferenceChangeListener(this);
+            leavingActivity = true;
             findViewById(R.id.drawable_overlay).setVisibility(View.INVISIBLE);
             findViewById(R.id.search_bar_container).setVisibility(View.INVISIBLE);
             findViewById(R.id.drawable_view).setVisibility(View.INVISIBLE);
@@ -573,6 +589,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         values.put(PhotosEntry.COLUMN_NAME_ENTRY_TIME, currentTime);
         values.put(PhotosEntry.COLUMN_NAME_TITLE, "Photo_Data");
         values.put(PhotosEntry.COLUMN_NAME_DATA, json);
+        values.put(PhotosEntry.COLUMN_FORMATTED_DATE, formattedDate);
+        values.put(PhotosEntry.COLUMN_FORMATTED_DATE, formattedTime);
         // Insert the new row, returning the primary key value of the new row
         long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
         IDArrayList.add(newRowID);

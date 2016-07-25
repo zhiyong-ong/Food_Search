@@ -5,19 +5,16 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -29,11 +26,12 @@ import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.Adapters.RecentImageAdapter;
 import orbital.com.foodsearch.DAO.PhotosContract;
 import orbital.com.foodsearch.R;
+import orbital.com.foodsearch.Utils.AnimUtils;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RecentsFragment extends android.app.Fragment implements RecyclerView.OnItemTouchListener, View.OnClickListener {
+public class RecentsFragment extends android.app.Fragment {
 
     private static final String LOG_TAG = "FOODIES";
     protected RecyclerView mRecyclerView;
@@ -43,6 +41,53 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
     private List<String> fileNames;
     private ActionMode actionMode;
     private GestureDetectorCompat gestureDetector;
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        // Called when the action mode is created; startActionMode() was called
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.menu_cab_delete_recent, menu);
+            return true;
+        }
+
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.menu_check_all:
+                    mAdapter.selectAll();
+                    return true;
+                case R.id.menu_delete:
+                    mAdapter.deleteSelections();
+                    actionMode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            actionMode = null;
+            clearFiles();
+            getFiles();
+            mAdapter.clearSelections();
+            if (filePaths.isEmpty()) {
+                AnimUtils.fadeIn(getView().findViewById(R.id.empty_recents_layout), AnimUtils.OVERLAY_DURATION);
+            }
+        }
+
+    };
 
     public RecentsFragment() {
         // Required empty public constructor
@@ -55,6 +100,7 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
         // Initialize dataset, this data would usually come from a local content provider or
         // remote server.
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -63,6 +109,7 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recent_images_recycler);
         filePaths = new ArrayList<>();
         fileNames = new ArrayList<>();
+        getFiles();
 
         // LinearLayoutManager is used here, this will layout the elements in a similar fashion
         // to the way ListView would layout elements. The RecyclerView.LayoutManager defines how
@@ -73,13 +120,10 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-        getFiles();
-        mAdapter = new RecentImageAdapter(getActivity(), filePaths, fileNames);
+        mAdapter = new RecentImageAdapter(getActivity(), this, filePaths, fileNames);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
 
-        mRecyclerView.addOnItemTouchListener(this);
-        gestureDetector = new GestureDetectorCompat(getActivity(), new RecyclerViewOnGestureListener());
         Log.e(LOG_TAG, "file paths: " + filePaths.size());
         Log.e(LOG_TAG, "file names: " + fileNames.size());
         return rootView;
@@ -130,114 +174,44 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
         if (files.length != 0) {
             clearFiles();
             getFiles();
+            getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
             mAdapter.notifyDataSetChanged();
+        } else {
+            getView().findViewById(R.id.empty_recents_layout).setVisibility(View.VISIBLE);
         }
         super.onResume();
     }
 
-    @Override
-    public void onClick(View view) {
-        int idx = mRecyclerView.getChildAdapterPosition(view);
-        if(actionMode != null) {
-            myToggleSelection(idx, view);
+    public void startActionMode(View itemView, int pos) {
+        if (actionMode != null) {
             return;
         }
-        Cursor cursor = mAdapter.readDatabase(fileNames.get(idx));
-        cursor.moveToFirst();
-        String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
-        Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
-        ((MainActivity) getActivity()).openRecentPhoto(filePaths.get(idx), data);
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        actionMode = activity.startSupportActionMode(mActionModeCallback);
+        toggleSelection(pos);
     }
 
-    private void myToggleSelection(int idx, View view) {
-        mAdapter.toggleSelection(idx, view);
-        String title = getString(R.string.selected_count, String.valueOf(mAdapter.getSelectedItemCount()));
-        actionMode.setTitle(title);
+    public void itemClick(View itemView, int position) {
+        if (actionMode != null) {
+            toggleSelection(position);
+        } else {
+            Cursor cursor = mAdapter.readDatabase(fileNames.get(position));
+            cursor.moveToFirst();
+            String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
+            Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
+            ((MainActivity) getActivity()).openRecentPhoto(itemView, filePaths.get(position), data);
+        }
     }
 
-    @Override
-    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        gestureDetector.onTouchEvent(e);
-        return false;
+    public void finishActionMode() {
+        actionMode.finish();
     }
 
-    @Override
-    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-
-    }
-
-    @Override
-    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-
-    }
-
-    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
-
-        // Called when the action mode is created; startActionMode() was called
-        @Override
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            // Inflate a menu resource providing context menu items
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.menu_cab_delete_recent, menu);
-            return true;
-        }
-
-        // Called each time the action mode is shown. Always called after onCreateActionMode, but
-        // may be called multiple times if the mode is invalidated.
-        @Override
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false; // Return false if nothing is done
-        }
-
-        // Called when the user selects a contextual menu item
-        @Override
-        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-                case R.id.menu_delete:
-                    List<Integer> selectedItemPositions = mAdapter.getSelectedItems();
-                    int currPos;
-                    for (int i = selectedItemPositions.size() - 1; i >= 0; i--) {
-                        currPos = selectedItemPositions.get(i);
-                        mAdapter.removeData(currPos);
-                    }
-                    actionMode.finish();
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        // Called when the user exits the action mode
-        @Override
-        public void onDestroyActionMode(ActionMode mode) {
-            actionMode = null;
-            mAdapter.clearSelections();
-        }
-
-    };
-    private class RecyclerViewOnGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent e) {
-            View view = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
-            onClick(view);
-            return super.onSingleTapConfirmed(e);
-        }
-
-        public void onLongPress(MotionEvent e) {
-            View view = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
-            Log.e(LOG_TAG, view.toString());
-            if (actionMode != null) {
-                return;
-            }
-            // Start the CAB using the ActionMode.Callback defined above
-            AppCompatActivity activity=(AppCompatActivity)getActivity();
-            actionMode = activity.startSupportActionMode(mActionModeCallback);
-            int idx = mRecyclerView.getChildAdapterPosition(view);
-            myToggleSelection(idx, view);
-
-            view.setBackgroundColor(ContextCompat.getColor(getActivity(), R.color.colorLightGrey));
-            super.onLongPress(e);
+    private void toggleSelection(int pos) {
+        mAdapter.toggleSelection(pos);
+        if (actionMode != null) {
+            String title = getString(R.string.selected_count, String.valueOf(mAdapter.getSelectedItemCount()));
+            actionMode.setTitle(title);
         }
     }
 }

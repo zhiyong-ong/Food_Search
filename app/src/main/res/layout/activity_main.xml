@@ -20,21 +20,19 @@
             android:layout_height="?attr/actionBarSize"
             android:fitsSystemWindows="true"
             android:theme="@style/ToolbarTheme"
-            app:layout_scrollFlags="scroll|enterAlways|snap" />
+            app:layout_scrollFlags="scroll|" />
     </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
         android:id="@+id/nav_frag_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     <FrameLayout
         android:id="@+id/fab_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="?android:attr/actionBarSize"
-        android:layout_marginTop="?attr/actionBarSize"
         android:background="@color/colorFabOverlay"
         android:clickable="false"
         android:visibility="gone" />
