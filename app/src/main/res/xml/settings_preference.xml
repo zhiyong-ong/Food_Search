@@ -4,7 +4,6 @@
         android:key="pref_key_translation_settings"
         android:title="@string/translation_cat_title">
         <ListPreference
-            android:defaultValue="en"
             android:entries="@array/listLanguages"
             android:entryValues="@array/listLanguagesValues"
             android:key="@string/select_lang_key"

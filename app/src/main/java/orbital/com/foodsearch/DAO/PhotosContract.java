@@ -22,5 +22,7 @@ public class PhotosContract {
         public static final String COLUMN_FORMATTED_DATE = "formatted_date";
         public static final String COLUMN_FORMATTED_TIME = "formatted_time";
     }
+
+
 }
 

@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
@@ -31,7 +32,13 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -94,7 +101,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
     private static ImageSearchResponse searchResponseDB;
-    private static SharedPreferences sharedPreferences;
     private static SharedPreferences sharedPreferencesSettings;
     private static int IMAGES_COUNT_MAX;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
@@ -103,8 +109,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private boolean leavingActivity = false;
     private int searchBarTrans;
     private String mFilePath = null;
-
     private String currentTime;
+    private Context context;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseAuth mAuth;
+    private String user = "foodies@firebase.com";
+    private String password = "Orbital123";
+
     private ArrayList<Long> IDArrayList;
     private String formattedDate;
     private String formattedTime;
@@ -185,14 +196,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 IDArrayList = new ArrayList<>();
                 //current time
                 Calendar cal = Calendar.getInstance();
-                Date timeF = cal.getTime();
-                String date = FileUtils.getDate(cal);
-                String time = FileUtils.getTime(cal);
-                currentTime = date + '_' + time + ".jpg";
-                DateFormat df = SimpleDateFormat.getDateInstance();
-                DateFormat tf = SimpleDateFormat.getTimeInstance();
-                formattedDate = df.format(timeF);
-                initializeDrawView();
+                currentTime = FileUtils.getTimeStamp(cal);
                 return null;
             }
         }.execute();
@@ -262,12 +266,16 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     @Override
     public void onStart() {
         super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
     }
 
@@ -589,11 +597,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         values.put(PhotosEntry.COLUMN_NAME_ENTRY_TIME, currentTime);
         values.put(PhotosEntry.COLUMN_NAME_TITLE, "Photo_Data");
         values.put(PhotosEntry.COLUMN_NAME_DATA, json);
-        values.put(PhotosEntry.COLUMN_FORMATTED_DATE, formattedDate);
-        values.put(PhotosEntry.COLUMN_FORMATTED_DATE, formattedTime);
         // Insert the new row, returning the primary key value of the new row
         long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
-        IDArrayList.add(newRowID);
         Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
     }
 

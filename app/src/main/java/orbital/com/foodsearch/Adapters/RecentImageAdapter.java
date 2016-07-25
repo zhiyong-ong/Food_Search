@@ -91,7 +91,6 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
                 PhotosEntry._ID,
                 PhotosEntry.COLUMN_NAME_DATA,
                 PhotosEntry.COLUMN_NAME_ENTRY_TIME};
-        String sortOrder = PhotosEntry.COLUMN_NAME_ENTRY_TIME;
         Cursor c = db.query(
                 PhotosEntry.TABLE_NAME,
                 results,
@@ -99,7 +98,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
                 null,
                 null,
                 null,
-                sortOrder);
+                null);
         return c;
     }
 
