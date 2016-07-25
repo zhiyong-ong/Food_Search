@@ -9,4 +9,9 @@
         <item name="android:actionModeBackground">@color/colorAccent</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
+
+    <style name="MainTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
 </resources>

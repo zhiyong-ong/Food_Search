@@ -17,7 +17,8 @@
         <ImageView
             android:id="@+id/preview_image_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:scaleType="fitXY" />
 
         <orbital.com.foodsearch.Views.DrawableView
             android:id="@+id/drawable_view"

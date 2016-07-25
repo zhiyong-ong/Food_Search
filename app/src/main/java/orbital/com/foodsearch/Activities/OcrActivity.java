@@ -22,6 +22,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
+import android.transition.Transition;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -69,6 +70,7 @@ import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
 import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.FileUtils;
 import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.NetworkUtils;
 import orbital.com.foodsearch.Utils.ViewUtils;
@@ -108,6 +110,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private FirebaseAuth mAuth;
     private String user = "foodies@firebase.com";
     private String password = "Orbital123";
+
+    private ArrayList<Long> IDArrayList;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -160,76 +164,85 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(Color.BLACK);
         }
-        imgDAO = new BingImageDAO();
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
-        IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
-        Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
-        context = this;
-        // Load a placeholder low res image first, resized to 30x48
-        final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-
-        //current time
-        Calendar cal = Calendar.getInstance();
-        currentTime = String.valueOf(cal.get(Calendar.DATE)) + "-" + String.valueOf(cal.get(Calendar.MONTH)) + "-"
-                + String.valueOf(cal.get(Calendar.YEAR)) + "_" + String.valueOf(cal.get(Calendar.HOUR_OF_DAY)) + ":"
-                + String.valueOf(cal.get(Calendar.MINUTE)) + ":" + String.valueOf(cal.get(Calendar.SECOND)) + ".jpg";
-
-        final String data = getIntent().getStringExtra(RESPONSE);
+        getInfoInBackground();
         initializeDrawView();
         setupSearchContainer();
         setupSearchBar();
+        setupPreview();
+    }
 
-        database = FirebaseDatabase.getInstance().getReference();
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
+    private void getInfoInBackground() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    database.child("APIKEY").addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            for (DataSnapshot next : dataSnapshot.getChildren()) {
-                                if (next.getKey().equals("OCP_APIM_KEY")) {
-                                    IMAGE_KEY = next.getChildren().iterator().next().getValue(String.class);
-                                } else if (next.getKey().equals("OCR_KEY")) {
-                                    OCR_KEY = next.getChildren().iterator().next().getValue(String.class);
-                                } else if (next.getKey().equals("TRANSLATE_KEY")) {
-                                    TRANSLATE_KEY = next.getChildren().iterator().next().getValue(String.class);
-                                }
-                            }
-                            Picasso.with(context).load("file://" + mFilePath)
-                                    //.placeholder(R.color.black_overlay)
-                                    .memoryPolicy(MemoryPolicy.NO_CACHE)
-                                    .resize(30, 48)
-                                    .into(previewImageView);
-                            startOcrService();
-                            Log.e(LOG_TAG, "COMPRESS!  " + data);
-                        }
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-                            Log.e(LOG_TAG, "getUser:onCancelled", databaseError.toException());
-                        }
-                    });
-                } else {
-                    // User is signed out
-                    Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
-                }
+            protected Void doInBackground(Void... voids) {
+                database = FirebaseDatabase.getInstance().getReference();
+                imgDAO = new BingImageDAO();
+                sharedPreferences = getSharedPreferences(MainActivity.MyPREFERENCES, MODE_PRIVATE);
+                IMAGE_KEY = sharedPreferences.getString(MainActivity.IMAGE_KEY, null);
+                OCR_KEY = sharedPreferences.getString(MainActivity.OCR_KEY, null);
+                TRANSLATE_KEY = sharedPreferences.getString(MainActivity.TRANSLATE_KEY, null);
+
+                IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
+                IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
+                Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
+
+                IDArrayList = new ArrayList<>();
+                //current time
+                Calendar cal = Calendar.getInstance();
+                currentTime = FileUtils.getTimeStamp(cal);
+                return null;
             }
-        };
+        }.execute();
+
+    }
+
+    private void setupPreview() {
+        final String data = getIntent().getStringExtra(RESPONSE);
+        final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
         if(data == null) {
-            //sign in to firebase to get the api keys and go through ocr service.
-            signInFirebase();
-        } else {
             Picasso.with(this).load("file://" + mFilePath)
-                    .noPlaceholder()
-                    .fit()
+                    //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
+                    .resize(30, 48)
+                    .into(previewImageView);
+            startOcrService();
+            Log.e(LOG_TAG, "COMPRESS!  " + data);
+        } else {
+            String transName = getString(R.string.recents_transition_name);
+            ViewCompat.setTransitionName(previewImageView, transName);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().setExitTransition(null);
+                getWindow().setEnterTransition(null);
+                findViewById(R.id.drawable_view).setVisibility(View.INVISIBLE);
+                findViewById(R.id.drawable_overlay).setVisibility(View.GONE);
+                final Transition sharedElement = getWindow().getSharedElementEnterTransition();
+                sharedElement.addListener(new AnimUtils.TransitionListenerAdapter() {
+                    @Override
+                    public void onTransitionEnd(Transition transition) {
+                        sharedElement.removeListener(this);
+                        AnimUtils.fadeIn(findViewById(R.id.drawable_view), AnimUtils.FAST_FADE);
+                        super.onTransitionEnd(transition);
+                    }
+                });
+                postponeEnterTransition();
+            }
+            previewImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    previewImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    drawBoxesRecentImage(data, mFilePath, findViewById(R.id.activity_ocr));
+                    return true;
+                }
+            });
+            Picasso.with(this).load("file://" + mFilePath)
+                    .fit()
                     .into(previewImageView, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
-                            drawBoxesRecentImage(data, mFilePath, findViewById(R.id.activity_ocr));
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                startPostponedEnterTransition();
+                            }
                         }
 
                         @Override
@@ -239,25 +252,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     });
         }
     }
-    private void signInFirebase() {
-        mAuth.signInWithEmailAndPassword(user, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.e(LOG_TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.e(LOG_TAG, "signInWithEmail", task.getException());
-                            Toast.makeText(OcrActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
 
-    }
     @Override
     public void onStart() {
         super.onStart();
@@ -421,7 +417,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     public void onBackPressed() {
         if (findViewById(R.id.search_frag_container).getTranslationY() != 0) {
             sharedPreferencesSettings.unregisterOnSharedPreferenceChangeListener(this);
-            super.onBackPressed();
+            findViewById(R.id.drawable_overlay).setVisibility(View.INVISIBLE);
+            findViewById(R.id.search_bar_container).setVisibility(View.INVISIBLE);
+            findViewById(R.id.drawable_view).setVisibility(View.INVISIBLE);
+            supportFinishAfterTransition();
         } else {
             View rootView = findViewById(R.id.activity_ocr);
             ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
@@ -448,7 +447,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 ((TextView) itemView.findViewById(R.id.card_title)).getText());
         String htmlText = Html.toHtml(((TextView) findViewById(R.id.card_hostpage)).getEditableText());
         intent.putExtra(PhotoViewActivity.FORMATTED_URL, htmlText);
-        ImageView cardImage = (ImageView) findViewById(R.id.card_image);
+        ImageView cardImage = (ImageView) itemView.findViewById(R.id.card_image);
         String transName = getString(R.string.fullscreen_transition_name);
         ViewCompat.setTransitionName(cardImage, transName);
         ActivityOptionsCompat options = ActivityOptionsCompat
@@ -576,8 +575,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      *
      * @param response
      */
-    private void SavePhotoOCR(BingOcrResponse response) {
-
+    private void saveOcrResponse(BingOcrResponse response) {
         Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
         //save the lines to local DB
         Gson gson = new Gson();
@@ -600,17 +598,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      *
      * @param finalBitmap
      */
-    private void SaveImage(Bitmap finalBitmap) {
-        String root = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES).toString();
-        File myDir = new File(root + "/Recent_Images");
-        if (!myDir.exists()) {
-            if (!myDir.mkdirs()) {
+    private void saveImage(Bitmap finalBitmap) {
+        File root = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Recent_Images");
+        if (!root.exists()) {
+            if (!root.mkdirs()) {
                 Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
             }
         }
-
         String fname = currentTime;
-        File file = new File(myDir, fname);
+        File file = new File(root, fname);
         if (file.exists()) file.delete();
         try {
             FileOutputStream out = new FileOutputStream(file);
@@ -812,8 +808,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
             ViewUtils.finishOcrProgress(rootView);
-            SavePhotoOCR(bingOcrResponse);
-            SaveImage(BitmapFactory.decodeFile(mFilePath));
+            saveOcrResponse(bingOcrResponse);
+            saveImage(BitmapFactory.decodeFile(mFilePath));
         }
 
         @Override

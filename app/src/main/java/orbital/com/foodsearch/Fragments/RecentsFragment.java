@@ -63,21 +63,25 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recent_images_recycler);
         filePaths = new ArrayList<>();
         fileNames = new ArrayList<>();
+
         // LinearLayoutManager is used here, this will layout the elements in a similar fashion
         // to the way ListView would layout elements. The RecyclerView.LayoutManager defines how
         // elements are laid out.
         mLayoutManager = new LinearLayoutManager(getActivity());
+        mLayoutManager.setReverseLayout(true);
+        mLayoutManager.setStackFromEnd(true);
         mLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         getFiles();
         mAdapter = new RecentImageAdapter(getActivity(), filePaths, fileNames);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.scrollToPosition(0);
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
 
         mRecyclerView.addOnItemTouchListener(this);
         gestureDetector = new GestureDetectorCompat(getActivity(), new RecyclerViewOnGestureListener());
+        Log.e(LOG_TAG, "file paths: " + filePaths.size());
+        Log.e(LOG_TAG, "file names: " + fileNames.size());
         return rootView;
     }
 
@@ -99,6 +103,18 @@ public class RecentsFragment extends android.app.Fragment implements RecyclerVie
     private void clearFiles() {
         filePaths.clear();
         fileNames.clear();
+    }
+
+    public void smoothScrollToTop() {
+        if (filePaths.size() > 0) {
+            mRecyclerView.smoothScrollToPosition(mAdapter.getItemCount() - 1);
+        }
+    }
+
+    public void scrollToTop() {
+        if (filePaths.size() > 0) {
+            mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+        }
     }
 
     @Override
