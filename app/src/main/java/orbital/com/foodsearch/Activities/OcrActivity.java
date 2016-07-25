@@ -616,10 +616,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private void drawBoxesRecentImage(String response, String mFilePath, View rootView) {
         DrawableView mDrawableView = (DrawableView) findViewById(R.id.drawable_view);
         Gson gson = new Gson();
-        Log.e(LOG_TAG, "RESPONSE: " + response);
-        Log.e(LOG_TAG, "response length " + response.length());
-        Log.e(LOG_TAG, "file path: " + mFilePath);
-        Log.e(LOG_TAG, "view: " + rootView.toString());
         BingOcrResponse responseData = gson.fromJson(response, BingOcrResponse.class);
         List<Line> lines = responseData.getAllLines();
         mDrawableView.drawBoxes(rootView, mFilePath, lines,
@@ -794,11 +790,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             BingOcrResponse bingOcrResponse = response.body();
             Gson gson = new Gson();
             String json = gson.toJson(bingOcrResponse);
-            Log.e(LOG_TAG, "OCR RESPONSE: " + bingOcrResponse.toString());
-            Log.e(LOG_TAG, "OCR RESPONSE2: " + json);
-            Log.e(LOG_TAG, "OCR LENGTH: " + json.length());
-            Log.e(LOG_TAG, "file path : " + mFilePath);
-            Log.e(LOG_TAG, "view :" + rootView.toString());
             List<Line> lines = bingOcrResponse.getAllLines();
             mDrawableView.drawBoxes(rootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),

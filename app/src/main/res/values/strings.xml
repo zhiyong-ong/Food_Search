@@ -2,7 +2,9 @@
     <string name="app_name">FoodSearch</string>
     <string name="searchbar_text">Tap on a green box to search</string>
     <string name="camFrag">camFragment</string>
-
+    <string name="action_remove">MenuRemove</string>
+    <string name="selected_count">%1$s selected</string>
+    <string name="check_all">MenuCheckAll</string>
     <string name="title_activity_fullscreen">Camera</string>
     <string name="title_activity_google_search">Google search</string>
     <string name="title_activity_ocr">OCR</string>
@@ -120,4 +122,5 @@
     <string name="Vietnamese">Vietnamese</string>
     <string name="Welsh">Welsh</string>
     <string name="YucatecMaya">Yucatec Maya</string>
+    <string name="title_activity_main2">Main2Activity</string>
 </resources>

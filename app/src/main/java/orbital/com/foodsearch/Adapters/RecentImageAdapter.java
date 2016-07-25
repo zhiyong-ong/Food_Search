@@ -9,6 +9,7 @@ import android.support.percent.PercentRelativeLayout;
 import android.support.v7.graphics.Palette;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +19,10 @@ import android.widget.TextView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
-import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.R;
@@ -31,15 +33,18 @@ import orbital.com.foodsearch.R;
 
 public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.ViewHolder> {
     private static String LOG_TAG = "FOODIES";
-    PhotosDBHelper mDBHelper;
     private Context mContext;
     private List<String> filePaths;
     private List<String> fileTitles;
+    private SparseBooleanArray selectedItems;
+    private PhotosDBHelper mDBHelper;
+
     public RecentImageAdapter(Context context, List<String> FilePaths, List<String> TimeStamp) {
         this.filePaths = FilePaths;
         this.fileTitles = TimeStamp;
         mContext = context;
         mDBHelper = new PhotosDBHelper(context);
+        selectedItems = new SparseBooleanArray();
     }
 
     @Override
@@ -83,7 +88,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
                 });
     }
 
-    private Cursor readDatabase(String fileTitle) {
+    public Cursor readDatabase(String fileTitle) {
         SQLiteDatabase db = mDBHelper.getReadableDatabase();
         String[] results = {
                 PhotosEntry._ID,
@@ -106,34 +111,58 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         return filePaths.size();
     }
 
+    public void removeData(int pos) {
+        File file = new File(filePaths.get(pos));
+        file.delete();
+        SQLiteDatabase db = mDBHelper.getReadableDatabase();
+        db.delete(PhotosEntry.TABLE_NAME, PhotosEntry.COLUMN_NAME_TITLE + " = '" + fileTitles.get(pos) + "'", null);
+        filePaths.remove(pos);
+        fileTitles.remove(pos);
+        notifyItemChanged(pos);
+    }
+    public void toggleSelection(int pos, View view) {
+        if (selectedItems.get(pos, false)) {
+            selectedItems.delete(pos);
+            view.findViewById(R.id.remove_item_checkbox).setVisibility(View.INVISIBLE);
+        }
+        else {
+            selectedItems.put(pos, true);
+            view.findViewById(R.id.remove_item_checkbox).setVisibility(View.VISIBLE);
+        }
+        notifyItemChanged(pos);
+    }
+
+    public void clearSelections() {
+        selectedItems.clear();
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedItemCount() {
+        return selectedItems.size();
+    }
+
+    public List<Integer> getSelectedItems() {
+        List<Integer> items =
+                new ArrayList<Integer>(selectedItems.size());
+        for (int i = 0; i < selectedItems.size(); i++) {
+            items.add(selectedItems.keyAt(i));
+        }
+        return items;
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         private View itemView;
         private ImageView recentImage;
         private TextView timeStamp;
-        private PercentRelativeLayout layoutView;
+        private ImageView checkCircle;
         public ViewHolder(View itemView) {
             super(itemView);
             this.itemView = itemView;
             recentImage = (ImageView) itemView.findViewById(R.id.recent_image_view);
             timeStamp = (TextView) itemView.findViewById(R.id.recent_image_timestamp);
-            layoutView = (PercentRelativeLayout) itemView.findViewById(R.id.recent_image_layout);
-            layoutView.setOnClickListener(this);
+            checkCircle = (ImageView) itemView.findViewById(R.id.remove_item_checkbox);
+            checkCircle.setImageResource(R.drawable.ic_check_circle);
         }
 
-        @Override
-        public void onClick(View v) {
-            Cursor cursor = readDatabase(fileTitles.get(getAdapterPosition()));
-            cursor.moveToFirst();
-            String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_DATA));
-            Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
-            Log.e(LOG_TAG, "adapter pos: " + getAdapterPosition());
-            ((MainActivity) mContext).openRecentPhoto(itemView, filePaths.get(getAdapterPosition()), data);
-
-        }
-
-        @Override
-        public boolean onLongClick(View view) {
-            return false;
-        }
     }
 }

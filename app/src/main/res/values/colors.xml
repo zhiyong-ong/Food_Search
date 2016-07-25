@@ -9,7 +9,7 @@
     <color name="colorGrey">#212121</color>
     <color name="colorTranslate">#00b0ff</color>
     <color name="overlayDark">#Bf000000</color>
-
+    <color name="colorLightGrey">#b2b2b2</color>
     <!--For Floating action buttons-->
     <color name="colorPrimaryLighter">#f44336</color>
     <color name="colorPrimaryLight">#e53935</color>
