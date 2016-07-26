@@ -1,11 +1,10 @@
 package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -51,7 +50,8 @@ import java.util.Date;
 import java.util.List;
 
 import orbital.com.foodsearch.DAO.BingImageDAO;
-import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
+import orbital.com.foodsearch.DAO.PhotosContract;
+import orbital.com.foodsearch.DAO.PhotosDAO;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.SearchBarFragment;
 import orbital.com.foodsearch.Fragments.SearchResultsFragment;
@@ -67,7 +67,6 @@ import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
 import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
-import orbital.com.foodsearch.Utils.FileUtils;
 import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.NetworkUtils;
 import orbital.com.foodsearch.Utils.ViewUtils;
@@ -176,17 +175,19 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             @Override
             protected Void doInBackground(Void... voids) {
                 imgDAO = new BingImageDAO();
+
                 IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
                 IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
                 RECENT_PHOTOS_COUNT = 0;
                 if(sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
                     RECENT_PHOTOS_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "1"));
                 }
+                Log.e(LOG_TAG, "recent photos count: " + RECENT_PHOTOS_COUNT);
 
                 //current time
                 Calendar cal = Calendar.getInstance();
-                currentTime = FileUtils.getDate(cal);
                 Date date = cal.getTime();
+                currentTime = String.valueOf(date.getTime()) + ".jpg";
                 DateFormat df = SimpleDateFormat.getDateInstance(DateFormat.FULL);
                 DateFormat tf = SimpleDateFormat.getTimeInstance();
                 formattedDate = df.format(date);
@@ -571,28 +572,30 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     /**
      * saves the ocr response into the local db in the form of json, with the key being
-     * the current time
+     * the current time. Delete least recently saved photo if the number of photos exceed the
+     * number of photos allowed to be saved.
      *
      * @param response
      */
     private void saveOcrResponse(BingOcrResponse response) {
+        PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
+        Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
+        String fileName = null;
+        Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
+        if(cursor.getCount() >= RECENT_PHOTOS_COUNT) {
+            cursor.moveToFirst();
+            fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
+            PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
+            Log.e(LOG_TAG, fileName + " DELETED!");
+        }
+        cursor.close();
         Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
         //save the lines to local DB
         Gson gson = new Gson();
         String json = gson.toJson(response);
-        PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
-        SQLiteDatabase db = mDBHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        // Create a new map of values, where column names are the keys
-        values.put(PhotosEntry.COLUMN_NAME_ENTRY_TIME, currentTime);
-        values.put(PhotosEntry.COLUMN_NAME_TITLE, "Photo_Data");
-        values.put(PhotosEntry.COLUMN_NAME_DATA, json);
-        values.put(PhotosEntry.COLUMN_NAME_FORMATTED_DATE, formattedDate);
-        values.put(PhotosEntry.COLUMN_NAME_FORMATTED_STRING, formattedTime);
-
-        // Insert the new row, returning the primary key value of the new row
-        long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
+        long newRowID = PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
         Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
+        saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
     }
 
     /**
@@ -601,13 +604,20 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      *
      * @param finalBitmap
      */
-    private void saveImage(Bitmap finalBitmap) {
+    private void saveImage(Bitmap finalBitmap, String fileToDelete) {
         File root = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Recent_Images");
         if (!root.exists()) {
             if (!root.mkdirs()) {
                 Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
             }
         }
+
+        if(fileToDelete != null) {
+            File file = new File(root, fileToDelete);
+            file.delete();
+            Log.e(LOG_TAG, "FILE " + fileToDelete + " DELETED");
+        }
+
         String fname = currentTime;
         File file = new File(root, fname);
         if (file.exists()) file.delete();
@@ -812,8 +822,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
             ViewUtils.finishOcrProgress(rootView);
+
             saveOcrResponse(bingOcrResponse);
-            saveImage(BitmapFactory.decodeFile(mFilePath));
         }
 
         @Override

@@ -25,6 +25,8 @@ import java.util.List;
 import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.Adapters.RecentImageAdapter;
 import orbital.com.foodsearch.DAO.PhotosContract;
+import orbital.com.foodsearch.DAO.PhotosDAO;
+import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
 
@@ -195,10 +197,12 @@ public class RecentsFragment extends android.app.Fragment {
         if (actionMode != null) {
             toggleSelection(position);
         } else {
-            Cursor cursor = mAdapter.readDatabase(fileNames.get(position));
+            PhotosDBHelper mDBHelper = new PhotosDBHelper(getActivity());
+            Cursor cursor = PhotosDAO.readDatabaseGetRow(fileNames.get(position), mDBHelper);
             cursor.moveToFirst();
             String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
             Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
+            cursor.close();
             ((MainActivity) getActivity()).openRecentPhoto(itemView, filePaths.get(position), data);
         }
     }

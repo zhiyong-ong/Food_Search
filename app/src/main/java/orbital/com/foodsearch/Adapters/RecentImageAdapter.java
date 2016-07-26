@@ -3,7 +3,6 @@ package orbital.com.foodsearch.Adapters;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
+import orbital.com.foodsearch.DAO.PhotosDAO;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.R;
@@ -67,13 +67,15 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         TextView timestamp = holder.dateView;
         Log.e(LOG_TAG, "position is: " + position);
         String title = fileTitles.get(position);
+        Log.e(LOG_TAG, "title is :" + title);
         timestamp.setText(title);
-        Cursor cursor = readDatabase(title);
+        Cursor cursor = PhotosDAO.readDatabaseGetRow(title, mDBHelper);
         cursor.moveToFirst();
         String formattedDate = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_DATE));
         String formattedTime = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
         holder.dateView.setText(formattedDate);
         holder.timeView.setText("at " + formattedTime);
+        cursor.close();
 
         String path = filePaths.get(position);
         Log.e(LOG_TAG, "path is: " + path);
@@ -92,25 +94,6 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
                 .into(recentImageView);
     }
 
-    public Cursor readDatabase(String fileTitle) {
-        SQLiteDatabase db = mDBHelper.getReadableDatabase();
-        String[] results = {
-                PhotosEntry._ID,
-                PhotosEntry.COLUMN_NAME_DATA,
-                PhotosEntry.COLUMN_NAME_ENTRY_TIME,
-                PhotosEntry.COLUMN_NAME_FORMATTED_DATE,
-                PhotosEntry.COLUMN_NAME_FORMATTED_STRING};
-        Cursor c = db.query(
-                PhotosEntry.TABLE_NAME,
-                results,
-                PhotosEntry.COLUMN_NAME_ENTRY_TIME + " = '" + fileTitle + "'",
-                null,
-                null,
-                null,
-                null);
-        return c;
-    }
-
     @Override
     public int getItemCount() {
         return filePaths.size();
@@ -119,8 +102,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     public void deleteData(int pos) {
         File file = new File(filePaths.get(pos));
         file.delete();
-        SQLiteDatabase db = mDBHelper.getReadableDatabase();
-        db.delete(PhotosEntry.TABLE_NAME, PhotosEntry.COLUMN_NAME_TITLE + " = '" + fileTitles.get(pos) + "'", null);
+        PhotosDAO.deleteOnEntryTime(fileTitles.get(pos), mDBHelper);
         filePaths.remove(pos);
         fileTitles.remove(pos);
         notifyItemChanged(pos);
@@ -160,7 +142,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
             int currPos = selectedItemKeys.get(i);
             deleteData(currPos);
         }
-        Toast.makeText(mRecentsFragment.getActivity(), selectedItemKeys.size() + " photos delete.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mRecentsFragment.getActivity(), selectedItemKeys.size() + " photo(s) deleted", Toast.LENGTH_SHORT).show();
     }
 
     public int getSelectedItemCount() {

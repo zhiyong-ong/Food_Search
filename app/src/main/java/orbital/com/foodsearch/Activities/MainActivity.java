@@ -123,15 +123,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                             Log.e(LOG_TAG, "getUser:onCancelled", databaseError.toException());
                         }
                     });
+                    Log.e(LOG_TAG, "onAuthStateChanged:signed_in");
                 } else {
                     // User is signed out
                     Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
                 }
-
+                //refreshDB();
             }
 
         };
-        signInFirebase();
+        if(GlobalVar.getImageKey() == null) {
+            signInFirebase();
+        }
     }
 
     //feeder code... add it into the signing in code if you wanna refresh db.
