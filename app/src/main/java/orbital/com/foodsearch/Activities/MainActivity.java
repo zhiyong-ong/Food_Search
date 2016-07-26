@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int IMAGE_PICK_INTENT_REQUEST_CODE = 200;
     private static final int CAMERA_CROP_INTENT_REQUEST_CODE = 300;
     private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
-    private static final int OCR_IMAGE_INTENT = 1000;
+    private static final int OCR_IMAGE_INTENT_CODE = 1000;
     private static final String RECENTS_FRAG_TAG = "recentsFrag";
     private static final String SETTINGS_FRAG_TAG = "settingsFrag";
     private static final String SAVED_URI = "savedUri";
@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static SharedPreferences sharedPreferencesSettings;
     private final String DEFAULT_LANG_KEY = "DEFAULT_LANG_KEY";
     private final String foodSearch = "FoodSearch";
+    public boolean waitingOcrResult = false;
     private Uri fileUri = null;
     private FrameLayout mFabOverlay;
     private FloatingActionMenu mFabMenu;
@@ -381,11 +382,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
-            case OCR_IMAGE_INTENT:
+            case OCR_IMAGE_INTENT_CODE:
                 if (resultCode == RESULT_OK) {
-                    if (mRecentsFrag != null) {
-                        mRecentsFrag.scrollToTop();
-                    }
+                    waitingOcrResult = true;
                 }
                 break;
             case OCR_CAMERA_INTENT_REQUEST_CODE:
@@ -445,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private void startOcrActivity() {
         Intent intent = new Intent(this, OcrActivity.class);
         intent.putExtra(OcrActivity.FILE_PATH, fileUri.getPath());
-        startActivityForResult(intent, OCR_IMAGE_INTENT);
+        startActivityForResult(intent, OCR_IMAGE_INTENT_CODE);
     }
 
     public void openRecentPhoto(View itemView, String path, String data) {
@@ -567,10 +566,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
 
     @Override
     public void onStop() {
-        super.onStop();
         if (mAuthListener != null) {
             mAuth.removeAuthStateListener(mAuthListener);
         }
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
+        super.onStop();
     }
 }

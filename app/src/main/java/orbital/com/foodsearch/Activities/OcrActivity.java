@@ -261,8 +261,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     @Override
     public void onStop() {
-        super.onStop();
         sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
+        super.onStop();
     }
 
     /**

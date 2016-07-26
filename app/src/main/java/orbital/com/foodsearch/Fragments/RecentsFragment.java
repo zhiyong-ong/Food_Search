@@ -4,8 +4,8 @@ package orbital.com.foodsearch.Fragments;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v4.view.GestureDetectorCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,12 +17,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import jp.wasabeef.recyclerview.animators.SlideInRightAnimator;
+import jp.wasabeef.recyclerview.animators.FadeInRightAnimator;
 import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.Adapters.RecentImageAdapter;
 import orbital.com.foodsearch.DAO.PhotosContract;
@@ -42,7 +43,7 @@ public class RecentsFragment extends android.app.Fragment {
     private List<String> filePaths;
     private List<String> fileNames;
     private ActionMode actionMode;
-    private GestureDetectorCompat gestureDetector;
+    private int bottomNavHeight = -1;
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
         boolean deleted = false;
 
@@ -85,16 +86,14 @@ public class RecentsFragment extends android.app.Fragment {
         public void onDestroyActionMode(ActionMode mode) {
             actionMode = null;
             mAdapter.clearAllSelection();
-            if (!deleted) {
+            if (!deleted || filePaths.isEmpty()) {
                 mAdapter.notifyDataSetChanged();
             }
             if (filePaths.isEmpty()) {
-                mAdapter.notifyDataSetChanged();
                 AnimUtils.fadeIn(getView().findViewById(R.id.empty_recents_layout), AnimUtils.OVERLAY_DURATION);
             }
         }
     };
-    private int bottomNavHeight = -1;
 
     public RecentsFragment() {
         // Required empty public constructor
@@ -116,7 +115,7 @@ public class RecentsFragment extends android.app.Fragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recent_images_recycler);
         filePaths = new ArrayList<>();
         fileNames = new ArrayList<>();
-        getFiles();
+        addAllFiles(getFiles());
 
         // LinearLayoutManager is used here, this will layout the elements in a similar fashion
         // to the way ListView would layout elements. The RecyclerView.LayoutManager defines how
@@ -129,21 +128,62 @@ public class RecentsFragment extends android.app.Fragment {
 
         mAdapter = new RecentImageAdapter(getActivity(), this, filePaths, fileNames);
         mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.setItemAnimator(new SlideInRightAnimator() {
+        RecyclerView.ItemAnimator animator = new FadeInRightAnimator() {
             @Override
             public void onAnimationFinished(RecyclerView.ViewHolder viewHolder) {
-                updateRecyclerLayout();
                 super.onAnimationFinished(viewHolder);
+                updateRecyclerLayout();
+            }
+        };
+        animator.setMoveDuration(AnimUtils.FAST_FADE);
+        animator.setAddDuration(AnimUtils.OVERLAY_EXIT_DURATION);
+        mRecyclerView.setItemAnimator(animator);
+        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
+        final ViewTreeObserver vto = mRecyclerView.getViewTreeObserver();
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                updateRecyclerLayout();
+                mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                return false;
             }
         });
-        mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
 
         Log.e(LOG_TAG, "file paths: " + filePaths.size());
         Log.e(LOG_TAG, "file names: " + fileNames.size());
         return rootView;
     }
 
-    private void getFiles() {
+    @Override
+    public void onResume() {
+        super.onResume();
+        File[] newFiles = getFiles();
+        if (newFiles.length != 0) {
+            if (((MainActivity) getActivity()).waitingOcrResult) {
+                ((MainActivity) getActivity()).waitingOcrResult = false;
+                addFile(newFiles[newFiles.length - 1]);
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        scrollToTop();
+                        mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
+                    }
+                }, 350);
+            } else {
+                clearFiles();
+                addAllFiles(newFiles);
+                mAdapter.notifyDataSetChanged();
+                updateRecyclerLayout();
+                scrollToTop();
+            }
+            getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
+        } else {
+            getView().findViewById(R.id.empty_recents_layout).setVisibility(View.VISIBLE);
+        }
+    }
+
+    private File[] getFiles() {
         File root = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
                 , "Recent_Images");
         if (!root.exists()) {
@@ -153,11 +193,19 @@ public class RecentsFragment extends android.app.Fragment {
         }
         File[] files = root.listFiles();
         FileUtils.sortFileByTime(files);
+        return files;
+    }
+
+    private void addAllFiles(File[] files) {
         for (File file : files) {
             filePaths.add(file.getAbsolutePath());
             fileNames.add(file.getName());
         }
+    }
 
+    private void addFile(File file) {
+        filePaths.add(file.getAbsolutePath());
+        fileNames.add(file.getName());
     }
 
     private void clearFiles() {
@@ -177,31 +225,6 @@ public class RecentsFragment extends android.app.Fragment {
         }
     }
 
-    @Override
-    public void onResume() {
-        File root = new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-                , "Recent_Images");
-        if (!root.exists()) {
-            if (!root.mkdirs()) {
-                Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
-            }
-        }
-        File[] files = root.listFiles();
-        if (files.length != 0) {
-            refreshRecents();
-            getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
-        } else {
-            getView().findViewById(R.id.empty_recents_layout).setVisibility(View.VISIBLE);
-        }
-        super.onResume();
-    }
-
-    private void refreshRecents() {
-        clearFiles();
-        getFiles();
-        mAdapter.notifyDataSetChanged();
-        updateRecyclerLayout();
-    }
 
     public void updateRecyclerLayout() {
         if (isRecyclerScrollable(mRecyclerView)) {
@@ -212,10 +235,10 @@ public class RecentsFragment extends android.app.Fragment {
     }
 
     private boolean isRecyclerScrollable(RecyclerView recyclerView) {
-        if (bottomNavHeight < 0) {
+        if (bottomNavHeight <= 0) {
             bottomNavHeight = getActivity().findViewById(R.id.bottom_navigation).getHeight();
         }
-        return recyclerView.computeVerticalScrollRange() > recyclerView.getHeight() - bottomNavHeight;
+        return recyclerView.computeVerticalScrollRange() > recyclerView.getMeasuredHeight() - bottomNavHeight;
     }
 
     public void startActionMode(int pos) {

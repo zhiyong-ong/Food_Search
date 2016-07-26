@@ -56,9 +56,9 @@ public class SearchBarFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         initializeBar();
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        super.onViewCreated(view, savedInstanceState);
     }
 
     /**
