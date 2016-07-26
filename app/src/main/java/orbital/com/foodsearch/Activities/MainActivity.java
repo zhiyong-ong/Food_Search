@@ -285,12 +285,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     }
 
     private void closeFab() {
+        if (mRecentsFrag != null) {
+            mRecentsFrag.finishActionMode();
+        }
         mFabOverlay.setClickable(false);
         mFabMenu.close(true);
         AnimUtils.fadeOut(mFabOverlay, AnimUtils.FAB_OVERLAY_DURATION);
     }
 
     private void openFab() {
+        if (mRecentsFrag != null) {
+            mRecentsFrag.finishActionMode();
+        }
         mFabOverlay.setClickable(true);
         mFabMenu.open(true);
         AnimUtils.fadeIn(mFabOverlay, AnimUtils.FAB_OVERLAY_DURATION);

@@ -181,6 +181,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 if(sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
                     RECENT_PHOTOS_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "1"));
                 }
+                ocrSaved = false;
                 //current time
                 Calendar cal = Calendar.getInstance();
                 currentTime = FileUtils.getTimeStamp(cal);

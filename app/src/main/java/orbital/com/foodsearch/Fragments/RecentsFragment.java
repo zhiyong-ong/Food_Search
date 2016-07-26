@@ -115,7 +115,6 @@ public class RecentsFragment extends android.app.Fragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recent_images_recycler);
         filePaths = new ArrayList<>();
         fileNames = new ArrayList<>();
-        addAllFiles(getFiles());
 
         // LinearLayoutManager is used here, this will layout the elements in a similar fashion
         // to the way ListView would layout elements. The RecyclerView.LayoutManager defines how
@@ -136,7 +135,6 @@ public class RecentsFragment extends android.app.Fragment {
             }
         };
         animator.setMoveDuration(AnimUtils.FAST_FADE);
-        animator.setAddDuration(AnimUtils.OVERLAY_EXIT_DURATION);
         mRecyclerView.setItemAnimator(animator);
         mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
         final ViewTreeObserver vto = mRecyclerView.getViewTreeObserver();
@@ -159,7 +157,13 @@ public class RecentsFragment extends android.app.Fragment {
         super.onResume();
         File[] newFiles = getFiles();
         if (newFiles.length != 0) {
-            if (((MainActivity) getActivity()).waitingOcrResult) {
+            if (fileNames.isEmpty() || !((MainActivity) getActivity()).waitingOcrResult) {
+                clearFiles();
+                addAllFiles(newFiles);
+                mAdapter.notifyDataSetChanged();
+                updateRecyclerLayout();
+                scrollToTop();
+            } else {
                 ((MainActivity) getActivity()).waitingOcrResult = false;
                 addFile(newFiles[newFiles.length - 1]);
                 final Handler handler = new Handler();
@@ -167,15 +171,9 @@ public class RecentsFragment extends android.app.Fragment {
                     @Override
                     public void run() {
                         scrollToTop();
-                        mAdapter.notifyItemInserted(mAdapter.getItemCount() - 1);
+                        mAdapter.notifyItemInserted(mAdapter.getItemCount());
                     }
-                }, 350);
-            } else {
-                clearFiles();
-                addAllFiles(newFiles);
-                mAdapter.notifyDataSetChanged();
-                updateRecyclerLayout();
-                scrollToTop();
+                }, 400);
             }
             getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
         } else {
@@ -263,7 +261,9 @@ public class RecentsFragment extends android.app.Fragment {
     }
 
     public void finishActionMode() {
-        actionMode.finish();
+        if (actionMode != null) {
+            actionMode.finish();
+        }
     }
 
     private void toggleSelection(int pos) {
