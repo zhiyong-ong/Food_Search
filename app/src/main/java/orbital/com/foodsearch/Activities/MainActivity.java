@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int IMAGE_PICK_INTENT_REQUEST_CODE = 200;
     private static final int CAMERA_CROP_INTENT_REQUEST_CODE = 300;
     private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
+    private static final int OCR_IMAGE_INTENT = 1000;
     private static final String RECENTS_FRAG_TAG = "recentsFrag";
     private static final String SETTINGS_FRAG_TAG = "settingsFrag";
     private static final String SAVED_URI = "savedUri";
@@ -310,12 +311,23 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    @Override
-    protected void onResume() {
-        if (mRecentsFrag != null) {
-            mRecentsFrag.scrollToTop();
-        }
-        super.onResume();
+    public void enableScroll() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        final AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams)
+                toolbar.getLayoutParams();
+        params.setScrollFlags(
+                AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS |
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP);
+        toolbar.setLayoutParams(params);
+    }
+
+    public void disableScroll() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        final AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams)
+                toolbar.getLayoutParams();
+        params.setScrollFlags(0);
+        toolbar.setLayoutParams(params);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -369,6 +381,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
+            case OCR_IMAGE_INTENT:
+                if (resultCode == RESULT_OK) {
+                    if (mRecentsFrag != null) {
+                        mRecentsFrag.scrollToTop();
+                    }
+                }
+                break;
             case OCR_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     ExifInterface exif;
@@ -426,7 +445,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private void startOcrActivity() {
         Intent intent = new Intent(this, OcrActivity.class);
         intent.putExtra(OcrActivity.FILE_PATH, fileUri.getPath());
-        startActivity(intent);
+        startActivityForResult(intent, OCR_IMAGE_INTENT);
     }
 
     public void openRecentPhoto(View itemView, String path, String data) {

@@ -22,11 +22,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import jp.wasabeef.recyclerview.animators.SlideInRightAnimator;
 import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.Adapters.RecentImageAdapter;
 import orbital.com.foodsearch.DAO.PhotosContract;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.FileUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -42,6 +44,7 @@ public class RecentsFragment extends android.app.Fragment {
     private ActionMode actionMode;
     private GestureDetectorCompat gestureDetector;
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+        boolean deleted = false;
 
         // Called when the action mode is created; startActionMode() was called
         @Override
@@ -56,6 +59,7 @@ public class RecentsFragment extends android.app.Fragment {
         // may be called multiple times if the mode is invalidated.
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            deleted = false;
             return false; // Return false if nothing is done
         }
 
@@ -67,7 +71,8 @@ public class RecentsFragment extends android.app.Fragment {
                     mAdapter.selectAll();
                     return true;
                 case R.id.menu_delete:
-                    mAdapter.deleteSelections();
+                    deleted = true;
+                    mAdapter.deleteSelected();
                     actionMode.finish();
                     return true;
                 default:
@@ -79,15 +84,17 @@ public class RecentsFragment extends android.app.Fragment {
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             actionMode = null;
-            clearFiles();
-            getFiles();
-            mAdapter.clearSelections();
+            mAdapter.clearAllSelection();
+            if (!deleted) {
+                mAdapter.notifyDataSetChanged();
+            }
             if (filePaths.isEmpty()) {
+                mAdapter.notifyDataSetChanged();
                 AnimUtils.fadeIn(getView().findViewById(R.id.empty_recents_layout), AnimUtils.OVERLAY_DURATION);
             }
         }
-
     };
+    private int bottomNavHeight = -1;
 
     public RecentsFragment() {
         // Required empty public constructor
@@ -122,6 +129,13 @@ public class RecentsFragment extends android.app.Fragment {
 
         mAdapter = new RecentImageAdapter(getActivity(), this, filePaths, fileNames);
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setItemAnimator(new SlideInRightAnimator() {
+            @Override
+            public void onAnimationFinished(RecyclerView.ViewHolder viewHolder) {
+                updateRecyclerLayout();
+                super.onAnimationFinished(viewHolder);
+            }
+        });
         mRecyclerView.scrollToPosition(mAdapter.getItemCount() - 1);
 
         Log.e(LOG_TAG, "file paths: " + filePaths.size());
@@ -138,10 +152,12 @@ public class RecentsFragment extends android.app.Fragment {
             }
         }
         File[] files = root.listFiles();
+        FileUtils.sortFileByTime(files);
         for (File file : files) {
             filePaths.add(file.getAbsolutePath());
             fileNames.add(file.getName());
         }
+
     }
 
     private void clearFiles() {
@@ -172,17 +188,37 @@ public class RecentsFragment extends android.app.Fragment {
         }
         File[] files = root.listFiles();
         if (files.length != 0) {
-            clearFiles();
-            getFiles();
+            refreshRecents();
             getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
-            mAdapter.notifyDataSetChanged();
         } else {
             getView().findViewById(R.id.empty_recents_layout).setVisibility(View.VISIBLE);
         }
         super.onResume();
     }
 
-    public void startActionMode(View itemView, int pos) {
+    private void refreshRecents() {
+        clearFiles();
+        getFiles();
+        mAdapter.notifyDataSetChanged();
+        updateRecyclerLayout();
+    }
+
+    public void updateRecyclerLayout() {
+        if (isRecyclerScrollable(mRecyclerView)) {
+            ((MainActivity) getActivity()).enableScroll();
+        } else {
+            ((MainActivity) getActivity()).disableScroll();
+        }
+    }
+
+    private boolean isRecyclerScrollable(RecyclerView recyclerView) {
+        if (bottomNavHeight < 0) {
+            bottomNavHeight = getActivity().findViewById(R.id.bottom_navigation).getHeight();
+        }
+        return recyclerView.computeVerticalScrollRange() > recyclerView.getHeight() - bottomNavHeight;
+    }
+
+    public void startActionMode(int pos) {
         if (actionMode != null) {
             return;
         }

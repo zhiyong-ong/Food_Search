@@ -44,8 +44,6 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -100,6 +98,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private boolean animating = false;
     private boolean leavingActivity = false;
+    private boolean ocrSaved = false;
     private int searchBarTrans;
     private String mFilePath = null;
     private String currentTime;
@@ -182,15 +181,12 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 if(sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
                     RECENT_PHOTOS_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "1"));
                 }
-
                 //current time
                 Calendar cal = Calendar.getInstance();
-                currentTime = FileUtils.getDate(cal);
+                currentTime = FileUtils.getTimeStamp(cal);
                 Date date = cal.getTime();
-                DateFormat df = SimpleDateFormat.getDateInstance(DateFormat.FULL);
-                DateFormat tf = SimpleDateFormat.getTimeInstance();
-                formattedDate = df.format(date);
-                formattedTime = tf.format(date);
+                formattedDate = FileUtils.getFormattedDate(cal);
+                formattedTime = FileUtils.getFormattedTime(cal);
                 return null;
             }
         }.execute();
@@ -420,6 +416,12 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             findViewById(R.id.drawable_overlay).setVisibility(View.INVISIBLE);
             findViewById(R.id.search_bar_container).setVisibility(View.INVISIBLE);
             findViewById(R.id.drawable_view).setVisibility(View.INVISIBLE);
+            Intent intent = getIntent();
+            if (ocrSaved) {
+                this.setResult(RESULT_OK, intent);
+            } else {
+                this.setResult(RESULT_CANCELED, intent);
+            }
             supportFinishAfterTransition();
         } else {
             View rootView = findViewById(R.id.activity_ocr);
@@ -814,6 +816,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             ViewUtils.finishOcrProgress(rootView);
             saveOcrResponse(bingOcrResponse);
             saveImage(BitmapFactory.decodeFile(mFilePath));
+            ocrSaved = true;
         }
 
         @Override
