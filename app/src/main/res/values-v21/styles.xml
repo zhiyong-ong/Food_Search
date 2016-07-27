@@ -10,6 +10,11 @@
         <item name="windowActionModeOverlay">true</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:statusBarColor">@android:color/white</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
     <style name="ActionTextStyle" parent="Base.TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="background">@color/colorAccent</item>
     </style>

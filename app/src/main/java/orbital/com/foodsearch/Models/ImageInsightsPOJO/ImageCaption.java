@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Models.ImageInsightsPOJO;
+package orbital.com.foodsearch.models.ImageInsightsPOJO;
 
 import java.util.ArrayList;
 import java.util.List;

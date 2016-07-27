@@ -1,9 +1,9 @@
-package orbital.com.foodsearch.Models.ImageInsightsPOJO;
+package orbital.com.foodsearch.models.ImageInsightsPOJO;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import orbital.com.foodsearch.Models.ImageSearchPOJO.Instrumentation;
+import orbital.com.foodsearch.models.ImageSearchPOJO.Instrumentation;
 
 /**
  * Created by zhiyong on 27/6/2016.

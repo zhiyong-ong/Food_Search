@@ -9,6 +9,10 @@
         <item name="windowActionModeOverlay">true</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless.Colored"></style>
 
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">

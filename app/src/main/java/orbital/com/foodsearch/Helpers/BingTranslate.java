@@ -1,10 +1,10 @@
-package orbital.com.foodsearch.Helpers;
+package orbital.com.foodsearch.helpers;
 
 import android.util.Log;
 
-import orbital.com.foodsearch.Activities.MainActivity;
-import orbital.com.foodsearch.Activities.OcrActivity;
-import orbital.com.foodsearch.Helpers.BingTranslateMemetix.translate.Translate;
+import orbital.com.foodsearch.activities.MainActivity;
+import orbital.com.foodsearch.helpers.BingTranslateMemetix.translate.Translate;
+import orbital.com.foodsearch.misc.GlobalVar;
 
 /**
  * Created by zhiyong on 1/7/2016.
@@ -16,7 +16,7 @@ public class BingTranslate {
     public static String getTranslatedText(String txt) {
         Log.e(LOG_TAG, "MAIN activity base lang: " + MainActivity.BASE_LANGUAGE);
         Translate.setClientId("foodies1");
-        Translate.setClientSecret(OcrActivity.TRANSLATE_KEY);
+        Translate.setClientSecret(GlobalVar.getTranslateKey());
         String translation = null;
         try {
             //2nd param is translate from, 3rd param is translate to
@@ -30,7 +30,7 @@ public class BingTranslate {
 
     public static String getTranslatedText(String txt, String language) {
         Translate.setClientId("foodies1");
-        Translate.setClientSecret(OcrActivity.TRANSLATE_KEY);
+        Translate.setClientSecret(GlobalVar.getTranslateKey());
         String translation = null;
         try {
             //2nd param is translate from, 3rd param is translate to

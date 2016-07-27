@@ -21,9 +21,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Activities.MainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme">
+            android:name=".activities.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,24 +30,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.GoogleSearchActivity"
+            android:name=".activities.GoogleSearchActivity"
             android:label="@string/title_activity_google_search"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.OcrActivity"
+            android:name=".activities.OcrActivity"
             android:label="OCR"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
         <activity
-            android:name=".Activities.PhotoViewActivity"
-            android:parentActivityName=".Activities.OcrActivity"
+            android:name=".activities.PhotoViewActivity"
+            android:parentActivityName=".activities.OcrActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.CropActivity"
+            android:name=".activities.CropActivity"
             android:label="@string/crop_image_activity_title"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName=".activities.MainActivity"
             android:screenOrientation="portrait" />
     </application>
 

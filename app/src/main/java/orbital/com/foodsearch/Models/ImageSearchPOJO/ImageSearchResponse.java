@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Models.ImageSearchPOJO;
+package orbital.com.foodsearch.models.ImageSearchPOJO;
 
 import com.google.gson.annotations.SerializedName;
 

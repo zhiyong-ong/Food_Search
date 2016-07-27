@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Utils;
+package orbital.com.foodsearch.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

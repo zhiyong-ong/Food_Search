@@ -15,13 +15,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package orbital.com.foodsearch.Helpers.BingTranslateMemetix.speak;
+package orbital.com.foodsearch.helpers.BingTranslateMemetix.speak;
 
 import java.net.URL;
 import java.net.URLEncoder;
 
-import orbital.com.foodsearch.Helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
-import orbital.com.foodsearch.Helpers.BingTranslateMemetix.language.SpokenDialect;
+import orbital.com.foodsearch.helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
+import orbital.com.foodsearch.helpers.BingTranslateMemetix.language.SpokenDialect;
 
 /**
  * Speak 

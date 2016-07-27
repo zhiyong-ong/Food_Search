@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Fragments;
+package orbital.com.foodsearch.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;

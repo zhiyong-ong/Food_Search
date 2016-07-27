@@ -18,6 +18,7 @@
     <string name="permission_ungranted">Permission was not granted</string>
     <string name="internet_error_text">You\'re not online</string>
     <string name="ocr_call_fail">OCR Call Failed</string>
+    <string name="no_keys_text">Something went wrong!</string>
     <string name="image_search_fail">Image Search Call Failed</string>
     <string name="insights_search_fail">Insights call failed!</string>
     <string name="translate_fail">Failed to translate search query</string>
@@ -60,8 +61,8 @@
     <string name="settings_tab">Settings</string>
     <string name="crop_rotate">Rotate</string>
 
-    <string name="fab_menu_behavior">orbital.com.foodsearch.Misc.FloatingActionMenuBehavior</string>
-    <string name="searchbar_behavior">orbital.com.foodsearch.Misc.SearchbarBehavior</string>
+    <string name="fab_menu_behavior">orbital.com.foodsearch.misc.FloatingActionMenuBehavior</string>
+    <string name="searchbar_behavior">orbital.com.foodsearch.misc.SearchbarBehavior</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="fullscreen_transition_name">fullscreenTransition</string>
@@ -73,7 +74,7 @@
         <item quantity="one">%d photo deleted</item>
         <item quantity="other">%d photos deleted</item>
     </plurals>
-    <string name="time_text">At %1$s</string>
+    <string name="time_text">at %1$s</string>
 
     <!--String for languages-->
     <string name="Afrikaans">Afrikaans</string>

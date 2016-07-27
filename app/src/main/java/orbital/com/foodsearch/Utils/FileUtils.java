@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Utils;
+package orbital.com.foodsearch.utils;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -42,7 +42,7 @@ public class FileUtils {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                return date1 != null ? date1.compareTo(date2) : 0;
+                return date1 != null ? -date1.compareTo(date2) : 0;
             }
         });
     }

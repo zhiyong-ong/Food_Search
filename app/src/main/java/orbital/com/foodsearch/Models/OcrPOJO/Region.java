@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Models.OcrPOJO;
+package orbital.com.foodsearch.models.OcrPOJO;
 
 import java.util.ArrayList;
 import java.util.HashMap;

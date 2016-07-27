@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Activities;
+package orbital.com.foodsearch.activities;
 
 import android.content.Intent;
 import android.graphics.Bitmap;

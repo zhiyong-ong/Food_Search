@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.DAO;
+package orbital.com.foodsearch.dao;
 
 import android.provider.BaseColumns;
 

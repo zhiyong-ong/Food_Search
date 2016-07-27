@@ -5,7 +5,7 @@
     android:id="@+id/coord_main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:mContext="orbital.com.foodsearch.Activities.MainActivity">
+    tools:mContext="orbital.com.foodsearch.activities.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/appbar"

@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:mContext="orbital.com.foodsearch.Activities.GoogleSearchActivity"
+    tools:mContext="orbital.com.foodsearch.activities.GoogleSearchActivity"
     tools:showIn="@layout/activity_google_search">
 
     <EditText
@@ -68,21 +68,21 @@
         android:id="@+id/buttonTranslate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/translateText"
         android:layout_alignParentEnd="true"
         android:layout_alignTop="@+id/translateText"
         android:layout_toEndOf="@+id/translateText"
         android:text="click"
-        android:textSize="10dp"
-        android:layout_alignBottom="@+id/translateText" />
+        android:textSize="10dp" />
 
     <TextView
 
+        android:id="@+id/translatedText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/translateText"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="32dp"
-        android:id="@+id/translatedText" />
+        android:layout_marginTop="32dp" />
 
 
     <EditText
@@ -101,42 +101,42 @@
         android:id="@+id/buttonDB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/testDB"
         android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/testDB"
         android:layout_toEndOf="@+id/testDB"
         android:text="click"
-        android:textSize="10dp"
-        android:layout_alignBottom="@+id/testDB"
-        android:layout_alignTop="@+id/testDB" />
+        android:textSize="10dp" />
 
     <TextView
-        android:text="database"
+        android:id="@+id/retrieveDB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/retrieveDBBtn"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:id="@+id/retrieveDB" />
+        android:text="database" />
 
     <Button
-        android:text="Get from db"
+        android:id="@+id/retrieveDBBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="84dp"
-        android:id="@+id/retrieveDBBtn"
         android:layout_below="@+id/testDB"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="84dp"
+        android:text="Get from db" />
 
     <EditText
+        android:id="@+id/textQueryDB"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
         android:layout_below="@+id/testDB"
-        android:layout_toStartOf="@+id/buttonDB"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
+        android:layout_toStartOf="@+id/buttonDB"
         android:background="@android:drawable/editbox_background"
         android:ems="10"
         android:hint="Enter into DB..."
-        android:textAlignment="center"
-        android:id="@+id/textQueryDB" />
+        android:inputType="textPersonName"
+        android:textAlignment="center" />
 </RelativeLayout>

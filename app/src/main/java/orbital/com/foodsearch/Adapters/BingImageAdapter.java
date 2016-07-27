@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Adapters;
+package orbital.com.foodsearch.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -25,15 +25,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 
-import orbital.com.foodsearch.Activities.OcrActivity;
-import orbital.com.foodsearch.Helpers.BingTranslate;
-import orbital.com.foodsearch.Misc.ScrimTransformation;
-import orbital.com.foodsearch.Models.ImageInsightsPOJO.BestRepresentativeQuery;
-import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageCaption;
-import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.Utils.AnimUtils;
-import orbital.com.foodsearch.Utils.NetworkUtils;
+import orbital.com.foodsearch.activities.OcrActivity;
+import orbital.com.foodsearch.helpers.BingTranslate;
+import orbital.com.foodsearch.misc.ScrimTransformation;
+import orbital.com.foodsearch.models.ImageInsightsPOJO.BestRepresentativeQuery;
+import orbital.com.foodsearch.models.ImageInsightsPOJO.ImageCaption;
+import orbital.com.foodsearch.models.ImageSearchPOJO.ImageValue;
+import orbital.com.foodsearch.utils.AnimUtils;
+import orbital.com.foodsearch.utils.NetworkUtils;
 
 /**
  * Created by Abel on 6/14/2016.

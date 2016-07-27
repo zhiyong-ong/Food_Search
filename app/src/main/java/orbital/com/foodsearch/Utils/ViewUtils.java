@@ -1,6 +1,7 @@
-package orbital.com.foodsearch.Utils;
+package orbital.com.foodsearch.utils;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -26,26 +27,11 @@ public class ViewUtils {
     public static void showSearchResults(final View rootView, String translatedText) {
         TextView textView = (TextView) rootView.findViewById(R.id.searchbar_translate_text);
         textView.setText(translatedText);
-        AnimUtils.containerSlideUp(rootView, new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
+        AnimUtils.containerSlideUp(rootView, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animator) {
                 rootView.findViewById(R.id.drawable_overlay).setClickable(false);
                 rootView.findViewById(R.id.searchbar_translate_btn).performClick();
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
             }
         });
         rootView.findViewById(R.id.searchbar_progress).setVisibility(View.GONE);

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package orbital.com.foodsearch.Helpers.BingTranslateMemetix.language;
+package orbital.com.foodsearch.helpers.BingTranslateMemetix.language;
 
 
 import java.net.URL;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import orbital.com.foodsearch.Helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
+import orbital.com.foodsearch.helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
 
 /**
  * Language - an enum of all language codes supported by the Microsoft Translator API
@@ -106,6 +106,54 @@ public enum Language {
 		return null;
 	}
 	
+        public static void setKey(String pKey) {
+            LanguageService.setKey(pKey);
+        }
+        
+        public static void setClientId(String pId) {
+            LanguageService.setClientId(pId);
+        }
+        
+        public static void setClientSecret(String pSecret) {
+            LanguageService.setClientSecret(pSecret);
+        }
+
+     public static List<String> getLanguageCodesForTranslation() throws Exception {
+            String[] codes = GetLanguagesForTranslateService.execute();
+            return Arrays.asList(codes);
+        }
+        
+     /**
+     * values(Language locale)
+     *
+	 * Returns a map of all languages, keyed and sorted by
+     * the localized name in the tongue of the specified locale
+     *
+     * It returns a map, sorted alphanumerically by the keys()
+     *
+     * Key: The localized language name
+     * Value: The Language instance
+     *
+     * @param locale The Language we should localize the Language names with
+	 * @return A Map of all supported languages stored by their localized name.
+	 */
+        public static Map<String,Language> values(Language locale) throws Exception {
+            Map<String,Language>localizedMap = new TreeMap<String,Language>();
+            for(Language lang : Language.values()) {
+                if(lang==Language.AUTO_DETECT)
+                    localizedMap.put(Language.AUTO_DETECT.name(), lang);
+                else
+                    localizedMap.put(lang.getName(locale), lang);
+            }
+            return localizedMap;
+        }
+        
+        // Flushes the localized name cache for all languages
+        public static void flushNameCache() {
+            for(Language lang : Language.values())
+                lang.flushCache();
+        }
+        
 	/**
 	 * Returns the String representation of this language.
 	 * @return The String representation of this language.
@@ -115,30 +163,19 @@ public enum Language {
 		return language;
 	}
         
-        public static void setKey(String pKey) {
-            LanguageService.setKey(pKey);
-        }
-        
-        public static void setClientId(String pId) {
-            LanguageService.setClientId(pId);
-        }
-        public static void setClientSecret(String pSecret) {
-            LanguageService.setClientSecret(pSecret);
-        }
-        
 		/**
 		 * getName()
-		 * 
+		 *
 		 * Returns the name for this language in the tongue of the specified locale
-		 * 
+		 *
 		 * If the name is not cached, then it retrieves the name of ALL languages in this locale.
 		 * This is not bad behavior for 2 reasons:
-		 * 
+		 *
 		 *      1) We can make a reasonable assumption that the client will request the
-		 *         name of another language in the same locale 
-		 *      2) The GetLanguageNames service call expects an array and therefore we can 
+		 *         name of another language in the same locale
+		 *      2) The GetLanguageNames service call expects an array and therefore we can
 		 *         retrieve ALL names in the same, single call anyway.
-		 * 
+		 *
 		 * @return The String representation of this language's localized Name.
 		 */
         public String getName(Language locale) throws Exception {
@@ -153,7 +190,7 @@ public enum Language {
                     String[] names = LanguageService.execute(Language.values(), locale);
                     int i = 0;
                     for(Language lang : Language.values()) {
-                        if(lang!=Language.AUTO_DETECT) {   
+                        if(lang!=Language.AUTO_DETECT) {
                             lang.localizedCache.put(locale,names[i]);
                             i++;
                         }
@@ -164,45 +201,9 @@ public enum Language {
             return localizedName;
         }
         
-     public static List<String> getLanguageCodesForTranslation() throws Exception {
-            String[] codes = GetLanguagesForTranslateService.execute();
-            return Arrays.asList(codes);
-        }
-        
-     /**
-     * values(Language locale)
-     * 
-	 * Returns a map of all languages, keyed and sorted by 
-     * the localized name in the tongue of the specified locale
-     * 
-     * It returns a map, sorted alphanumerically by the keys()
-     * 
-     * Key: The localized language name
-     * Value: The Language instance
-     *
-     * @param locale The Language we should localize the Language names with
-	 * @return A Map of all supported languages stored by their localized name.
-	 */
-        public static Map<String,Language> values(Language locale) throws Exception {
-            Map<String,Language>localizedMap = new TreeMap<String,Language>(); 
-            for(Language lang : Language.values()) {
-                if(lang==Language.AUTO_DETECT)
-                    localizedMap.put(Language.AUTO_DETECT.name(), lang);
-                else
-                    localizedMap.put(lang.getName(locale), lang);
-            }
-            return localizedMap;
-        }
-        
         // Flushes the localized name cache for this language
         private void flushCache() {
             this.localizedCache.clear();
-        }
-        
-        // Flushes the localized name cache for all languages
-        public static void flushNameCache() {
-            for(Language lang : Language.values())
-                lang.flushCache();
         }
         
       private final static class LanguageService extends MicrosoftTranslatorAPI {

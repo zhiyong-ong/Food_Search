@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package orbital.com.foodsearch.Helpers.BingTranslateMemetix.language;
+package orbital.com.foodsearch.helpers.BingTranslateMemetix.language;
 
 
 import java.net.URL;
@@ -23,7 +23,7 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import orbital.com.foodsearch.Helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
+import orbital.com.foodsearch.helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
 
 /**
  * SpokenLanguage - an enum of all spoken language codes supported by the Microsoft Translator API for the Speak Service
@@ -87,15 +87,6 @@ public enum SpokenDialect {
 		return null;
 	}
 	
-	/**
-	 * Returns the String representation of this language.
-	 * @return The String representation of this language.
-	 */
-	@Override
-	public String toString() {
-		return language;
-	}
-        
         public static void setKey(String pKey) {
             SpokenDialectService.setKey(pKey);
         }
@@ -108,19 +99,34 @@ public enum SpokenDialect {
             SpokenDialectService.setClientSecret(pSecret);
         }
         
+        // Flushes the localized name cache for all languages
+        public static void flushNameCache() {
+            for(SpokenDialect lang : SpokenDialect.values())
+                lang.flushCache();
+        }
+        
+	/**
+	 * Returns the String representation of this language.
+	 * @return The String representation of this language.
+	 */
+	@Override
+	public String toString() {
+		return language;
+	}
+        
     /**
      * getName()
-     * 
+     *
      * Returns the name for this language in the tongue of the specified locale
-     * 
+     *
      * If the name is not cached, then it retrieves the name of ALL languages in this locale.
      * This is not bad behavior for 2 reasons:
-     * 
+     *
      *      1) We can make a reasonable assumption that the client will request the
-     *         name of another language in the same locale 
-     *      2) The GetLanguageNames service call expects an array and therefore we can 
+     *         name of another language in the same locale
+     *      2) The GetLanguageNames service call expects an array and therefore we can
      *         retrieve ALL names in the same, single call anyway.
-     * 
+     *
 	 * @return The String representation of this language's localized Name.
 	 */
         public String getName(Language locale) throws Exception {
@@ -128,7 +134,7 @@ public enum SpokenDialect {
             if(this.localizedCache.containsKey(locale)) {
                 localizedName = this.localizedCache.get(locale);
             } else {
-              
+
                 //If not in the cache, pre-load all the Language names for this locale
                 String[] names = SpokenDialectService.execute(SpokenDialect.values(), locale);
                 int i = 0;
@@ -139,19 +145,12 @@ public enum SpokenDialect {
                 localizedName = this.localizedCache.get(locale);
             }
             return localizedName;
-        }     
+        }
         
         // Flushes the localized name cache for this language
         private void flushCache() {
             this.localizedCache.clear();
         }
-        
-        // Flushes the localized name cache for all languages
-        public static void flushNameCache() {
-            for(SpokenDialect lang : SpokenDialect.values())
-                lang.flushCache();
-        }
-        
         
         private final static class SpokenDialectService extends MicrosoftTranslatorAPI {
             private static final String SERVICE_URL = "http://api.microsofttranslator.com/V2/Ajax.svc/GetLanguageNames?";
