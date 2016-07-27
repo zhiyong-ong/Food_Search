@@ -39,6 +39,7 @@ import orbital.com.foodsearch.Utils.AnimUtils;
  */
 public class SearchBarFragment extends Fragment {
 
+    private static final String LOG_TAG = "FOODIES";
     private SharedPreferences sharedPreferencesSettings = null;
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
@@ -57,9 +58,9 @@ public class SearchBarFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         initializeBar();
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        super.onViewCreated(view, savedInstanceState);
     }
 
     /**
@@ -246,12 +247,12 @@ public class SearchBarFragment extends Fragment {
             }
             String selectedValue = langValuesArr[menuItem.getItemId()];
             EditText editText = (EditText) getView().findViewById(R.id.searchbar_edit_text);
+            getView().findViewById(R.id.searchbar_translate_btn).setEnabled(false);
             TranslateTask task = new TranslateTask(getView());
             task.execute(editText.getText().toString(), selectedValue);
             sharedPreferencesSettings.edit()
                     .putString(getActivity().getString(R.string.select_lang_key), selectedValue)
                     .apply();
-            getView().findViewById(R.id.searchbar_translate_btn).setEnabled(false);
             return true;
         }
     }

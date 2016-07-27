@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,7 +64,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final ImageView recentImageView = holder.recentImage;
         TextView timestamp = holder.dateView;
-        Log.e(LOG_TAG, "position is: " + position);
+        //Log.e(LOG_TAG, "position is: " + position);
         String title = fileTitles.get(position);
         Log.e(LOG_TAG, "title is :" + title);
         timestamp.setText(title);
@@ -74,11 +73,11 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         String formattedDate = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_DATE));
         String formattedTime = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_FORMATTED_STRING));
         holder.dateView.setText(formattedDate);
-        holder.timeView.setText("at " + formattedTime);
         cursor.close();
+        holder.timeView.setText(mContext.getResources().getString(R.string.time_text, formattedTime));
 
         String path = filePaths.get(position);
-        Log.e(LOG_TAG, "path is: " + path);
+        //Log.e(LOG_TAG, "path is: " + path);
         if (selectedItems.get(position, false)) {
             holder.layoutView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorSelected));
         } else {
@@ -99,13 +98,13 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         return filePaths.size();
     }
 
-    public void deleteData(int pos) {
+    private void deleteData(int pos) {
         File file = new File(filePaths.get(pos));
         file.delete();
         PhotosDAO.deleteOnEntryTime(fileTitles.get(pos), mDBHelper);
         filePaths.remove(pos);
         fileTitles.remove(pos);
-        notifyItemChanged(pos);
+        notifyItemRemoved(pos);
     }
 
     public void selectAll() {
@@ -113,43 +112,47 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         for (int pos = 0; pos < total; pos++) {
             selectedItems.put(pos, true);
         }
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, total);
     }
 
     public void toggleSelection(int pos) {
         if (selectedItems.get(pos, false)) {
             selectedItems.delete(pos);
-            notifyDataSetChanged();
-            if (selectedItems.size() == 0) {
-                mRecentsFragment.finishActionMode();
-            }
-            //selectedView.findViewById(R.id.remove_item_checkbox).setVisibility(View.INVISIBLE);
         } else {
             selectedItems.put(pos, true);
-            notifyDataSetChanged();
-            //selectedView.findViewById(R.id.remove_item_checkbox).setVisibility(View.VISIBLE);
+        }
+        notifyItemChanged(pos);
+        if (selectedItems.size() == 0) {
+            mRecentsFragment.finishActionMode();
         }
     }
 
-    public void clearSelections() {
+    public void clearAllSelection() {
         selectedItems.clear();
-        notifyDataSetChanged();
     }
 
-    public void deleteSelections() {
+    public void clearSelection(int pos) {
+        selectedItems.delete(pos);
+    }
+
+    public void deleteSelected() {
         List<Integer> selectedItemKeys = getSelectedItemsKeys();
+        clearAllSelection();
         for (int i = selectedItemKeys.size() - 1; i >= 0; i--) {
             int currPos = selectedItemKeys.get(i);
             deleteData(currPos);
         }
-        Toast.makeText(mRecentsFragment.getActivity(), selectedItemKeys.size() + " photo(s) deleted", Toast.LENGTH_SHORT).show();
+        Toast.makeText(mRecentsFragment.getActivity(),
+                mContext.getResources().getQuantityString(R.plurals.photo_deleted_string,
+                        selectedItemKeys.size(), selectedItemKeys.size()), Toast.LENGTH_SHORT)
+                .show();
     }
 
     public int getSelectedItemCount() {
         return selectedItems.size();
     }
 
-    public List<Integer> getSelectedItemsKeys() {
+    private List<Integer> getSelectedItemsKeys() {
         List<Integer> items =
                 new ArrayList<Integer>(selectedItems.size());
         for (int i = 0; i < selectedItems.size(); i++) {
@@ -183,7 +186,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
 
         @Override
         public boolean onLongClick(View view) {
-            mRecentsFragment.startActionMode(view, getAdapterPosition());
+            mRecentsFragment.startActionMode(getAdapterPosition());
             return true;
         }
     }
