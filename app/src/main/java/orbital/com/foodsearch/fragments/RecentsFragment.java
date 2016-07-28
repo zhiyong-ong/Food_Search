@@ -216,6 +216,7 @@ public class RecentsFragment extends android.app.Fragment {
     private void addFile(File file) {
         filePaths.add(0, file.getAbsolutePath());
         fileNames.add(0, file.getName());
+        Log.e(LOG_TAG, "test");
     }
 
     private int removeLastFiles(int deleteNumber) {
@@ -223,10 +224,6 @@ public class RecentsFragment extends android.app.Fragment {
         filePaths.subList(deletedIndex, filePaths.size()).clear();
         fileNames.subList(deletedIndex, fileNames.size()).clear();
         return deletedIndex;
-    }
-
-    private void updateRecentsCount() {
-
     }
 
     private void clearFiles() {

@@ -739,7 +739,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         if (fileToDelete != null) {
             File file = new File(root, fileToDelete);
             file.delete();
-            Log.e(LOG_TAG, "FILE " + fileToDelete + " DELETED");
+            Log.e(LOG_TAG, "FILE: " + fileToDelete + " DELETED");
         }
 
         String fname = currentTime;

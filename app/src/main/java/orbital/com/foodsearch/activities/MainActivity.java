@@ -273,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 } else {
                     openFab();
                 }
+                Log.e(LOG_TAG, "test");
             }
         });
         FloatingActionButton fileFab = (FloatingActionButton) findViewById(R.id.start_image_pick_fab);

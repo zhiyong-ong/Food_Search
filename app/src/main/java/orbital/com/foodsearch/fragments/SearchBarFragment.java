@@ -104,6 +104,7 @@ public class SearchBarFragment extends Fragment {
                 return false;
             }
         });
+        Log.e(LOG_TAG, "test");
 
         editText.addTextChangedListener(new TextWatcher() {
             @Override
