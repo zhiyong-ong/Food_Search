@@ -66,6 +66,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         TextView timestamp = holder.dateView;
         //Log.e(LOG_TAG, "position is: " + position);
         String title = fileTitles.get(position);
+        Log.e(LOG_TAG, "title is :" + title);
         timestamp.setText(title);
         Cursor cursor = PhotosDAO.readDatabaseGetRow(title, mDBHelper);
         cursor.moveToFirst();

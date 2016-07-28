@@ -45,6 +45,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -198,6 +199,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 //current time
                 Calendar cal = Calendar.getInstance();
                 currentTime = FileUtils.getTimeStamp(cal);
+                Date date = cal.getTime();
                 formattedDate = FileUtils.getFormattedDate(cal);
                 formattedTime = FileUtils.getFormattedTime(cal);
                 return null;
@@ -702,19 +704,22 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         String fileName = null;
         //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
         if (cursor.getCount() >= RECENT_PHOTOS_COUNT) {
-            cursor.moveToFirst();
-            fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
-            PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
-            Log.e(LOG_TAG, fileName + " DELETED!");
+            //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
+            if (cursor.getCount() >= RECENT_PHOTOS_COUNT) {
+                cursor.moveToFirst();
+                fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
+                PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
+                //Log.e(LOG_TAG, fileName + " DELETED!");
+            }
+            cursor.close();
+            // Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
+            //save the lines to local DB
+            Gson gson = new Gson();
+            String json = gson.toJson(response);
+            long newRowID = PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
+            // Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
+            saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
         }
-        cursor.close();
-        // Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
-        //save the lines to local DB
-        Gson gson = new Gson();
-        String json = gson.toJson(response);
-        long newRowID = PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
-        // Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
-        saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
     }
 
     /**

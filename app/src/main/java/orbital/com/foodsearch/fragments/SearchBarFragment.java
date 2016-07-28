@@ -39,10 +39,11 @@ import orbital.com.foodsearch.Utils.AnimUtils;
  */
 public class SearchBarFragment extends Fragment {
 
-    private static final String LOG_TAG = "FOODIES";
     private SharedPreferences sharedPreferencesSettings = null;
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
+    private ImageButton translateBtn;
+    private static final String LOG_TAG = "FOODIES";
 
 
     public SearchBarFragment() {
@@ -76,7 +77,7 @@ public class SearchBarFragment extends Fragment {
         final View translateLayout = searchBar.findViewById(R.id.searchbar_translate_layout);
         final TextView translateTitleView = (TextView) searchBar.findViewById(R.id.searchbar_translate_title);
         final TextView translateTextView = (TextView) searchBar.findViewById(R.id.searchbar_translate_text);
-        final ImageButton translateBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_btn);
+        translateBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_btn);
         final ImageButton translateCloseBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_close);
         final ImageButton copyBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_copy);
         final InputMethodManager imm = (InputMethodManager) getActivity()
@@ -186,7 +187,6 @@ public class SearchBarFragment extends Fragment {
                 }
             }
         };
-
         editText.setOnClickListener(listener);
         searchButton.setOnClickListener(listener);
         cancelButton.setOnClickListener(listener);
@@ -198,7 +198,6 @@ public class SearchBarFragment extends Fragment {
         translateBtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-
                 showPopup(view);
                 return true;
             }
@@ -278,10 +277,20 @@ public class SearchBarFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String result) {
-            ImageButton transBtn = (ImageButton) rootView.findViewById(R.id.searchbar_translate_btn);
             ((TextView) rootView.findViewById(R.id.searchbar_translate_text)).setText(result);
-            transBtn.setEnabled(true);
-            transBtn.performClick();
+            translateBtn.setEnabled(true);
+            translateBtn.performClick();
+            translateBtn.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View view) {
+                    Log.e(LOG_TAG, "on long click pressed");
+                    showPopup(view);
+                    return true;
+                }
+            });
+            translateBtn.setEnabled(true);
+            translateBtn.performClick();
+            super.onPostExecute(result);
         }
     }
 
