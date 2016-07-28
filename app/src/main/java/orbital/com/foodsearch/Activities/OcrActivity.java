@@ -65,6 +65,7 @@ import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
 import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.FileUtils;
 import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.NetworkUtils;
 import orbital.com.foodsearch.Utils.ViewUtils;
