@@ -5,9 +5,9 @@ package orbital.com.foodsearch.misc;
  */
 
 public class GlobalVar {
-    public static String OCR_KEY;
-    public static String IMAGE_KEY;
-    public static String TRANSLATE_KEY;
+    public static String OCR_KEY = null;
+    public static String IMAGE_KEY = null;
+    public static String TRANSLATE_KEY = null;
 
     public static String getOcrKey() {
         return OCR_KEY;

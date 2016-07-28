@@ -34,13 +34,13 @@
         android:key="pref_key_recents_settings"
         android:title="Recents">
         <CheckBoxPreference
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:key="@string/save_recents_key"
             android:summary="@string/save_recents_summary"
             android:title="@string/save_recents_title" />
 
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="10"
             android:dependency="@string/save_recents_key"
             android:entries="@array/listNumber"
             android:entryValues="@array/listNumber"
