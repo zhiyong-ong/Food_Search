@@ -1,8 +1,10 @@
 package orbital.com.foodsearch.Utils;
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -23,33 +25,28 @@ public class ViewUtils {
         rootView.findViewById(R.id.searchbar_progress).setVisibility(View.GONE);
     }
 
+    public static void showSearchBar(View rootView, String searchParam, Animator.AnimatorListener listener) {
+        ImageButton translateBtn = (ImageButton) rootView.findViewById(R.id.searchbar_translate_btn);
+        AnimUtils.fadeOut(translateBtn, AnimUtils.FAST_FADE);
+        AnimUtils.showSearchBar(rootView.findViewById(R.id.search_bar_container), listener);
+        EditText editText = (EditText) rootView.findViewById(R.id.searchbar_edit_text);
+        editText.setText(searchParam);
+        editText.clearFocus();
+    }
+
     public static void showSearchResults(final View rootView, String translatedText) {
         TextView textView = (TextView) rootView.findViewById(R.id.searchbar_translate_text);
         textView.setText(translatedText);
-        AnimUtils.containerSlideUp(rootView, new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
+        AnimUtils.darkenOverlay(rootView.findViewById(R.id.drawable_overlay));
+        AnimUtils.containerSlideUp(rootView, new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animator) {
                 rootView.findViewById(R.id.drawable_overlay).setClickable(false);
                 rootView.findViewById(R.id.searchbar_translate_btn).performClick();
             }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
         });
-        rootView.findViewById(R.id.searchbar_progress).setVisibility(View.GONE);
         AnimUtils.fadeIn(rootView.findViewById(R.id.searchbar_translate_btn), AnimUtils.OVERLAY_DURATION);
+        rootView.findViewById(R.id.searchbar_progress).setVisibility(View.GONE);
     }
 
     public static void closeSearchResults(View rootView, Animator.AnimatorListener listener, int containerTransY) {
@@ -69,11 +66,11 @@ public class ViewUtils {
 
     public static void startOcrProgress(View rootView) {
         AnimUtils.fadeIn(rootView.findViewById(R.id.drawable_overlay), AnimUtils.OVERLAY_DURATION);
-        AnimUtils.fadeIn(rootView.findViewById(R.id.progress_bar), AnimUtils.PROGRESS_BAR_DURATION);
+        AnimUtils.fadeIn(rootView.findViewById(R.id.ocr_progress_bar), AnimUtils.PROGRESS_BAR_DURATION);
     }
 
     public static void finishOcrProgress(View rootView) {
         AnimUtils.fadeOut(rootView.findViewById(R.id.drawable_overlay), AnimUtils.OVERLAY_DURATION);
-        AnimUtils.fadeOut(rootView.findViewById(R.id.progress_bar), AnimUtils.PROGRESS_BAR_DURATION);
+        AnimUtils.fadeOut(rootView.findViewById(R.id.ocr_progress_bar), AnimUtils.PROGRESS_BAR_DURATION);
     }
 }

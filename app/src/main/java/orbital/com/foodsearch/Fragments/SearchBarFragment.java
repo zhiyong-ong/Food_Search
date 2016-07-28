@@ -43,7 +43,7 @@ public class SearchBarFragment extends Fragment {
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
     private ImageButton translateBtn;
-    private static final String LOG_TAG = "FOODIES";
+
 
     public SearchBarFragment() {
     }
@@ -78,6 +78,7 @@ public class SearchBarFragment extends Fragment {
         final TextView translateTextView = (TextView) searchBar.findViewById(R.id.searchbar_translate_text);
         translateBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_btn);
         final ImageButton translateCloseBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_close);
+        final ImageButton copyBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_copy);
         final InputMethodManager imm = (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -121,6 +122,7 @@ public class SearchBarFragment extends Fragment {
 
         View.OnClickListener listener = new View.OnClickListener() {
             private boolean translateOpen = false;
+
             @Override
             public void onClick(View v) {
                 switch (v.getId()) {
@@ -150,6 +152,7 @@ public class SearchBarFragment extends Fragment {
                             translateOpen = false;
                         }
                         break;
+                    case R.id.searchbar_translate_copy:
                     case R.id.searchbar_translate_text:
                     case R.id.searchbar_translate_title:
                         if (translateOpen) {
@@ -183,8 +186,6 @@ public class SearchBarFragment extends Fragment {
                 }
             }
         };
-
-
         editText.setOnClickListener(listener);
         searchButton.setOnClickListener(listener);
         cancelButton.setOnClickListener(listener);
@@ -192,10 +193,10 @@ public class SearchBarFragment extends Fragment {
         translateCloseBtn.setOnClickListener(listener);
         translateTextView.setOnClickListener(listener);
         translateTitleView.setOnClickListener(listener);
+        copyBtn.setOnClickListener(listener);
         translateBtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                Log.e(LOG_TAG, "on long click pressed");
                 showPopup(view);
                 return true;
             }
@@ -276,6 +277,8 @@ public class SearchBarFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
             ((TextView) rootView.findViewById(R.id.searchbar_translate_text)).setText(result);
+            translateBtn.setEnabled(true);
+            translateBtn.performClick();
             translateBtn.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {

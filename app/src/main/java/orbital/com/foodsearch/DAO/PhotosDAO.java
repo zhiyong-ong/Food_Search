@@ -3,12 +3,16 @@ package orbital.com.foodsearch.DAO;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
 import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
+
 /**
  * Created by zhiyong on 27/7/2016.
  */
 
 public class PhotosDAO {
+    private final static String ENTRY_TIME_CLAUSE = "entry_time = ?";
+
     public static Cursor readDatabaseGetRow(String fileTitle, PhotosDBHelper mDBHelper) {
         SQLiteDatabase db = mDBHelper.getReadableDatabase();
         String[] results = {
@@ -20,8 +24,8 @@ public class PhotosDAO {
         Cursor c = db.query(
                 PhotosEntry.TABLE_NAME,
                 results,
-                PhotosEntry.COLUMN_NAME_ENTRY_TIME + " = '" + fileTitle + "'",
-                null,
+                ENTRY_TIME_CLAUSE,
+                new String[]{fileTitle},
                 null,
                 null,
                 null);
@@ -57,11 +61,13 @@ public class PhotosDAO {
         values.put(PhotosEntry.COLUMN_NAME_FORMATTED_DATE, fDate);
         values.put(PhotosEntry.COLUMN_NAME_FORMATTED_STRING, fTime);
         long rowId = db.insert(PhotosEntry.TABLE_NAME, null, values);
+        db.close();
         return rowId;
     }
 
     public static void deleteOnEntryTime(String entryTime, PhotosDBHelper mDBHelper) {
-        SQLiteDatabase db = mDBHelper.getReadableDatabase();
-        db.delete(PhotosEntry.TABLE_NAME, PhotosEntry.COLUMN_NAME_TITLE + " = '" + entryTime + "'", null);
+        SQLiteDatabase db = mDBHelper.getWritableDatabase();
+        db.delete(PhotosEntry.TABLE_NAME, ENTRY_TIME_CLAUSE, new String[]{entryTime});
+        db.close();
     }
 }

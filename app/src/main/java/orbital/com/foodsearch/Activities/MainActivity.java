@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int IMAGE_PICK_INTENT_REQUEST_CODE = 200;
     private static final int CAMERA_CROP_INTENT_REQUEST_CODE = 300;
     private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
-    private static final int OCR_IMAGE_INTENT_CODE = 1000;
+    private static final int OCR_IMAGE_INTENT_CODE = 500;
     private static final String RECENTS_FRAG_TAG = "recentsFrag";
     private static final String SETTINGS_FRAG_TAG = "settingsFrag";
     private static final String SAVED_URI = "savedUri";
@@ -70,19 +71,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final String PHOTO_FILE_NAME = "photo.jpg";
     public static String BASE_LANGUAGE;
     private static SharedPreferences sharedPreferencesSettings;
-    private final String DEFAULT_LANG_KEY = "DEFAULT_LANG_KEY";
     private final String foodSearch = "FoodSearch";
-    public boolean waitingOcrResult = false;
+    private final String user = "foodies@firebase.com";
+    private final String password = "Orbital123";
+    public boolean savedNewImage = false;
     private Uri fileUri = null;
     private FrameLayout mFabOverlay;
     private FloatingActionMenu mFabMenu;
-    private String defaultLang;
     private RecentsFragment mRecentsFrag;
     private SettingFragment mSettingFrag;
     private FirebaseAuth.AuthStateListener mAuthListener;
     private FirebaseAuth mAuth;
-    private String user = "foodies@firebase.com";
-    private String password = "Orbital123";
+    private FirebaseAsync mFirebaseTask;
     private DatabaseReference database;
 
     @Override
@@ -98,7 +98,19 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         PreferenceManager.setDefaultValues(this, R.xml.settings_preference, false);
         getBaseLanguage();
+    }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (sharedPreferencesSettings != null) {
+            sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
+        }
+        mFirebaseTask = new FirebaseAsync();
+        mFirebaseTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    private void setupFirebase() {
         database = FirebaseDatabase.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -130,13 +142,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     // User is signed out
                     Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
                 }
-                //refreshDB();
             }
 
         };
-        if(GlobalVar.getImageKey() == null) {
-            signInFirebase();
-        }
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
     //feeder code... add it into the signing in code if you wanna refresh db.
@@ -146,13 +155,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
         mDbHelper.onCreate(db);
     }
+
     private void signInFirebase() {
         mAuth.signInWithEmailAndPassword(user, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.e(LOG_TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
-
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the
                         // signed in user can be handled in the listener.
@@ -163,12 +172,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         }
                     }
                 });
-
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         String langKey = getString(R.string.select_lang_key);
+        String numRecentsKey = getString(R.string.num_recents_key);
         if (langKey.equals(s)) {
             MainActivity.BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
         }
@@ -201,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             }
         });
 
-        android.app.FragmentTransaction ft = getFragmentManager().beginTransaction();
         bottomNavigation.setCurrentItem(1);
         bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
             @Override
@@ -277,7 +285,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         });
     }
 
-
     @Override
     public void onBackPressed() {
         if (mFabMenu != null && mFabMenu.isOpened()) {
@@ -319,25 +326,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if (savedInstanceState.containsKey(SAVED_URI)) {
             fileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
         }
-    }
-
-    public void enableScroll() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        final AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams)
-                toolbar.getLayoutParams();
-        params.setScrollFlags(
-                AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
-                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS |
-                        AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP);
-        toolbar.setLayoutParams(params);
-    }
-
-    public void disableScroll() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        final AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams)
-                toolbar.getLayoutParams();
-        params.setScrollFlags(0);
-        toolbar.setLayoutParams(params);
     }
 
     @TargetApi(Build.VERSION_CODES.M)
@@ -393,7 +381,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         switch (requestCode) {
             case OCR_IMAGE_INTENT_CODE:
                 if (resultCode == RESULT_OK) {
-                    waitingOcrResult = true;
+                    expandAppBar();
+                    savedNewImage = true;
                 }
                 break;
             case OCR_CAMERA_INTENT_REQUEST_CODE:
@@ -436,17 +425,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    private void startCropActivity(Uri uri, boolean isCamera) {
-        Intent intent = new Intent(this, CropActivity.class);
-        intent.putExtra(CropActivity.SOURCE_URI, uri);
-        intent.putExtra(CropActivity.OUTPUT_URI, fileUri);
-        if (isCamera) {
-            startActivityForResult(intent, CAMERA_CROP_INTENT_REQUEST_CODE);
-        } else {
-            startActivityForResult(intent, GALLERY_CROP_INTENT_REQUEST_CODE);
-        }
-    }
-
     /**
      * Starts OcrActivity with the file uris
      */
@@ -454,6 +432,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Intent intent = new Intent(this, OcrActivity.class);
         intent.putExtra(OcrActivity.FILE_PATH, fileUri.getPath());
         startActivityForResult(intent, OCR_IMAGE_INTENT_CODE);
+
     }
 
     public void openRecentPhoto(View itemView, String path, String data) {
@@ -472,6 +451,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         startActivity(intent, options.toBundle());
     }
 
+    private void startCropActivity(Uri uri, final boolean isCamera) {
+        Intent intent = new Intent(this, CropActivity.class);
+        intent.putExtra(CropActivity.SOURCE_URI, uri);
+        intent.putExtra(CropActivity.OUTPUT_URI, fileUri);
+        if (isCamera) {
+            startActivityForResult(intent, CAMERA_CROP_INTENT_REQUEST_CODE);
+        } else {
+            startActivityForResult(intent, GALLERY_CROP_INTENT_REQUEST_CODE);
+        }
+    }
+
     /**
      * This method checks if we already registered a default language. If not,
      * we will check through system language until we find one that tallies and
@@ -479,7 +469,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
      * If already registered default then we simply load for shared preference settings.
      */
     private void getBaseLanguage() {
-        defaultLang = sharedPreferencesSettings.getString(getString(R.string.select_lang_key), null);
+        String defaultLang = sharedPreferencesSettings.getString(getString(R.string.select_lang_key), null);
         if (defaultLang == null) {
             String[] langValues = getResources().getStringArray(R.array.listLanguagesValues);
             String sysLang = Locale.getDefault().getLanguage();
@@ -550,6 +540,47 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         startActivityForResult(intent, IMAGE_PICK_INTENT_REQUEST_CODE);
     }
 
+    @Override
+    public void onStop() {
+        if (mAuthListener != null && mAuth != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+        if (sharedPreferencesSettings != null) {
+            sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
+        }
+        super.onStop();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        expandAppBar();
+    }
+
+    public void enableScroll() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        final AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams)
+                toolbar.getLayoutParams();
+        params.setScrollFlags(
+                AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS |
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_SNAP);
+        toolbar.setLayoutParams(params);
+    }
+
+    public void disableScroll() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        final AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams)
+                toolbar.getLayoutParams();
+        params.setScrollFlags(0);
+        toolbar.setLayoutParams(params);
+    }
+
+    private void expandAppBar() {
+        AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar);
+        appBarLayout.setExpanded(true);
+    }
+
     /**
      * This method generates the Uri and saves it as the member variable
      */
@@ -566,19 +597,27 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 + File.separator + PHOTO_FILE_NAME));
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
-        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
-    }
+    private class FirebaseAsync extends AsyncTask<Void, Void, Void> {
 
-    @Override
-    public void onStop() {
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
+        @Override
+        protected void onPreExecute() {
+            if (GlobalVar.hasKeyValues()) {
+                cancel(true);
+            }
         }
-        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
-        super.onStop();
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            setupFirebase();
+            signInFirebase();
+            return null;
+        }
+
+        @Override
+        protected void onCancelled() {
+            if (mAuthListener != null && mAuth != null) {
+                mAuth.addAuthStateListener(mAuthListener);
+            }
+        }
     }
 }

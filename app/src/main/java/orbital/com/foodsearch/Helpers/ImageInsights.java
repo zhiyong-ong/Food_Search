@@ -9,7 +9,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
-import orbital.com.foodsearch.Activities.OcrActivity;
+import orbital.com.foodsearch.Misc.GlobalVar;
 import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -30,7 +30,6 @@ public class ImageInsights {
     //Abel's one
     //private static final String OCP_APIM_KEY = "df4bfc35ad584f8c856052cb46f213dd";
 
-    private static final String OCP_APIM_KEY = OcrActivity.IMAGE_KEY;
     private static final String BING_IMAGE_URL = "https://api.cognitive.microsoft.com/bing/v5.0/images/";
     private static final String LOG_TAG = "FOODIES";
 
@@ -63,7 +62,7 @@ public class ImageInsights {
         httpClient.networkInterceptors().add(new Interceptor() {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request request = chain.request().newBuilder().addHeader("Ocp-Apim-Subscription-Key", OCP_APIM_KEY).build();
+                Request request = chain.request().newBuilder().addHeader("Ocp-Apim-Subscription-Key", GlobalVar.getImageKey()).build();
                 return chain.proceed(request);
             }
         });

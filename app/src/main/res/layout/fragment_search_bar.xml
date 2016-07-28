@@ -95,6 +95,15 @@
             android:textSize="@dimen/subhead_font_size" />
 
         <ImageButton
+            android:id="@+id/searchbar_translate_copy"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackground"
+            android:paddingLeft="@dimen/activity_half_margin"
+            android:paddingRight="@dimen/activity_half_margin"
+            android:src="@drawable/ic_copy_white" />
+
+        <ImageButton
             android:id="@+id/searchbar_translate_close"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

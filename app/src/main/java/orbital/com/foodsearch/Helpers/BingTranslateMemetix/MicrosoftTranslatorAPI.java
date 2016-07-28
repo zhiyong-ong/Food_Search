@@ -42,16 +42,6 @@ import java.net.URLEncoder;
 public abstract class MicrosoftTranslatorAPI {
     //Encoding type
     protected static final String ENCODING = "UTF-8";
-    
-    protected static String apiKey;
-    private static String DatamarketAccessUri = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
-    private static String referrer;
-    private static String clientId;
-    private static String clientSecret;
-    private static String token;
-    private static long tokenExpiration = 0;
-    private static String contentType = "text/plain";
-    
     protected static final String PARAM_APP_ID = "appId=",
                                   PARAM_TO_LANG = "&to=",
                                   PARAM_FROM_LANG = "&from=",
@@ -61,6 +51,14 @@ public abstract class MicrosoftTranslatorAPI {
                                   PARAM_SENTENCES_LANGUAGE = "&language=",
                                   PARAM_LOCALE = "&locale=",
                                   PARAM_LANGUAGE_CODES = "&languageCodes=";
+    protected static String apiKey;
+    private static String DatamarketAccessUri = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
+    private static String referrer;
+    private static String clientId;
+    private static String clientSecret;
+    private static String token;
+    private static long tokenExpiration = 0;
+    private static String contentType = "text/plain";
     
     /**
      * Sets the API key.

@@ -17,9 +17,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 
 import com.github.clans.fab.FloatingActionMenu;
 
@@ -108,17 +106,12 @@ public class AnimUtils {
         anim.start();
     }
 
-    public static void showSearchBar(View rootView, View searchBar, String searchParam, Animator.AnimatorListener listener) {
+    public static void showSearchBar(View searchBar, Animator.AnimatorListener listener) {
         searchBar.animate().translationY(0)
                 .setInterpolator(new FastOutSlowInInterpolator())
                 .setDuration(SEARCH_BAR_SHOW)
                 .setListener(listener)
                 .start();
-        ImageButton translateBtn = (ImageButton) rootView.findViewById(R.id.searchbar_translate_btn);
-        AnimUtils.fadeOut(translateBtn, AnimUtils.FAST_FADE);
-        EditText editText = (EditText) searchBar.findViewById(R.id.searchbar_edit_text);
-        editText.setText(searchParam);
-        editText.clearFocus();
     }
 
     public static void hideSearchBar(View searchBar, int searchbarTrans) {
@@ -214,6 +207,9 @@ public class AnimUtils {
     }
 
     public static void fadeIn(View view, int duration) {
+        if (view.getVisibility() == View.VISIBLE) {
+            return;
+        }
         view.setAlpha(0f);
         view.setVisibility(View.VISIBLE);
         ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.ALPHA, 0, 1);
