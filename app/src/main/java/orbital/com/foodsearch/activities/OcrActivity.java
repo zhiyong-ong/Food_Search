@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.activities;
+package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
 import android.content.Context;
@@ -49,29 +49,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import orbital.com.foodsearch.DAO.BingImageDAO;
+import orbital.com.foodsearch.DAO.PhotosContract;
+import orbital.com.foodsearch.DAO.PhotosDAO;
+import orbital.com.foodsearch.DAO.PhotosDBHelper;
+import orbital.com.foodsearch.Fragments.SearchBarFragment;
+import orbital.com.foodsearch.Fragments.SearchResultsFragment;
+import orbital.com.foodsearch.Helpers.BingOcr;
+import orbital.com.foodsearch.Helpers.BingSearch;
+import orbital.com.foodsearch.Helpers.BingTranslate;
+import orbital.com.foodsearch.Helpers.ImageInsights;
+import orbital.com.foodsearch.Misc.GlobalVar;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
+import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
+import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.dao.BingImageDAO;
-import orbital.com.foodsearch.dao.PhotosContract.PhotosEntry;
-import orbital.com.foodsearch.dao.PhotosDAO;
-import orbital.com.foodsearch.dao.PhotosDBHelper;
-import orbital.com.foodsearch.fragments.SearchBarFragment;
-import orbital.com.foodsearch.fragments.SearchResultsFragment;
-import orbital.com.foodsearch.helpers.BingOcr;
-import orbital.com.foodsearch.helpers.BingSearch;
-import orbital.com.foodsearch.helpers.BingTranslate;
-import orbital.com.foodsearch.helpers.ImageInsights;
-import orbital.com.foodsearch.misc.GlobalVar;
-import orbital.com.foodsearch.models.ImageInsightsPOJO.ImageInsightsResponse;
-import orbital.com.foodsearch.models.ImageSearchPOJO.ImageSearchResponse;
-import orbital.com.foodsearch.models.ImageSearchPOJO.ImageValue;
-import orbital.com.foodsearch.models.OcrPOJO.BingOcrResponse;
-import orbital.com.foodsearch.models.OcrPOJO.Line;
-import orbital.com.foodsearch.utils.AnimUtils;
-import orbital.com.foodsearch.utils.FileUtils;
-import orbital.com.foodsearch.utils.ImageUtils;
-import orbital.com.foodsearch.utils.NetworkUtils;
-import orbital.com.foodsearch.utils.ViewUtils;
-import orbital.com.foodsearch.views.DrawableView;
+import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.FileUtils;
+import orbital.com.foodsearch.Utils.ImageUtils;
+import orbital.com.foodsearch.Utils.NetworkUtils;
+import orbital.com.foodsearch.Utils.ViewUtils;
+import orbital.com.foodsearch.Views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -703,7 +703,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
         if (cursor.getCount() >= RECENT_PHOTOS_COUNT) {
             cursor.moveToFirst();
-            fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_ENTRY_TIME));
+            fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
             PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
             Log.e(LOG_TAG, fileName + " DELETED!");
         }

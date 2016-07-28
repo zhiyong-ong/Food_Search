@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.activities;
+package orbital.com.foodsearch.Activities;
 
 import android.Manifest;
 import android.annotation.TargetApi;
@@ -47,13 +47,13 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.util.Locale;
 
+import orbital.com.foodsearch.DAO.PhotosContract;
+import orbital.com.foodsearch.DAO.PhotosDBHelper;
+import orbital.com.foodsearch.Fragments.RecentsFragment;
+import orbital.com.foodsearch.Fragments.SettingFragment;
+import orbital.com.foodsearch.Misc.GlobalVar;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.dao.PhotosContract;
-import orbital.com.foodsearch.dao.PhotosDBHelper;
-import orbital.com.foodsearch.fragments.RecentsFragment;
-import orbital.com.foodsearch.fragments.SettingFragment;
-import orbital.com.foodsearch.misc.GlobalVar;
-import orbital.com.foodsearch.utils.AnimUtils;
+import orbital.com.foodsearch.Utils.AnimUtils;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 

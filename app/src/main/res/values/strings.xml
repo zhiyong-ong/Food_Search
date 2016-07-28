@@ -64,8 +64,8 @@
     <string name="empty_recents_title_string">No menus saved yet</string>
     <string name="empty_recents_text">You haven\'t saved any menus yet\nStart by scanning one</string>
 
-    <string name="fab_menu_behavior">orbital.com.foodsearch.misc.FloatingActionMenuBehavior</string>
-    <string name="searchbar_behavior">orbital.com.foodsearch.misc.SearchbarBehavior</string>
+    <string name="fab_menu_behavior">orbital.com.foodsearch.Misc.FloatingActionMenuBehavior</string>
+    <string name="searchbar_behavior">orbital.com.foodsearch.Misc.SearchbarBehavior</string>
 
     <string name="fullscreen_transition_name">fullscreenTransition</string>
     <string name="recents_transition_name">recentsTransition</string>

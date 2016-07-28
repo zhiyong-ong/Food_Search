@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.adapters;
+package orbital.com.foodsearch.Adapters;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -20,11 +20,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
+import orbital.com.foodsearch.DAO.PhotosDAO;
+import orbital.com.foodsearch.DAO.PhotosDBHelper;
+import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.dao.PhotosContract.PhotosEntry;
-import orbital.com.foodsearch.dao.PhotosDAO;
-import orbital.com.foodsearch.dao.PhotosDBHelper;
-import orbital.com.foodsearch.fragments.RecentsFragment;
 
 /**
  * Created by zhiyong on 21/7/2016.

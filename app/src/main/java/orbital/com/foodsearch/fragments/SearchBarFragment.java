@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.fragments;
+package orbital.com.foodsearch.Fragments;
 
 
 import android.animation.Animator;
@@ -29,10 +29,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import me.zhanghai.android.materialprogressbar.IndeterminateHorizontalProgressDrawable;
+import orbital.com.foodsearch.Activities.OcrActivity;
+import orbital.com.foodsearch.Helpers.BingTranslate;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.activities.OcrActivity;
-import orbital.com.foodsearch.helpers.BingTranslate;
-import orbital.com.foodsearch.utils.AnimUtils;
+import orbital.com.foodsearch.Utils.AnimUtils;
 
 /**
  * A simple {@link Fragment} subclass.

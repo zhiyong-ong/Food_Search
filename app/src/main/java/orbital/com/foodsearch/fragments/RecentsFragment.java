@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.fragments;
+package orbital.com.foodsearch.Fragments;
 
 
 import android.database.Cursor;
@@ -24,15 +24,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jp.wasabeef.recyclerview.animators.FadeInLeftAnimator;
+import orbital.com.foodsearch.Activities.MainActivity;
+import orbital.com.foodsearch.Adapters.RecentImageAdapter;
+import orbital.com.foodsearch.DAO.PhotosContract;
+import orbital.com.foodsearch.DAO.PhotosDAO;
+import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.activities.MainActivity;
-import orbital.com.foodsearch.adapters.RecentImageAdapter;
-import orbital.com.foodsearch.dao.PhotosDAO;
-import orbital.com.foodsearch.dao.PhotosDBHelper;
-import orbital.com.foodsearch.utils.AnimUtils;
-import orbital.com.foodsearch.utils.FileUtils;
-
-import static orbital.com.foodsearch.dao.PhotosContract.PhotosEntry;
+import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.FileUtils;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -278,8 +277,8 @@ public class RecentsFragment extends android.app.Fragment {
             PhotosDBHelper mDBHelper = new PhotosDBHelper(getActivity());
             Cursor cursor = PhotosDAO.readDatabaseGetRow(fileNames.get(position), mDBHelper);
             cursor.moveToFirst();
-            String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_DATA));
-            Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
+            String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
+            Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
             cursor.close();
             ((MainActivity) getActivity()).openRecentPhoto(itemView, filePaths.get(position), data);
         }
