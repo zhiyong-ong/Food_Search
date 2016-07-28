@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.Activities;
+package orbital.com.foodsearch.activities;
 
 import android.animation.Animator;
 import android.content.ContentValues;
@@ -44,32 +44,34 @@ import com.squareup.picasso.Picasso;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import orbital.com.foodsearch.DAO.BingImageDAO;
-import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
-import orbital.com.foodsearch.DAO.PhotosDBHelper;
-import orbital.com.foodsearch.Fragments.SearchBarFragment;
-import orbital.com.foodsearch.Fragments.SearchResultsFragment;
-import orbital.com.foodsearch.Helpers.BingOcr;
-import orbital.com.foodsearch.Helpers.BingSearch;
-import orbital.com.foodsearch.Helpers.BingTranslate;
-import orbital.com.foodsearch.Helpers.ImageInsights;
-import orbital.com.foodsearch.Misc.GlobalVar;
-import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
-import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
-import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
-import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
-import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.Utils.AnimUtils;
-import orbital.com.foodsearch.Utils.FileUtils;
-import orbital.com.foodsearch.Utils.ImageUtils;
-import orbital.com.foodsearch.Utils.NetworkUtils;
-import orbital.com.foodsearch.Utils.ViewUtils;
-import orbital.com.foodsearch.Views.DrawableView;
+import orbital.com.foodsearch.dao.BingImageDAO;
+import orbital.com.foodsearch.dao.PhotosContract.PhotosEntry;
+import orbital.com.foodsearch.dao.PhotosDBHelper;
+import orbital.com.foodsearch.fragments.SearchBarFragment;
+import orbital.com.foodsearch.fragments.SearchResultsFragment;
+import orbital.com.foodsearch.helpers.BingOcr;
+import orbital.com.foodsearch.helpers.BingSearch;
+import orbital.com.foodsearch.helpers.BingTranslate;
+import orbital.com.foodsearch.helpers.ImageInsights;
+import orbital.com.foodsearch.misc.GlobalVar;
+import orbital.com.foodsearch.models.ImageInsightsPOJO.ImageInsightsResponse;
+import orbital.com.foodsearch.models.ImageSearchPOJO.ImageSearchResponse;
+import orbital.com.foodsearch.models.ImageSearchPOJO.ImageValue;
+import orbital.com.foodsearch.models.OcrPOJO.BingOcrResponse;
+import orbital.com.foodsearch.models.OcrPOJO.Line;
+import orbital.com.foodsearch.utils.AnimUtils;
+import orbital.com.foodsearch.utils.FileUtils;
+import orbital.com.foodsearch.utils.ImageUtils;
+import orbital.com.foodsearch.utils.NetworkUtils;
+import orbital.com.foodsearch.utils.ViewUtils;
+import orbital.com.foodsearch.views.DrawableView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -78,12 +80,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     public static final String RESPONSE = "dataResponse";
     static final String FILE_PATH = "FILEPATH";
+    static final String DATA = "DATA";
     private static final String LOG_TAG = "FOODIES";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
     private static final String SEARCH_BAR_TAG = "SEARCHBARTAG";
-    public static String IMAGE_KEY = null;
-    public static String OCR_KEY = null;
-    public static String TRANSLATE_KEY = null;
     public static int IMAGES_COUNT;
     public static int RECENT_PHOTOS_COUNT;
     public static int imageResultSize;
@@ -96,14 +96,17 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private static SharedPreferences sharedPreferencesSettings;
     private static int IMAGES_COUNT_MAX;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
+    private String mFilePath = null;
+    private String mJson = null;
     private boolean animating = false;
     private boolean leavingActivity = false;
     private boolean ocrSaved = false;
     private int searchBarTrans;
-    private String mFilePath = null;
-    private String currentTime;
     private DatabaseReference database;
-
+    private ConcurrentHashMap<DatabaseReference, ValueEventListener> runningDBListeners;
+    private ArrayList<AsyncTask> runningTasks;
+    private ArrayList<Call> runningCalls;
+    private String currentTime;
     private String formattedDate;
     private String formattedTime;
 
@@ -111,6 +114,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     protected void onSaveInstanceState(Bundle outState) {
         if (mFilePath != null) {
             outState.putString(FILE_PATH, mFilePath);
+        }
+        if (mJson != null) {
+            outState.putString(DATA, mJson);
         }
         super.onSaveInstanceState(outState);
     }
@@ -121,28 +127,32 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         if (savedInstanceState.containsKey(FILE_PATH)) {
             mFilePath = savedInstanceState.getString(FILE_PATH);
         }
+        if (savedInstanceState.containsKey(DATA)) {
+            mJson = savedInstanceState.getString(DATA);
+        }
+        // To restore boxes in the event that ocr activity gets destroyed
+        final View previewImageView = findViewById(R.id.ocr_preview_image);
+        previewImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                previewImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+                drawBoxesRecentImage();
+                findViewById(R.id.drawable_view).setVisibility(View.VISIBLE);
+                return true;
+            }
+        });
     }
 
-    /**
-     * This is attached to sharedpreferencessettings. It checks if changed key is
-     * equal to language key. If it is then we update BASE_LANGUAGE accordingly and
-     * notify recycler accordingly so as to maintain same translation language
-     * with search results card.
-     * update
-     *
-     * @param sharedPreferences sharedpreferencessettings
-     * @param s                 Key for the changed value
-     */
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        String langKey = getString(R.string.select_lang_key);
-        if (langKey.equals(s)) {
-            MainActivity.BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
-            SearchResultsFragment frag = (SearchResultsFragment) getSupportFragmentManager().findFragmentByTag(SEARCH_FRAGMENT_TAG);
-            if (frag != null) {
-                frag.notifyRecycler();
-            }
-        }
+    public void onStart() {
+        super.onStart();
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onStop() {
+        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
+        super.onStop();
     }
 
     @Override
@@ -159,9 +169,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             window.setStatusBarColor(Color.BLACK);
         }
         database = FirebaseDatabase.getInstance().getReference();
-        OCR_KEY = GlobalVar.getOcrKey();
-        IMAGE_KEY = GlobalVar.getImageKey();
-        TRANSLATE_KEY = GlobalVar.getTranslateKey();
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         onCreateBackground();
         initializeDrawView();
@@ -171,6 +178,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
     private void onCreateBackground() {
+        runningDBListeners = new ConcurrentHashMap<>();
+        runningTasks = new ArrayList<>();
+        runningCalls = new ArrayList<>();
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... voids) {
@@ -178,37 +188,46 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
                 IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
                 RECENT_PHOTOS_COUNT = 0;
-                if(sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
+                if (sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
                     RECENT_PHOTOS_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "1"));
                 }
                 ocrSaved = false;
                 //current time
                 Calendar cal = Calendar.getInstance();
                 currentTime = FileUtils.getTimeStamp(cal);
-                Date date = cal.getTime();
                 formattedDate = FileUtils.getFormattedDate(cal);
                 formattedTime = FileUtils.getFormattedTime(cal);
                 return null;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                runningTasks.add(this);
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                runningTasks.remove(this);
             }
         }.execute();
 
     }
 
     private void setupPreview() {
-        final String data = getIntent().getStringExtra(RESPONSE);
-        final ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-        if(data == null) {
+        mJson = getIntent().getStringExtra(RESPONSE);
+        final ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
+        if (mJson == null) {
             Picasso.with(this).load("file://" + mFilePath)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .resize(30, 48)
                     .into(previewImageView);
-            startOcrService();
-            Log.e(LOG_TAG, "COMPRESS!  " + data);
+            prepareOcrService();
         } else {
-            String transName = getString(R.string.recents_transition_name);
-            ViewCompat.setTransitionName(previewImageView, transName);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                findViewById(R.id.ocr_progress_bar).setVisibility(View.GONE);
+                String transName = getString(R.string.recents_transition_name);
+                ViewCompat.setTransitionName(previewImageView, transName);
                 getWindow().setExitTransition(null);
                 getWindow().setEnterTransition(null);
                 findViewById(R.id.drawable_view).setVisibility(View.INVISIBLE);
@@ -226,12 +245,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 });
                 postponeEnterTransition();
             }
-            Picasso.with(this).load("file://" + mFilePath)
+            Picasso.with(this).load("file://" + this.mFilePath)
                     .into(previewImageView, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 startPostponedEnterTransition();
+                            } else {
+                                AnimUtils.fadeIn(findViewById(R.id.drawable_view), AnimUtils.FASTER_FADE);
                             }
                         }
 
@@ -246,24 +267,24 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 @Override
                 public boolean onPreDraw() {
                     previewImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    drawBoxesRecentImage(data, mFilePath, findViewById(R.id.activity_ocr));
+                    drawBoxesRecentImage();
                     return true;
                 }
             });
         }
     }
 
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    public void onStop() {
-        sharedPreferencesSettings.registerOnSharedPreferenceChangeListener(null);
-        super.onStop();
+    /**
+     * Draw boxes onto the image that have been saved.
+     */
+    private void drawBoxesRecentImage() {
+        DrawableView mDrawableView = (DrawableView) findViewById(R.id.drawable_view);
+        Gson gson = new Gson();
+        BingOcrResponse responseData = gson.fromJson(mJson, BingOcrResponse.class);
+        List<Line> lines = responseData.getAllLines();
+        mDrawableView.drawBoxes(findViewById(R.id.activity_ocr), mFilePath, lines,
+                responseData.getTextAngle().floatValue(),
+                responseData.getLanguage());
     }
 
     /**
@@ -314,51 +335,25 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     private void initializeDrawView() {
         final DrawableView drawableView = (DrawableView) findViewById(R.id.drawable_view);
-        drawableView.setOnTouchListener(new DrawableTouchListener(this, findViewById(R.id.activity_ocr)));
+        drawableView.setOnTouchListener(new DrawableTouchListener(findViewById(R.id.activity_ocr)));
     }
 
-    // Checks for internet connection, if available then just start service. Otherwise,
-    // create snackbar fall user to retry. Compressed full res image also loaded into preview.
-    private void startOcrService() {
-        if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
-            bingOcrConnect();
-        } else {
-            // Compress firsty then put bing connect on hold.
-            CompressAsyncTask compressTask = new CompressAsyncTask(this, findViewById(R.id.activity_ocr)) {
-                @Override
-                protected void onPostExecute(byte[] compressedImage) {
-                    ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                    Picasso.with(mContext).load("file://" + mFilePath)
-                            .noPlaceholder()
-                            .fit()
-                            .memoryPolicy(MemoryPolicy.NO_CACHE)
-                            .into(previewImageView);
-                    onHoldBingOcrConnect(compressedImage);
-                }
-            };
-            compressTask.execute(mFilePath, mFilePath);
-        }
-    }
-
-    /**
-     * Method that compresses the IMAGE_KEY before sending it to BingOcrService
-     */
-    private void bingOcrConnect() {
-        View root = findViewById(R.id.activity_ocr);
-        CompressAsyncTask compressTask = new CompressAsyncTask(this, root) {
+    private void prepareOcrService() {
+        CompressAsyncTask compressTask = new CompressAsyncTask(findViewById(R.id.activity_ocr)) {
             @Override
             protected void onPostExecute(byte[] compressedImage) {
-                // When compressTask is done, invoke dispatchCall for POST call
-                Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
-                // Enqueue the method to the call and wait for callback (Asynchronous call)
-                call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), mFilePath));
-                // After call is dispatched, load full res IMAGE_KEY into preview
-                ImageView previewImageView = (ImageView) findViewById(R.id.preview_image_view);
-                Picasso.with(mContext).load("file://" + mFilePath)
+                super.onPostExecute(compressedImage);
+                ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
+                Picasso.with(OcrActivity.this).load("file://" + mFilePath)
                         .noPlaceholder()
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .into(previewImageView);
+                if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
+                    enqueueOcr(compressedImage);
+                } else {
+                    onHoldEnqueueOcr(compressedImage);
+                }
             }
         };
         compressTask.execute(mFilePath, mFilePath);
@@ -366,9 +361,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     /**
      * This method puts bing ocr connect on hold with a snackbar for user to retry connection.
+     *
      * @param compressedImage compressed image to be sent for ocr service
      */
-    private void onHoldBingOcrConnect(final byte[] compressedImage) {
+    private void onHoldEnqueueOcr(final byte[] compressedImage) {
         // When compressTask is done, load preview into preview imageview
         // and remove progressbars and overlay.
         // then allow user to retry
@@ -380,11 +376,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             public void onClick(View v) {
                 ViewUtils.startOcrProgress(rootView);
                 if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
-                    Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
-                    // Enqueue the method to the call and wait for callback (Asynchronous call)
-                    call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr), mFilePath));
+                    enqueueOcr(compressedImage);
                 } else {
-                    onHoldBingOcrConnect(compressedImage);
+                    onHoldEnqueueOcr(compressedImage);
                 }
 
             }
@@ -408,6 +402,27 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
     }
 
+    /**
+     * This is attached to sharedpreferencessettings. It checks if changed key is
+     * equal to language key. If it is then we update BASE_LANGUAGE accordingly and
+     * notify recycler accordingly so as to maintain same translation language
+     * with search results card.
+     * update
+     *
+     * @param sharedPreferences sharedpreferencessettings
+     * @param s                 Key for the changed value
+     */
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        String langKey = getString(R.string.select_lang_key);
+        if (langKey.equals(s)) {
+            MainActivity.BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
+            SearchResultsFragment frag = (SearchResultsFragment) getSupportFragmentManager().findFragmentByTag(SEARCH_FRAGMENT_TAG);
+            if (frag != null) {
+                frag.notifyRecycler();
+            }
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -425,8 +440,38 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             }
             supportFinishAfterTransition();
         } else {
+            endAllThreads();
             View rootView = findViewById(R.id.activity_ocr);
             ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        endAllThreads();
+        super.onDestroy();
+    }
+
+    private void endAllThreads() {
+        if (runningDBListeners != null) {
+            for (Map.Entry<DatabaseReference, ValueEventListener> entry : runningDBListeners.entrySet()) {
+                entry.getKey().removeEventListener(entry.getValue());
+            }
+            runningDBListeners.clear();
+        }
+        if (runningCalls != null) {
+            for (Call call : runningCalls) {
+                call.cancel();
+            }
+            runningCalls.clear();
+        }
+        if (runningTasks != null) {
+            for (AsyncTask task : runningTasks) {
+                if (task.getStatus() != AsyncTask.Status.FINISHED) {
+                    task.cancel(true);
+                }
+            }
+            runningTasks.clear();
         }
     }
 
@@ -435,7 +480,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * This method closes both search bar and search results.
      */
     public void cancelSearch() {
+        endAllThreads();
         View rootView = findViewById(R.id.activity_ocr);
+        rootView.findViewById(R.id.searchbar_progress).setVisibility(View.GONE);
         ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
         AnimUtils.hideSearchBar(findViewById(R.id.search_bar_container),
                 searchBarTrans);
@@ -469,10 +516,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         AnimUtils.containerSlideDown(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
         ViewUtils.startSearchProgress(rootView);
         insightsCount = 0;
-
-        database.child("images").child(searchParam).addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference ref = database.child("images").child(searchParam);
+        ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (runningDBListeners.get(dataSnapshot.getRef()) == null) {
+                    return;
+                }
+                runningDBListeners.remove(dataSnapshot.getRef());
                 // Set search response DB to value from cloud
                 searchResponseDB = dataSnapshot.getValue(ImageSearchResponse.class);
                 // initialize the imagesearch again
@@ -496,10 +547,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(LOG_TAG, "getUser:onCancelled", databaseError.toException());
                 ViewUtils.terminateSearchProgress(rootView);
-//                enqueueSearch(searchParam);
-//                enqueueTranslate(searchParam);
-        }
-        });
+            }
+        };
+        ref.addListenerForSingleValueEvent(listener);
+        runningDBListeners.put(ref, listener);
     }
 
     /**
@@ -510,9 +561,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private void searchImageInsights(final Context context, final ImageValue imgVal) {
         String insightsToken = imgVal.getImageInsightsToken();
         final View rootView = findViewById(R.id.activity_ocr);
-        database.child("imageinsights").child(insightsToken).addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference ref = database.child("imageinsights").child(insightsToken);
+        ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                if (runningDBListeners.get(dataSnapshot.getRef()) == null) {
+                    return;
+                }
+                runningDBListeners.remove(dataSnapshot.getRef());
                 ImageInsightsResponse imgInsightsDB = dataSnapshot.getValue(ImageInsightsResponse.class);
                 //initialize the IMAGE_KEY insights search again
                 if (imgInsightsDB == null) {
@@ -524,7 +580,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     if (insightsCount < imageResultSize) {
                         return;
                     }
-                    new CompleteTask(context, rootView, FRAGMENT_MANAGER)
+                    new OcrActivity.CompleteTask(context, rootView, FRAGMENT_MANAGER)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -532,9 +588,29 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.w(LOG_TAG, "getUser:onCancelled", databaseError.toException());
-                enqueueImageInsightCall(imgVal);
             }
-        });
+        };
+        ref.addListenerForSingleValueEvent(listener);
+        runningDBListeners.put(ref, listener);
+    }
+
+    private void enqueueOcr(final byte[] compressedImage) {
+        // Keep api key in sync first before building and enqueueing call
+        if (GlobalVar.hasKeyValues()) {
+            Call<BingOcrResponse> call = BingOcr.buildCall(compressedImage);
+            runningCalls.add(call);
+            call.enqueue(new OcrCallback(findViewById(R.id.activity_ocr)));
+        } else {
+            new ApiKeySyncTask() {
+                @Override
+                protected void onPostExecute(Boolean isSuccessful) {
+                    super.onPostExecute(isSuccessful);
+                    if (isSuccessful) {
+                        enqueueOcr(compressedImage);
+                    }
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     /**
@@ -542,20 +618,46 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      *
      * @param searchParam parameter string to be searched for
      */
-    private void enqueueSearch(String searchParam) {
-        BingSearch bingImg = new BingSearch(searchParam, String.valueOf(IMAGES_COUNT_MAX));
-        Call<ImageSearchResponse> call = bingImg.buildCall();
-        call.enqueue(new ImageSearchCallback(this, findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
+    private void enqueueSearch(final String searchParam) {
+        // Keep api key in sync first before building and enqueueing call
+        if (GlobalVar.hasKeyValues()) {
+            BingSearch bingImg = new BingSearch(searchParam, String.valueOf(IMAGES_COUNT_MAX));
+            Call<ImageSearchResponse> call = bingImg.buildCall();
+            runningCalls.add(call);
+            call.enqueue(new ImageSearchCallback(OcrActivity.this, findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
+        } else {
+            new ApiKeySyncTask() {
+                @Override
+                protected void onPostExecute(Boolean isSuccessful) {
+                    super.onPostExecute(isSuccessful);
+                    if (isSuccessful) {
+                        enqueueSearch(searchParam);
+                    }
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     /**
-     * This method creates a translte call with search param and executes it on translateTask.
+     * This method creates a translte call with search param and executes it on TranslateTask.
+     *
      * @param searchParam string parameter to translate
      */
     private void enqueueTranslate(final String searchParam) {
-        mTranslatedText = searchParam;
-        translateTask = new translateTask(searchParam).executeOnExecutor(
-                AsyncTask.THREAD_POOL_EXECUTOR);
+        // Keep api key in sync first before building and enqueueing call
+        if (GlobalVar.hasKeyValues()) {
+            mTranslatedText = searchParam;
+            translateTask = new TranslateTask(searchParam).executeOnExecutor(
+                    AsyncTask.THREAD_POOL_EXECUTOR);
+        } else {
+            new ApiKeySyncTask() {
+                @Override
+                protected void onPostExecute(Boolean isSuccessful) {
+                    super.onPostExecute(isSuccessful);
+                    enqueueTranslate(searchParam);
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     /**
@@ -564,12 +666,24 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * @param imgVal IMAGE_KEY values list to be used as param for insightsToken call
      *               Multiple calls.
      */
-    private void enqueueImageInsightCall(ImageValue imgVal) {
-        ImageInsights imageInsights = new ImageInsights(imgVal.getImageInsightsToken(), "");
-        Call<ImageInsightsResponse> call = imageInsights.buildCall();
-        call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
-                FRAGMENT_MANAGER,
-                imgVal));
+    private void enqueueImageInsightCall(final ImageValue imgVal) {
+        // Keep api key in sync first before building and enqueueing call
+        if (GlobalVar.hasKeyValues()) {
+            ImageInsights imageInsights = new ImageInsights(imgVal.getImageInsightsToken(), "");
+            Call<ImageInsightsResponse> call = imageInsights.buildCall();
+            runningCalls.add(call);
+            call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
+                    FRAGMENT_MANAGER,
+                    imgVal));
+        } else {
+            new ApiKeySyncTask() {
+                @Override
+                protected void onPostExecute(Boolean isSuccess) {
+                    super.onPostExecute(isSuccess);
+                    enqueueImageInsightCall(imgVal);
+                }
+            }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
     }
 
     /**
@@ -582,20 +696,20 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
         //save the lines to local DB
         Gson gson = new Gson();
-        String json = gson.toJson(response);
+        mJson = gson.toJson(response);
         PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         // Create a new map of values, where column names are the keys
         values.put(PhotosEntry.COLUMN_NAME_ENTRY_TIME, currentTime);
         values.put(PhotosEntry.COLUMN_NAME_TITLE, "Photo_Data");
-        values.put(PhotosEntry.COLUMN_NAME_DATA, json);
+        values.put(PhotosEntry.COLUMN_NAME_DATA, mJson);
         values.put(PhotosEntry.COLUMN_NAME_FORMATTED_DATE, formattedDate);
         values.put(PhotosEntry.COLUMN_NAME_FORMATTED_STRING, formattedTime);
 
         // Insert the new row, returning the primary key value of the new row
         long newRowID = db.insert(PhotosEntry.TABLE_NAME, null, values);
-        Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
+        // Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
     }
 
     /**
@@ -625,25 +739,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
     }
 
-    /**
-     * Draw boxes onto the image that have been saved.
-     *
-     * @param response  JSON data for the boxes
-     * @param mFilePath file path of the image
-     * @param rootView  view in which the layout exists
-     */
-    private void drawBoxesRecentImage(String response, String mFilePath, View rootView) {
-        DrawableView mDrawableView = (DrawableView) findViewById(R.id.drawable_view);
-        Gson gson = new Gson();
-        BingOcrResponse responseData = gson.fromJson(response, BingOcrResponse.class);
-        List<Line> lines = responseData.getAllLines();
-        mDrawableView.drawBoxes(rootView, mFilePath, lines,
-                responseData.getTextAngle().floatValue(),
-                responseData.getLanguage());
-        ViewUtils.finishOcrProgress(rootView);
-    }
-
-    private static class CompleteTask extends AsyncTask<Void, Void, Void> {
+    private class CompleteTask extends AsyncTask<Void, Void, Boolean> {
         Context context = null;
         View rootView = null;
         FragmentManager fm = null;
@@ -655,13 +751,17 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected void onPreExecute() {
+            runningTasks.add(this);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
             int count = 0;
             // Wait 10 seconds for translate task to be done
             while (!translateTask.getStatus().equals(Status.FINISHED)) {
                 if (count == 20) {
-                    Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
-                    return null;
+                    return false;
                 }
                 try {
                     count++;
@@ -670,28 +770,33 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     e.printStackTrace();
                 }
             }
-            return null;
+            return true;
         }
 
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(Boolean successful) {
+            runningTasks.remove(this);
+            if (!successful) {
+                Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
+                return;
+            }
             if (searchResponseDB == null) {
                 //persist search result to DB
                 imgDAO.persistImage(searchResponse);
             }
-            Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
+            // Log.e(LOG_TAG, "TRANSLATED TEXT: " + mTranslatedText);
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             searchFragment.finalizeRecycler();
             ViewUtils.showSearchResults(rootView, mTranslatedText);
-            Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
+            // Log.e(LOG_TAG, "MAX IMAGES: " + IMAGES_COUNT_MAX);
         }
     }
 
     /**
      * Callback class for ImageInsightCallback.
      */
-    private static class ImageInsightCallback implements Callback<ImageInsightsResponse> {
+    private class ImageInsightCallback implements Callback<ImageInsightsResponse> {
         private Context context = null;
         private View rootView = null;
         private FragmentManager fm = null;
@@ -706,12 +811,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         public void onResponse(Call<ImageInsightsResponse> call, Response<ImageInsightsResponse> response) {
+            runningCalls.remove(call);
             // Get response body, persist to DB then complete task
             ImageInsightsResponse insightsResponse = response.body();
             imageValue.setInsightsResponse(insightsResponse);
             imgDAO.persistImageInsight(insightsResponse);
             insightsCount++;
-            Log.e(LOG_TAG, "Insights callback count: " + insightsCount);
+            // Log.e(LOG_TAG, "Insights callback count: " + insightsCount);
             if (insightsCount < imageResultSize) {
                 return;
             }
@@ -722,6 +828,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         public void onFailure(Call<ImageInsightsResponse> call, Throwable t) {
+            if (call.isCanceled()) {
+                return;
+            }
+            runningCalls.remove(call);
             insightsCount++;
             if (insightsCount < imageResultSize) {
                 return;
@@ -750,6 +860,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         public void onResponse(Call<ImageSearchResponse> call, Response<ImageSearchResponse> response) {
+            runningCalls.remove(call);
             searchResponse = response.body();
             if (searchResponse == null) {
                 try {
@@ -781,12 +892,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         public void onFailure(Call<ImageSearchResponse> call, Throwable t) {
-            Log.e(LOG_TAG, t.getMessage());
-            Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.image_search_fail,
-                    Snackbar.LENGTH_LONG)
-                    .show();
-            ViewUtils.terminateSearchProgress(rootView);
-            Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
+            if (!call.isCanceled()) {
+                runningCalls.remove(call);
+                Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.image_search_fail,
+                        Snackbar.LENGTH_LONG)
+                        .show();
+                ViewUtils.terminateSearchProgress(rootView);
+                Log.e(LOG_TAG, t.getMessage());
+                Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
+            }
         }
     }
 
@@ -796,20 +910,17 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      */
     private class OcrCallback implements Callback<BingOcrResponse> {
         private View rootView = null;
-        private String mFilePath = null;
         private DrawableView mDrawableView = null;
 
-        private OcrCallback(View rootView, String filePath) {
+        private OcrCallback(View rootView) {
             this.rootView = rootView;
-            mFilePath = filePath;
             mDrawableView = (DrawableView) rootView.findViewById(R.id.drawable_view);
         }
 
         @Override
         public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
+            runningCalls.remove(call);
             BingOcrResponse bingOcrResponse = response.body();
-            Gson gson = new Gson();
-            String json = gson.toJson(bingOcrResponse);
             List<Line> lines = bingOcrResponse.getAllLines();
             mDrawableView.drawBoxes(rootView, mFilePath, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
@@ -822,11 +933,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         public void onFailure(Call<BingOcrResponse> call, Throwable t) {
-            ViewUtils.finishOcrProgress(rootView);
-            Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.OCRFailed,
-                    Snackbar.LENGTH_LONG)
-                    .show();
-            Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
+            if (!call.isCanceled()) {
+                runningCalls.remove(call);
+                ViewUtils.finishOcrProgress(rootView);
+                Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.OCRFailed,
+                        Snackbar.LENGTH_LONG)
+                        .show();
+                Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
+            }
         }
     }
 
@@ -835,28 +949,34 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * background thread using ImageUtils.compressImage
      */
     private class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {
-        Context mContext = null;
         View mRootView = null;
 
-        CompressAsyncTask(Context context, View rootView) {
-            mContext = context;
+        CompressAsyncTask(View rootView) {
             mRootView = rootView;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            runningTasks.add(this);
         }
 
         @Override
         protected byte[] doInBackground(String... params) {
             return ImageUtils.compressImage(params[0], params[1]);
         }
+
+        @Override
+        protected void onPostExecute(byte[] bytes) {
+            runningTasks.remove(this);
+        }
     }
 
 
     private class DrawableTouchListener implements View.OnTouchListener {
-        private Context context;
         private View rootView;
         private DrawableView mDrawableView = null;
 
-        DrawableTouchListener(Context context, View rootView) {
-            this.context = context;
+        DrawableTouchListener(View rootView) {
             this.rootView = rootView;
         }
 
@@ -887,15 +1007,45 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             View searchBar = findViewById(R.id.search_bar_container);
             // if !Animating or searchbar is already up, show searchbar with new search param.
             if (!animating || searchBar.getTranslationY() == 0) {
-                AnimUtils.showSearchBar(rootView, searchBar, searchParam, new IsAnimatingListener(rootView));
+                ViewUtils.showSearchBar(rootView, searchParam, new IsAnimatingListener(rootView));
             }
         }
     }
 
-    private class translateTask extends AsyncTask<Void, Void, String> {
+    private class ApiKeySyncTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected void onPreExecute() {
+            runningTasks.add(this);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean isSuccess) {
+            runningTasks.remove(this);
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            int count = 0;
+            while (!GlobalVar.hasKeyValues()) {
+                // Wait 10 seconds max for API keys, modify the max here
+                if (count > 50) {
+                    return false;
+                }
+                try {
+                    count++;
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return true;
+        }
+    }
+
+    private class TranslateTask extends AsyncTask<Void, Void, String> {
         String searchParam;
 
-        translateTask(String searchParam) {
+        TranslateTask(String searchParam) {
             this.searchParam = searchParam;
         }
 
@@ -905,9 +1055,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
 
         @Override
+        protected void onPreExecute() {
+            runningTasks.add(this);
+        }
+
+        @Override
         protected void onPostExecute(String result) {
+            runningTasks.remove(this);
             mTranslatedText = result;
-            super.onPostExecute(result);
         }
     }
 

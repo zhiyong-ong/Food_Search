@@ -77,6 +77,7 @@ public class SearchBarFragment extends Fragment {
         final TextView translateTextView = (TextView) searchBar.findViewById(R.id.searchbar_translate_text);
         final ImageButton translateBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_btn);
         final ImageButton translateCloseBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_close);
+        final ImageButton copyBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_copy);
         final InputMethodManager imm = (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -149,6 +150,7 @@ public class SearchBarFragment extends Fragment {
                             translateOpen = false;
                         }
                         break;
+                    case R.id.searchbar_translate_copy:
                     case R.id.searchbar_translate_text:
                     case R.id.searchbar_translate_title:
                         if (translateOpen) {
@@ -189,6 +191,7 @@ public class SearchBarFragment extends Fragment {
         translateCloseBtn.setOnClickListener(listener);
         translateTextView.setOnClickListener(listener);
         translateTitleView.setOnClickListener(listener);
+        copyBtn.setOnClickListener(listener);
         translateBtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {

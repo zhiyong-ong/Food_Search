@@ -1,7 +1,6 @@
 package orbital.com.foodsearch.views;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,6 +9,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -32,7 +32,8 @@ public class DrawableView extends FrameLayout {
 
     private int selectedIndex = -1;
 
-    private Bitmap mOriginalBitmap = null;
+    private int originalWidth = 0;
+    private int originalHeight = 0;
     private Matrix mMatrix = new Matrix();
     private Float mAngle = 0.f;
 
@@ -41,9 +42,9 @@ public class DrawableView extends FrameLayout {
 
     public DrawableView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mRects = new ArrayList<Rect>();
-        mLineTexts = new ArrayList<String>();
-        setupPaints();
+        mRects = new ArrayList<>();
+        mLineTexts = new ArrayList<>();
+        setupPaints(context);
     }
 
     /**
@@ -94,7 +95,7 @@ public class DrawableView extends FrameLayout {
             mMatrix.reset();
         }
         mRootView = rootView;
-        mOriginalBitmap = BitmapFactory.decodeFile(imagePath);
+        getOriginalDimen(imagePath);
         addLinesForDraw(lines, lang);
         invalidate();
     }
@@ -131,6 +132,14 @@ public class DrawableView extends FrameLayout {
         }
     }
 
+    private void getOriginalDimen(String imagePath){
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, options);
+        originalHeight = options.outHeight;
+        originalWidth = options.outWidth;
+    }
+
     /**
      * This method sets scale on matrix to findXScale and findYScale then
      * maps it to rectF which is then rounded into outputRect
@@ -146,22 +155,22 @@ public class DrawableView extends FrameLayout {
     private float findXScale() {
         DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
         return (float)drawableView.getWidth()/
-                (float)mOriginalBitmap.getWidth();
+                (float)originalWidth;
     }
 
     private float findYScale() {
         DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
         return (float)drawableView.getHeight()/
-                (float)mOriginalBitmap.getHeight();
+                (float)originalHeight;
     }
 
-    private void setupPaints() {
+    private void setupPaints(Context context) {
         greenPaint = new Paint();
         greenPaint.setStyle(Paint.Style.STROKE);
-        greenPaint.setColor(Color.GREEN);
+        greenPaint.setColor(ContextCompat.getColor(context, R.color.basePaintColor));
         greenPaint.setStrokeWidth(4);
         redPaint = new Paint(greenPaint);
-        redPaint.setColor(Color.RED);
+        redPaint.setColor(ContextCompat.getColor(context, R.color.colorPrimaryLight));
     }
 
     public void selectIndex(int selectedIndex) {

@@ -1,0 +1,77 @@
+<resources>
+
+    <string name="searchbar_text">"Tap on a green box to search"</string>
+    <string name="selected_count">"%1$s selected"</string>
+    <string name="title_activity_fullscreen">"相機\""</string>
+    <string name="title_activity_google_search">"Google search"</string>
+    <string name="title_activity_crop">"Crop menu"</string>
+
+    <!--String values for error messages in snackbars-->
+    <string name="no_photo_text">"Photo was not taken"</string>
+    <string name="no_text_found">"No text was found in the photo"</string>
+    <string name="no_image_found">"Couldn't find any image"</string>
+    <string name="mkdir_fail_text">"Failed to make directory"</string>
+    <string name="permission_ungranted">"Permission was not granted"</string>
+    <string name="internet_error_text">"You're not online"</string>
+    <string name="ocr_call_fail">"OCR Call Failed"</string>
+    <string name="no_keys_text">"Something went wrong!"</string>
+    <string name="image_search_fail">"Image Search Call Failed"</string>
+    <string name="insights_search_fail">"Insights call failed!"</string>
+    <string name="translate_fail">"Failed to translate search query"</string>
+    <string name="OCRFailed">"No Internet Connection Available!"</string>
+
+    <!--String values for buttons-->
+    <string name="translate">"Translate"</string>
+    <string name="undo">"Undo Translate"</string>
+    <string name="retry">"Retry"</string>
+    <string name="copy">"複製"</string>
+
+    <!--For Floating action buttons-->
+    <string name="camera_fab_label">"Take a photo of the menu"</string>
+    <string name="image_pick_fab_label">"Pick a menu image from gallery"</string>
+
+    <!--For preferences-->
+    <string name="select_lang_title">"Translated language"</string>
+    <string name="select_lang_key">"select_lang"</string>
+    <string name="select_lang_summary">"Select the language that you would like the words to be
+        translated to
+    "</string>
+    <string name="search_immediately_title">"Search immediately"</string>
+    <string name="search_immediately_key">"search_immediately"</string>
+    <string name="num_images_title">"Number of images"</string>
+    <string name="num_images_key">"num_images"</string>
+    <string name="num_images_summary">"Select the number of images to be displayed"</string>
+    <string name="search_immediately_summary">"Search for images immediately on clicking a menu
+        item
+    "</string>
+    <string name="save_recents_title">"{0}主選單
+{/0} {1}歷史{/1}"</string>
+    <string name="save_recents_key">"save_recents"</string>
+    <string name="save_recents_summary">"Keep a history of recently scanned menus"</string>
+    <string name="num_recents_title">"Number of saved menus"</string>
+    <string name="num_recents_key">"num_recents"</string>
+    <string name="num_recents_summary">"Select the number of recently scanned menus. Older recents
+        will be automatically deleted
+    "</string>
+    <string name="translation_cat_title">"Translations"</string>
+    <string name="search_cat_title">"搜尋 "</string>
+    <string name="recents_cat_title">"Recents"</string>
+
+    <string name="recents_tab">"Recents"</string>
+    <string name="settings_tab">"設定"</string>
+    <string name="crop_rotate">"ROTATE);
+"</string>
+
+    <string name="translation">"翻譯"</string>
+
+    <!--Quantitized strings-->
+    <plurals name="photo_deleted_string">
+        <item quantity="one">"%d photo deleted"</item>
+        <item quantity="other">"%d photos deleted"</item>
+    </plurals>
+    <string name="time_text">"at %1$s"</string>
+
+    <string name="empty_recents_title_string">"No menus saved yet"</string>
+    <string name="empty_recents_text">"You haven't saved any menus yet\nStart by scanning one
+    "</string>
+</resources>

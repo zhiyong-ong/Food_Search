@@ -10,12 +10,12 @@
     tools:mContext="orbital.com.foodsearch.activities.OcrActivity">
 
     <android.support.percent.PercentRelativeLayout
-        android:id="@+id/content_container"
+        android:id="@+id/ocr_content_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/preview_image_view"
+            android:id="@+id/ocr_preview_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY" />
@@ -35,7 +35,7 @@
             android:clickable="true" />
 
         <ProgressBar
-            android:id="@+id/progress_bar"
+            android:id="@+id/ocr_progress_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"

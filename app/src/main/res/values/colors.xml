@@ -8,19 +8,21 @@
     <color name="colorLink">#37474f</color>
     <color name="colorOnTap">#0277bd</color>
     <color name="colorGrey">#212121</color>
-    <color name="colorTranslate">#00b0ff</color>
-    <color name="overlayDark">#Bf000000</color>
     <color name="colorLightGrey">#b2b2b2</color>
+
     <!--For Floating action buttons-->
     <color name="colorPrimaryVeryLight">#ef9a9a</color>
     <color name="colorPrimaryLighter">#f44336</color>
     <color name="colorPrimaryLight">#e53935</color>
     <color name="colorFabPick">#1976d2</color>
     <color name="colorFabPicked">#0d47a1</color>
+
+    <!--Overlay colors-->
+    <color name="overlayDark">#Bf000000</color>
     <color name="colorFabOverlay">#bfffffff</color>
-
-
     <color name="colorLoadOverlay">#34000000</color>
     <color name="white">#ffffff</color>
 
+    <color name="basePaintColor">#76FF03</color>
+    <color name="chosenPaintColor">#76FF03</color>
 </resources>

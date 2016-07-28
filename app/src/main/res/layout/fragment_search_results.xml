@@ -7,24 +7,24 @@
     tools:context="orbital.com.foodsearch.fragments.SearchResultsFragment">
 
     <FrameLayout
-        android:id="@+id/recycler_margin_frame"
+        android:id="@+id/results_margin_frame"
         android:layout_width="match_parent"
         app:layout_heightPercent="11%" />
 
     <orbital.com.foodsearch.views.SnappyRecyclerView
-        android:id="@+id/recycler_view"
+        android:id="@+id/results_recycler_view"
         android:layout_width="match_parent"
-        android:layout_below="@id/recycler_margin_frame"
+        android:layout_below="@id/results_margin_frame"
         android:layout_centerHorizontal="true"
         android:background="#00000000"
         android:orientation="horizontal"
         app:layout_heightPercent="70%" />
 
     <LinearLayout
-        android:id="@+id/dots_layout"
+        android:id="@+id/results_dots_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/recycler_view"
+        android:layout_below="@id/results_recycler_view"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/dots_top_margin"
         android:background="@android:color/transparent"

@@ -72,8 +72,8 @@ public class SearchResultsFragment extends Fragment {
     }
 
     private void initializeRecycler(View view) {
-        mDotsLayout = (LinearLayout) view.findViewById(R.id.dots_layout);
-        mRecyclerView = (SnappyRecyclerView) view.findViewById(R.id.recycler_view);
+        mDotsLayout = (LinearLayout) view.findViewById(R.id.results_dots_layout);
+        mRecyclerView = (SnappyRecyclerView) view.findViewById(R.id.results_recycler_view);
         accentColor = ContextCompat.getColor(getActivity(), R.color.colorAccent);
         mImageValues = new ArrayList<>(IMAGE_COUNT);
         mDotsTexts = new ArrayList<>(IMAGE_COUNT);
