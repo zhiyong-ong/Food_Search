@@ -142,10 +142,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     // User is signed out
                     Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
                 }
-                mAuth.addAuthStateListener(mAuthListener);
             }
 
         };
+        mAuth.addAuthStateListener(mAuthListener);
     }
 
     //feeder code... add it into the signing in code if you wanna refresh db.
@@ -273,7 +273,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 } else {
                     openFab();
                 }
-                Log.e(LOG_TAG, "test");
             }
         });
         FloatingActionButton fileFab = (FloatingActionButton) findViewById(R.id.start_image_pick_fab);

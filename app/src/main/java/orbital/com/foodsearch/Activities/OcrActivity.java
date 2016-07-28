@@ -45,7 +45,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -199,7 +198,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 //current time
                 Calendar cal = Calendar.getInstance();
                 currentTime = FileUtils.getTimeStamp(cal);
-                Date date = cal.getTime();
                 formattedDate = FileUtils.getFormattedDate(cal);
                 formattedTime = FileUtils.getFormattedTime(cal);
                 return null;
