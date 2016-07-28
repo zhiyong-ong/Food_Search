@@ -142,20 +142,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     // User is signed out
                     Log.e(LOG_TAG, "onAuthStateChanged:signed_out");
                 }
-<<<<<<< HEAD:app/src/main/java/orbital/com/foodsearch/activities/MainActivity.java
+                mAuth.addAuthStateListener(mAuthListener);
             }
 
         };
-        mAuth.addAuthStateListener(mAuthListener);
-=======
-                //refreshDB();
-            }
-
-        };
-        if(GlobalVar.getImageKey() == null) {
-            signInFirebase();
-        }
->>>>>>> origin/master:app/src/main/java/orbital/com/foodsearch/Activities/MainActivity.java
     }
 
     //feeder code... add it into the signing in code if you wanna refresh db.

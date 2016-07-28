@@ -39,11 +39,11 @@ import orbital.com.foodsearch.Utils.AnimUtils;
  */
 public class SearchBarFragment extends Fragment {
 
+    private static final String LOG_TAG = "FOODIES";
     private SharedPreferences sharedPreferencesSettings = null;
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
     private ImageButton translateBtn;
-    private static final String LOG_TAG = "FOODIES";
 
 
     public SearchBarFragment() {

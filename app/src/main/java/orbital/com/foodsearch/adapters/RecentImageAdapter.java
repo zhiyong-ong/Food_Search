@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
