@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.misc;
+package orbital.com.foodsearch.Misc;
 
 import android.annotation.TargetApi;
 import android.os.Build;

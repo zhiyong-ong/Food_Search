@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.helpers;
+package orbital.com.foodsearch.Helpers;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,8 +8,8 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
-import orbital.com.foodsearch.misc.GlobalVar;
-import orbital.com.foodsearch.models.ImageSearchPOJO.ImageSearchResponse;
+import orbital.com.foodsearch.Misc.GlobalVar;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

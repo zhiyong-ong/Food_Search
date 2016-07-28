@@ -1,6 +1,6 @@
-package orbital.com.foodsearch.models.ImageInsightsPOJO;
+package orbital.com.foodsearch.Models.ImageInsightsPOJO;
 
-import orbital.com.foodsearch.models.ImageSearchPOJO.Thumbnail;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.Thumbnail;
 
 /**
  * Created by zhiyong on 27/6/2016.

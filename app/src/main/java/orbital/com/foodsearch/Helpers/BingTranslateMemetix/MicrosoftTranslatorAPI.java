@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package orbital.com.foodsearch.helpers.BingTranslateMemetix;
+package orbital.com.foodsearch.Helpers.BingTranslateMemetix;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

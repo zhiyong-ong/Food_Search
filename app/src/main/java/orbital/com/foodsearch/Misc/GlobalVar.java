@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.misc;
+package orbital.com.foodsearch.Misc;
 
 /**
  * Created by zhiyong on 25/7/2016.

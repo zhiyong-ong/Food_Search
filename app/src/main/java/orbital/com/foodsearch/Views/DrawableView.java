@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.views;
+package orbital.com.foodsearch.Views;
 
 import android.content.Context;
 import android.graphics.BitmapFactory;
@@ -17,8 +17,8 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 import java.util.List;
 
+import orbital.com.foodsearch.Models.OcrPOJO.Line;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.models.OcrPOJO.Line;
 
 /**
  * Extended ImageView to draw the bounding boxes. Overrides onDraw method and it has

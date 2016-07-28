@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".Activities.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,24 +30,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.GoogleSearchActivity"
+            android:name=".Activities.GoogleSearchActivity"
             android:label="@string/title_activity_google_search"
-            android:parentActivityName=".activities.MainActivity"
+            android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activities.OcrActivity"
+            android:name=".Activities.OcrActivity"
             android:label="OCR"
-            android:parentActivityName=".activities.MainActivity"
+            android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
         <activity
-            android:name=".activities.PhotoViewActivity"
-            android:parentActivityName=".activities.OcrActivity"
+            android:name=".Activities.PhotoViewActivity"
+            android:parentActivityName=".Activities.OcrActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".activities.CropActivity"
+            android:name=".Activities.CropActivity"
             android:label="@string/crop_image_activity_title"
-            android:parentActivityName=".activities.MainActivity"
+            android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait" />
     </application>
 

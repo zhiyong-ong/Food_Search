@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.helpers;
+package orbital.com.foodsearch.Helpers;
 
 import java.io.IOException;
 import java.util.Map;
@@ -8,8 +8,8 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import orbital.com.foodsearch.misc.GlobalVar;
-import orbital.com.foodsearch.models.OcrPOJO.BingOcrResponse;
+import orbital.com.foodsearch.Misc.GlobalVar;
+import orbital.com.foodsearch.Models.OcrPOJO.BingOcrResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package orbital.com.foodsearch.helpers.BingTranslateMemetix.language;
+package orbital.com.foodsearch.Helpers.BingTranslateMemetix.language;
 
 
 import java.net.URL;
@@ -23,7 +23,7 @@ import java.net.URLEncoder;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import orbital.com.foodsearch.helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
+import orbital.com.foodsearch.Helpers.BingTranslateMemetix.MicrosoftTranslatorAPI;
 
 /**
  * SpokenLanguage - an enum of all spoken language codes supported by the Microsoft Translator API for the Speak Service

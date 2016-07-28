@@ -1,8 +1,8 @@
-package orbital.com.foodsearch.models.ImageSearchPOJO;
+package orbital.com.foodsearch.Models.ImageSearchPOJO;
 
-import orbital.com.foodsearch.models.ImageInsightsPOJO.BestRepresentativeQuery;
-import orbital.com.foodsearch.models.ImageInsightsPOJO.ImageCaption;
-import orbital.com.foodsearch.models.ImageInsightsPOJO.ImageInsightsResponse;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.BestRepresentativeQuery;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageCaption;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
 
 /**
  * Created by zhiyong on 13/6/2016.

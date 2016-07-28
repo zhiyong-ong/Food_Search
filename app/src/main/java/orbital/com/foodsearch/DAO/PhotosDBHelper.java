@@ -1,10 +1,10 @@
-package orbital.com.foodsearch.dao;
+package orbital.com.foodsearch.DAO;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import orbital.com.foodsearch.dao.PhotosContract.PhotosEntry;
+import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
 /**
  * Created by zhiyong on 19/7/2016.
  */

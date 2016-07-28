@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.activities;
+package orbital.com.foodsearch.Activities;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -20,10 +20,10 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import orbital.com.foodsearch.Helpers.BingSearch;
+import orbital.com.foodsearch.Helpers.BingTranslate;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.helpers.BingSearch;
-import orbital.com.foodsearch.helpers.BingTranslate;
-import orbital.com.foodsearch.models.ImageSearchPOJO.ImageSearchResponse;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;

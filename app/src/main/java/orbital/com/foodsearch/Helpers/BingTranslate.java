@@ -1,10 +1,10 @@
-package orbital.com.foodsearch.helpers;
+package orbital.com.foodsearch.Helpers;
 
 import android.util.Log;
 
-import orbital.com.foodsearch.activities.MainActivity;
-import orbital.com.foodsearch.helpers.BingTranslateMemetix.translate.Translate;
-import orbital.com.foodsearch.misc.GlobalVar;
+import orbital.com.foodsearch.Activities.MainActivity;
+import orbital.com.foodsearch.Helpers.BingTranslateMemetix.translate.Translate;
+import orbital.com.foodsearch.Misc.GlobalVar;
 
 /**
  * Created by zhiyong on 1/7/2016.

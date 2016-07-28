@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.views;
+package orbital.com.foodsearch.Views;
 
 import android.content.Context;
 import android.content.res.Resources;

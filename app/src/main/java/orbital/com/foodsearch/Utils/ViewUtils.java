@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.utils;
+package orbital.com.foodsearch.Utils;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

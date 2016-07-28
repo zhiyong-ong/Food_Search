@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:focusable="true"
     android:focusableInTouchMode="true"
-    tools:mContext="orbital.com.foodsearch.activities.OcrActivity">
+    tools:mContext="orbital.com.foodsearch.Activities.OcrActivity">
 
     <android.support.percent.PercentRelativeLayout
         android:id="@+id/ocr_content_container"
@@ -20,7 +20,7 @@
             android:layout_height="match_parent"
             android:scaleType="fitXY" />
 
-        <orbital.com.foodsearch.views.DrawableView
+        <orbital.com.foodsearch.Views.DrawableView
             android:id="@+id/drawable_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

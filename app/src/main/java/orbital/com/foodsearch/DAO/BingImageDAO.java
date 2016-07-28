@@ -1,10 +1,10 @@
-package orbital.com.foodsearch.dao;
+package orbital.com.foodsearch.DAO;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import orbital.com.foodsearch.models.ImageInsightsPOJO.ImageInsightsResponse;
-import orbital.com.foodsearch.models.ImageSearchPOJO.ImageSearchResponse;
+import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageInsightsResponse;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
 
 /**
  * Created by zhiyong on 10/7/2016.

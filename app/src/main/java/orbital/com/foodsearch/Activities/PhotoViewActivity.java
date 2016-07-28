@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.activities;
+package orbital.com.foodsearch.Activities;
 
 import android.annotation.TargetApi;
 import android.graphics.Color;
@@ -22,7 +22,7 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.utils.AnimUtils;
+import orbital.com.foodsearch.Utils.AnimUtils;
 import uk.co.senab.photoview.PhotoView;
 
 public class PhotoViewActivity extends AppCompatActivity {

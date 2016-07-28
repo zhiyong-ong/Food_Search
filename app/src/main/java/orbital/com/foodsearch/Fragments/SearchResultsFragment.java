@@ -1,4 +1,4 @@
-package orbital.com.foodsearch.fragments;
+package orbital.com.foodsearch.Fragments;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -18,11 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
+import orbital.com.foodsearch.Activities.OcrActivity;
+import orbital.com.foodsearch.Adapters.BingImageAdapter;
+import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.activities.OcrActivity;
-import orbital.com.foodsearch.adapters.BingImageAdapter;
-import orbital.com.foodsearch.models.ImageSearchPOJO.ImageValue;
-import orbital.com.foodsearch.views.SnappyRecyclerView;
+import orbital.com.foodsearch.Views.SnappyRecyclerView;
 
 public class SearchResultsFragment extends Fragment {
     private static final int IMAGE_COUNT = OcrActivity.IMAGES_COUNT;

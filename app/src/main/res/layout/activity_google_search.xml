@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:mContext="orbital.com.foodsearch.activities.GoogleSearchActivity">
+    tools:mContext="orbital.com.foodsearch.Activities.GoogleSearchActivity">
     <include layout="@layout/content_google_search" />
 
 
