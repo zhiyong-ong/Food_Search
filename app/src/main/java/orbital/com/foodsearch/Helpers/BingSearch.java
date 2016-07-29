@@ -8,6 +8,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
+import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.Misc.GlobalVar;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageSearchResponse;
 import retrofit2.Call;
@@ -22,14 +23,6 @@ import retrofit2.http.QueryMap;
  */
 
 public class BingSearch {
-    //Zhiyong api key. renew on 11/7/16
-    //private static final String OCP_APIM_KEY = "e801fac4192d4741976e816b93bdcb48";
-    //private static final String OCP_APIM_KEY = "80940a827ff74b1f882d9b18ef6b8110";
-    //private static final String OCP_APIM_KEY = "ccfba34562094f9480bf01f74750b423";
-
-    //Abel's one
-    //private static final String OCP_APIM_KEY = "df4bfc35ad584f8c856052cb46f213dd";
-    //private static final String OCP_APIM_KEY = "45ab98a696814189ac303f5ceb975476";
     private static final String BING_IMAGE_URL = "https://api.cognitive.microsoft.com/bing/v5.0/images/";
     private static final String LOG_TAG = "FOODIES";
 
@@ -85,7 +78,9 @@ public class BingSearch {
         // For adding in the parameters
         Map<String, String> data = new HashMap<>();
         data.put("safeSearch", safeSearch);
-        data.put("mkt", markets);
+        data.put("imageType", "Photo");
+        data.put("setLang", MainActivity.BASE_LANGUAGE);
+        data.put("mkt", MainActivity.MARKET_CODE);
         data.put("offset", offset);
         data.put("count", count);
         data.put("q", queryTxt);

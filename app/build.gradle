@@ -24,7 +24,24 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
 
         }
+
+        applicationVariants.all { variant ->
+            variant.buildConfigField "String", "FIREBASE_USER", "\"" + getUser() + "\""
+            variant.buildConfigField "String", "FIREBASE_PW", "\"" + getPw() + "\""
+        }
     }
+}
+
+def getPw() {
+    def Properties props = new Properties()
+    props.load(new FileInputStream(new File('secret.properties')))
+    return props['FIREBASE_PW']
+}
+
+def getUser() {
+    def Properties props = new Properties()
+    props.load(new FileInputStream(new File('secret.properties')))
+    return props['FIREBASE_USER']
 }
 
 dependencies {

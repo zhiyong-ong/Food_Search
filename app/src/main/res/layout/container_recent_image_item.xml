@@ -5,5 +5,5 @@
     android:layout_height="wrap_content"
     android:background="@drawable/recycle_item_background">
 
-    <include layout="@layout/recent_image_item" />
+    <include layout="@layout/recents_item_linear" />
 </RelativeLayout>
