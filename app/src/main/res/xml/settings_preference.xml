@@ -47,5 +47,6 @@
             android:key="@string/num_recents_key"
             android:summary="@string/num_recents_summary"
             android:title="@string/num_recents_title" />
+
     </PreferenceCategory>
 </PreferenceScreen>

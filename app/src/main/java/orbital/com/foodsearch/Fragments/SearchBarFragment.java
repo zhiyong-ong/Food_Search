@@ -43,7 +43,7 @@ public class SearchBarFragment extends Fragment {
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
     private ImageButton translateBtn;
-
+    private static final String LOG_TAG = "FOODIES";
 
     public SearchBarFragment() {
     }

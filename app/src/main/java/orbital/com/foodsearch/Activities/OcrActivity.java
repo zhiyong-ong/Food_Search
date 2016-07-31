@@ -700,24 +700,22 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
         Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
         String fileName = null;
-        //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
+        Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
         if (cursor.getCount() >= RECENT_PHOTOS_COUNT) {
-            //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
-            if (cursor.getCount() >= RECENT_PHOTOS_COUNT) {
-                cursor.moveToFirst();
-                fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
-                PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
-                //Log.e(LOG_TAG, fileName + " DELETED!");
-            }
-            cursor.close();
-            // Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
-            //save the lines to local DB
-            Gson gson = new Gson();
-            String json = gson.toJson(response);
-            long newRowID = PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
-            // Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
-            saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
+            cursor.moveToFirst();
+            fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
+            PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
+            Log.e(LOG_TAG, fileName + " DELETED!");
         }
+        cursor.close();
+        Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
+        //save the lines to local DB
+        Gson gson = new Gson();
+        String json = gson.toJson(response);
+        long newRowID = PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
+         Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
+        saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
+
     }
 
     /**
