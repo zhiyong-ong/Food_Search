@@ -12,3 +12,6 @@ It is an Android app that uses OCR to convert physical food menus into a digital
  - Internet connection on the device
  
 ##Screenshots
+<img src="/screenshots/Screenshot_20160802-134252.png" width="250">
+<img src="/screenshots/Screenshot_20160802-144359.png" width="250">
+<img src="/screenshots/Screenshot_20160802-134312.png" width="250">
