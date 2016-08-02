@@ -7,7 +7,8 @@ Food Search aims to make food menus universally understandable by providing imag
 
 It is an Android app that uses OCR to convert physical food menus into a digital format for users to easily search and translate the food menu texts.
 
-## Requirements
-1. An android device running 4.4 Kitkat (API level 19) and above
-2. Internet connection on the device
-
+##Requirements
+ - An android device running <b>4.4 Kitkat (API level 19) and above</b> 
+ - Internet connection on the device
+ 
+##Screenshots
