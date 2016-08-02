@@ -79,22 +79,24 @@ import retrofit2.Response;
 public class OcrActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String RESPONSE = "dataResponse";
-    static final String FILE_PATH = "FILEPATH";
-    static final String DATA = "DATA";
+    public static final String FILE_PATH = "FILEPATH";
+    private static final String DATA = "DATA";
     private static final String LOG_TAG = "FOODIES";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
     private static final String SEARCH_BAR_TAG = "SEARCHBARTAG";
+    private static final int INSIGHTS_COUNT_CAP = 5;
     public static int IMAGES_COUNT;
-    public static int RECENT_PHOTOS_COUNT;
-    public static int imageResultSize;
-    private static volatile int insightsCount = 0;
+    private static int IMAGES_COUNT_MAX;
+    private static int expectedResultCount;
+    private static int expectedInsightCount;
+    private static volatile int dispatchedInsightCount = 0;
+    private static volatile int receivedInsightsCount = 0;
     private static String mTranslatedText = null;
     private static AsyncTask<Void, Void, String> translateTask;
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
     private static ImageSearchResponse searchResponseDB;
     private static SharedPreferences sharedPreferencesSettings;
-    private static int IMAGES_COUNT_MAX;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private String mFilePath = null;
     private String mJson = null;
@@ -109,6 +111,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private String currentTime;
     private String formattedDate;
     private String formattedTime;
+    private String mQuery;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -188,12 +191,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
                 IMAGES_COUNT_MAX = getResources().getIntArray(R.array.listNumber)[getResources().getIntArray(R.array.listNumber).length - 1];
                 IMAGES_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getResources().getString(R.string.num_images_key), "1"));
-                RECENT_PHOTOS_COUNT = 0;
-                if (sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), false)) {
-                    RECENT_PHOTOS_COUNT = Integer.parseInt(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "10"));
-                }
+
                 ocrSaved = false;
-                Log.e(LOG_TAG, "recent photos count: " + RECENT_PHOTOS_COUNT);
 
                 //current time
                 Calendar cal = Calendar.getInstance();
@@ -515,10 +514,12 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * @param searchParam String to be searched for
      */
     private void searchImageResponse(final Context context, final String searchParam) {
+        mQuery = searchParam;
         final View rootView = findViewById(R.id.activity_ocr);
         AnimUtils.containerSlideDown(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
         ViewUtils.startSearchProgress(rootView);
-        insightsCount = 0;
+        dispatchedInsightCount = 0;
+        receivedInsightsCount = 0;
         DatabaseReference ref = database.child("images").child(searchParam);
         ValueEventListener listener = new ValueEventListener() {
             @Override
@@ -534,10 +535,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     enqueueSearch(searchParam);
                 } else {
                     // Expected result size is the minimum of the max count and the size.
-                    imageResultSize = Math.min(searchResponseDB.getImageValues().size(), IMAGES_COUNT);
+                    expectedResultCount = Math.min(searchResponseDB.getImageValues().size(), IMAGES_COUNT);
+                    expectedInsightCount = Math.min(expectedResultCount, INSIGHTS_COUNT_CAP);
                     SearchResultsFragment searchFragment = (SearchResultsFragment) FRAGMENT_MANAGER.findFragmentByTag(SEARCH_FRAGMENT_TAG);
                     searchFragment.clearRecycler();
-                    for (int i = 0; i < imageResultSize; i++) {
+                    for (int i = 0; i < expectedResultCount; i++) {
                         ImageValue imgVal = searchResponseDB.getImageValues().get(i);
                         searchFragment.updateRecyclerList(imgVal);
                         searchImageInsights(context, imgVal);
@@ -562,6 +564,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * persisted into the database. Flag used is imageExists
      */
     private void searchImageInsights(final Context context, final ImageValue imgVal) {
+        dispatchedInsightCount++;
+        if (dispatchedInsightCount > expectedInsightCount) {
+            return;
+        }
         String insightsToken = imgVal.getImageInsightsToken();
         final View rootView = findViewById(R.id.activity_ocr);
         DatabaseReference ref = database.child("imageinsights").child(insightsToken);
@@ -578,12 +584,12 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     enqueueImageInsightCall(imgVal);
                 } else {
                     imgVal.setInsightsResponse(imgInsightsDB);
-                    insightsCount++;
-                    Log.e(LOG_TAG, "Insights DB count: " + insightsCount);
-                    if (insightsCount < imageResultSize) {
+                    receivedInsightsCount++;
+                    if (receivedInsightsCount < expectedInsightCount) {
                         return;
                     }
-                    new OcrActivity.CompleteTask(context, rootView, FRAGMENT_MANAGER)
+//                    Log.e(LOG_TAG, "Insights DB count: " + receivedInsightsCount);
+                    new CompleteTask(context, rootView, FRAGMENT_MANAGER)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -672,7 +678,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private void enqueueImageInsightCall(final ImageValue imgVal) {
         // Keep api key in sync first before building and enqueueing call
         if (GlobalVar.hasKeyValues()) {
-            ImageInsights imageInsights = new ImageInsights(imgVal.getImageInsightsToken(), "");
+            ImageInsights imageInsights = new ImageInsights(mQuery, imgVal.getImageInsightsToken(), "");
             Call<ImageInsightsResponse> call = imageInsights.buildCall();
             runningCalls.add(call);
             call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
@@ -700,22 +706,20 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
         Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
         String fileName = null;
-        Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
-        if (cursor.getCount() >= RECENT_PHOTOS_COUNT) {
+        //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
+        if (cursor.getCount() >= MainActivity.IMAGE_RECENTS_COUNT) {
             cursor.moveToFirst();
             fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
             PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
-            Log.e(LOG_TAG, fileName + " DELETED!");
+            cursor.close();
+            // Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
+            // Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
         }
-        cursor.close();
-        Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
         //save the lines to local DB
         Gson gson = new Gson();
         String json = gson.toJson(response);
         long newRowID = PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
-         Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
         saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
-
     }
 
     /**
@@ -829,9 +833,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             ImageInsightsResponse insightsResponse = response.body();
             imageValue.setInsightsResponse(insightsResponse);
             imgDAO.persistImageInsight(insightsResponse);
-            insightsCount++;
-            // Log.e(LOG_TAG, "Insights callback count: " + insightsCount);
-            if (insightsCount < imageResultSize) {
+            receivedInsightsCount++;
+            // Log.e(LOG_TAG, "Insights callback count: " + receivedInsightsCount);
+            if (receivedInsightsCount < expectedInsightCount) {
                 return;
             }
             // Once we have collated X imageinsights count, start CompleteTask to synchronize all tasks
@@ -845,8 +849,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 return;
             }
             runningCalls.remove(call);
-            insightsCount++;
-            if (insightsCount < imageResultSize) {
+            receivedInsightsCount++;
+            if (receivedInsightsCount < expectedInsightCount) {
                 return;
             }
             // Failed to get the IMAGE_KEY insights so display snackbar error dialog
@@ -889,9 +893,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             SearchResultsFragment searchFragment = (SearchResultsFragment) fm.findFragmentByTag(SEARCH_FRAGMENT_TAG);
             if (!imageValues.isEmpty()) {
                 // Expected result size is the minimum of the max count and the size.
-                imageResultSize = Math.min(imageValues.size(), IMAGES_COUNT);
+                expectedResultCount = Math.min(imageValues.size(), IMAGES_COUNT);
+                expectedInsightCount = Math.min(expectedResultCount, INSIGHTS_COUNT_CAP);
                 searchFragment.clearRecycler();
-                for (int i = 0; i < imageResultSize; i++) {
+                for (int i = 0; i < expectedResultCount; i++) {
                     ImageValue imgVal = imageValues.get(i);
                     searchFragment.updateRecyclerList(imgVal);
                     searchImageInsights(context, imgVal);

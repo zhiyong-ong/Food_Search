@@ -5,18 +5,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:actionModeBackground">@color/colorPrimary</item>
         <item name="android:windowContentTransitions">true</item>
+        <item name="android:actionModeBackground">@color/colorPrimary</item>
+        <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="windowActionModeOverlay">true</item>
-    </style>
-
-    <style name="SplashTheme" parent="AppTheme">
-        <item name="android:statusBarColor">@android:color/white</item>
-        <item name="android:windowBackground">@drawable/splash_screen</item>
-    </style>
-
-    <style name="ActionTextStyle" parent="Base.TextAppearance.AppCompat.Widget.ActionBar.Title">
-        <item name="background">@color/colorAccent</item>
     </style>
 
     <style name="MainTheme" parent="Theme.AppCompat.Light.NoActionBar">

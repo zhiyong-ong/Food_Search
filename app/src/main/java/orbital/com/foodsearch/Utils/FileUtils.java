@@ -25,7 +25,7 @@ public class FileUtils {
     }
 
     public static String getFormattedTime(Calendar cal) {
-        DateFormat tf = SimpleDateFormat.getTimeInstance();
+        DateFormat tf = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
         return tf.format(cal.getTime());
     }
 

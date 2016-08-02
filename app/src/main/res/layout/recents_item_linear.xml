@@ -3,10 +3,10 @@
     android:id="@+id/recent_image_card"
     android:layout_width="match_parent"
     android:layout_height="150dp"
-    android:layout_marginBottom="@dimen/recents_item_margin"
+    android:layout_marginBottom="@dimen/quarter_margin"
     android:layout_marginEnd="@dimen/activity_half_margin"
     android:layout_marginStart="@dimen/activity_half_margin"
-    android:layout_marginTop="@dimen/recents_item_margin"
+    android:layout_marginTop="@dimen/quarter_margin"
     android:background="#00000000">
 
     <android.support.percent.PercentRelativeLayout

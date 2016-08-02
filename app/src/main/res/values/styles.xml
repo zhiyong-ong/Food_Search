@@ -6,17 +6,16 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:actionModeBackground">@color/colorPrimary</item>
+        <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="SplashTheme" parent="AppTheme">
-        <item name="android:windowBackground">@drawable/splash_screen</item>
+    <style name="actionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
     </style>
 
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless.Colored"></style>
 
     <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-        <item name="android:background">@color/colorPrimary</item>
     </style>
 
     <style name="TranslucentToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">

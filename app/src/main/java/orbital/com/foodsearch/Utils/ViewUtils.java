@@ -2,6 +2,7 @@ package orbital.com.foodsearch.Utils;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.content.res.Resources;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,6 +16,9 @@ import orbital.com.foodsearch.R;
  */
 
 public class ViewUtils {
+    public static final int GRID_VIEW_ID = 0;
+    public static final int LIST_VIEW_ID = 1;
+
     public static void startSearchProgress(View rootView) {
         AnimUtils.fadeIn(rootView.findViewById(R.id.drawable_overlay), AnimUtils.OVERLAY_DURATION);
         rootView.findViewById(R.id.searchbar_progress).setVisibility(View.VISIBLE);
@@ -72,5 +76,13 @@ public class ViewUtils {
     public static void finishOcrProgress(View rootView) {
         AnimUtils.fadeOut(rootView.findViewById(R.id.drawable_overlay), AnimUtils.OVERLAY_DURATION);
         AnimUtils.fadeOut(rootView.findViewById(R.id.ocr_progress_bar), AnimUtils.PROGRESS_BAR_DURATION);
+    }
+
+    public static int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    public static int pxToDp(int px) {
+        return (int) (px / Resources.getSystem().getDisplayMetrics().density);
     }
 }

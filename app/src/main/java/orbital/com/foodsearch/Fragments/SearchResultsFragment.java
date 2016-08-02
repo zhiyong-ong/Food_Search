@@ -25,7 +25,6 @@ import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Views.SnappyRecyclerView;
 
 public class SearchResultsFragment extends Fragment {
-    private static final int IMAGE_COUNT = OcrActivity.IMAGES_COUNT;
     private final String RECYCLER_SAVED_STATE = "RECYCLERSAVEDSTATE";
     private ArrayList<ImageValue> mImageValues;
     private BingImageAdapter mAdapter;
@@ -75,8 +74,8 @@ public class SearchResultsFragment extends Fragment {
         mDotsLayout = (LinearLayout) view.findViewById(R.id.results_dots_layout);
         mRecyclerView = (SnappyRecyclerView) view.findViewById(R.id.results_recycler_view);
         accentColor = ContextCompat.getColor(getActivity(), R.color.colorAccent);
-        mImageValues = new ArrayList<>(IMAGE_COUNT);
-        mDotsTexts = new ArrayList<>(IMAGE_COUNT);
+        mImageValues = new ArrayList<>(OcrActivity.IMAGES_COUNT);
+        mDotsTexts = new ArrayList<>(OcrActivity.IMAGES_COUNT);
         LinearLayoutManager layoutMgr = new LinearLayoutManager(getActivity());
         layoutMgr.setOrientation(LinearLayoutManager.HORIZONTAL);
         mRecyclerView.setHasFixedSize(true);

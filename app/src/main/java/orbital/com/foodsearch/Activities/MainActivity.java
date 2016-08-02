@@ -22,8 +22,12 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -45,8 +49,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
-import java.util.Locale;
 
+import orbital.com.foodsearch.BuildConfig;
 import orbital.com.foodsearch.DAO.PhotosContract;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
@@ -54,6 +58,8 @@ import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.Misc.GlobalVar;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.LocaleUtils;
+import orbital.com.foodsearch.Utils.ViewUtils;
 
 public class MainActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -65,15 +71,18 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
     private static final int OCR_IMAGE_INTENT_CODE = 500;
     private static final String RECENTS_FRAG_TAG = "recentsFrag";
-    private static final String SETTINGS_FRAG_TAG = "settingsFrag";
+    private static final String VIEW_TYPE = "viewType";
     private static final String SAVED_URI = "savedUri";
     private static final String LOG_TAG = "FOODIES";
     private static final String PHOTO_FILE_NAME = "photo.jpg";
     public static String BASE_LANGUAGE;
+    public static String MARKET_CODE;
+    public static int IMAGE_RECENTS_COUNT;
+    public static int viewType = 0;
     private static SharedPreferences sharedPreferencesSettings;
     private final String foodSearch = "FoodSearch";
-    private final String user = "foodies@firebase.com";
-    private final String password = "Orbital123";
+    private final String user = BuildConfig.FIREBASE_USER;
+    private final String password = BuildConfig.FIREBASE_PW;
     public boolean savedNewImage = false;
     private Uri fileUri = null;
     private FrameLayout mFabOverlay;
@@ -84,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private FirebaseAuth mAuth;
     private FirebaseAsync mFirebaseTask;
     private DatabaseReference database;
+    private PopupMenu mPopup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,13 +101,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
+
+        sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
+        LocaleUtils.getBaseLanguage(this, sharedPreferencesSettings);
+        LocaleUtils.getMarketCode();
+        PreferenceManager.setDefaultValues(this, R.xml.settings_preference, false);
+        IMAGE_RECENTS_COUNT = Integer.valueOf(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "10"));
+        viewType = sharedPreferencesSettings.getInt(VIEW_TYPE, ViewUtils.GRID_VIEW_ID);
+
         setupFab();
         setBottomNavigationBar();
         generateUri();
-
-        sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
-        PreferenceManager.setDefaultValues(this, R.xml.settings_preference, false);
-        getBaseLanguage();
     }
 
     @Override
@@ -179,7 +193,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         String langKey = getString(R.string.select_lang_key);
         String numRecentsKey = getString(R.string.num_recents_key);
         if (langKey.equals(s)) {
-            MainActivity.BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
+            BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
+        } else if (numRecentsKey.equals(s)) {
+            IMAGE_RECENTS_COUNT = Integer.valueOf(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "10"));
         }
     }
 
@@ -198,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         bottomNavigation.setAccentColor(ContextCompat.getColor(this, R.color.colorPrimary));
         bottomNavigation.setForceTitlesDisplay(true);
         bottomNavigation.setBehaviorTranslationEnabled(false);
-        AppBarLayout appBar = (AppBarLayout) findViewById(R.id.appbar);
+        final AppBarLayout appBar = (AppBarLayout) findViewById(R.id.appbar);
         appBar.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
             public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
@@ -382,6 +398,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             case OCR_IMAGE_INTENT_CODE:
                 if (resultCode == RESULT_OK) {
                     expandAppBar();
+                    switchToRecent();
                     savedNewImage = true;
                 }
                 break;
@@ -431,6 +448,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private void startOcrActivity() {
         Intent intent = new Intent(this, OcrActivity.class);
         intent.putExtra(OcrActivity.FILE_PATH, fileUri.getPath());
+        switchToRecent();
         startActivityForResult(intent, OCR_IMAGE_INTENT_CODE);
 
     }
@@ -459,39 +477,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             startActivityForResult(intent, CAMERA_CROP_INTENT_REQUEST_CODE);
         } else {
             startActivityForResult(intent, GALLERY_CROP_INTENT_REQUEST_CODE);
-        }
-    }
-
-    /**
-     * This method checks if we already registered a default language. If not,
-     * we will check through system language until we find one that tallies and
-     * set it as default lang. BASE_LANGUAGE is then set to this default.
-     * If already registered default then we simply load for shared preference settings.
-     */
-    private void getBaseLanguage() {
-        String defaultLang = sharedPreferencesSettings.getString(getString(R.string.select_lang_key), null);
-        if (defaultLang == null) {
-            String[] langValues = getResources().getStringArray(R.array.listLanguagesValues);
-            String sysLang = Locale.getDefault().getLanguage();
-            // Run through language values, if matching found for locale then set it to preferences
-            for (String langValue : langValues) {
-                if ((langValue.equals(sysLang))) {
-                    defaultLang = langValue;
-                    break;
-                } else if (sysLang.equals("zh")) {
-                    // TODO: Fix locales with country
-                    defaultLang = "zh-CHS";
-                    break;
-                }
-            }
-            if (defaultLang == null) {
-                defaultLang = "en";
-            }
-            sharedPreferencesSettings.edit().putString(getString(R.string.select_lang_key), defaultLang).apply();
-            BASE_LANGUAGE = defaultLang;
-        } else {
-            BASE_LANGUAGE = sharedPreferencesSettings.getString(
-                    getResources().getString(R.string.select_lang_key), defaultLang);
         }
     }
 
@@ -551,12 +536,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         super.onStop();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        expandAppBar();
-    }
-
     public void enableScroll() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         final AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams)
@@ -581,6 +560,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         appBarLayout.setExpanded(true);
     }
 
+    private void switchToRecent() {
+        AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
+        bottomNavigation.setCurrentItem(0);
+        bottomNavigation.setSelected(true);
+    }
+
     /**
      * This method generates the Uri and saves it as the member variable
      */
@@ -595,6 +580,33 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
         fileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
                 + File.separator + PHOTO_FILE_NAME));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_toolbar_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.view_type_btn:
+                showPopup(findViewById(R.id.view_type_btn));
+                return true;
+        }
+        return false;
+
+    }
+
+    private void showPopup(View anchoredView) {
+        mPopup = new PopupMenu(this, anchoredView);
+        mPopup.setOnMenuItemClickListener(new ViewTypeClickListener());
+        anchoredView.setOnTouchListener(mPopup.getDragToOpenListener());
+        mPopup.inflate(R.menu.view_type_popup);
+        mPopup.getMenu().getItem(viewType).setChecked(true);
+        mPopup.show();
     }
 
     private class FirebaseAsync extends AsyncTask<Void, Void, Void> {
@@ -618,6 +630,31 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
             if (mAuthListener != null && mAuth != null) {
                 mAuth.addAuthStateListener(mAuthListener);
             }
+        }
+    }
+
+    private class ViewTypeClickListener implements PopupMenu.OnMenuItemClickListener {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.grid_view_selector:
+                    viewType = ViewUtils.GRID_VIEW_ID;
+                    if (mRecentsFrag != null) {
+                        mRecentsFrag.setRecyclerLayout();
+                    }
+                    break;
+                case R.id.list_view_selector:
+                    viewType = ViewUtils.LIST_VIEW_ID;
+                    if (mRecentsFrag != null) {
+                        mRecentsFrag.setRecyclerLayout();
+                    }
+                    break;
+            }
+            if (sharedPreferencesSettings != null) {
+                sharedPreferencesSettings.edit().putInt(VIEW_TYPE, viewType)
+                        .apply();
+            }
+            return true;
         }
     }
 }

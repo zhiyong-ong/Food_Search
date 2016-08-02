@@ -21,7 +21,7 @@
             android:title="@string/search_immediately_title" />
 
         <ListPreference
-            android:defaultValue="1"
+            android:defaultValue="5"
             android:entries="@array/listNumber"
             android:entryValues="@array/listNumber"
             android:key="@string/num_images_key"
@@ -40,10 +40,10 @@
             android:title="@string/save_recents_title" />
 
         <ListPreference
-            android:defaultValue="10"
+            android:defaultValue="20"
             android:dependency="@string/save_recents_key"
-            android:entries="@array/listNumber"
-            android:entryValues="@array/listNumber"
+            android:entries="@array/recentNumbers"
+            android:entryValues="@array/recentNumbers"
             android:key="@string/num_recents_key"
             android:summary="@string/num_recents_summary"
             android:title="@string/num_recents_title" />

@@ -9,6 +9,7 @@
         android:id="@+id/crop_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
         android:theme="@style/ToolbarTheme" />
 
     <com.theartofdev.edmodo.cropper.CropImageView

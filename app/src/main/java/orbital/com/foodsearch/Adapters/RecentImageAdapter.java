@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,11 +20,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.DAO.PhotosContract.PhotosEntry;
 import orbital.com.foodsearch.DAO.PhotosDAO;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.R;
+import orbital.com.foodsearch.Utils.ViewUtils;
 
 /**
  * Created by zhiyong on 21/7/2016.
@@ -37,6 +38,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     private RecentsFragment mRecentsFragment;
     private List<String> filePaths;
     private List<String> fileTitles;
+    private int currentViewType = 1;
     private SparseBooleanArray selectedItems;
     private PhotosDBHelper mDBHelper;
 
@@ -49,16 +51,32 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         selectedItems = new SparseBooleanArray();
     }
 
-    @Override
-    public RecentImageAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+    public void setViewType(int type) {
+        currentViewType = type;
+        notifyDataSetChanged();
+    }
 
-        // Inflate the custom layout
-        View recentImagesView = inflater.inflate(R.layout.recent_image_item,
-                parent, false);
-        // Return a new holder instance
-        RecentImageAdapter.ViewHolder viewHolder = new RecentImageAdapter.ViewHolder(recentImagesView);
-        return viewHolder;
+    @Override
+    public int getItemViewType(int position) {
+        return MainActivity.viewType;
+    }
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View itemView = null;
+        switch (viewType) {
+            case ViewUtils.GRID_VIEW_ID:
+                itemView = inflater.inflate(R.layout.recents_item_grid,
+                        parent, false);
+                break;
+            case ViewUtils.LIST_VIEW_ID:
+                // Inflate the list layout
+                itemView = inflater.inflate(R.layout.recents_item_linear,
+                        parent, false);
+                break;
+        }
+        return new ViewHolder(itemView);
     }
 
     @Override
@@ -67,7 +85,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         TextView timestamp = holder.dateView;
         //Log.e(LOG_TAG, "position is: " + position);
         String title = fileTitles.get(position);
-        Log.e(LOG_TAG, "title is:" + title);
+        //Log.e(LOG_TAG, "title is:" + title);
         timestamp.setText(title);
         Cursor cursor = PhotosDAO.readDatabaseGetRow(title, mDBHelper);
         cursor.moveToFirst();
@@ -106,6 +124,15 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         filePaths.remove(pos);
         fileTitles.remove(pos);
         notifyItemRemoved(pos);
+    }
+
+    public void trimData(int numberToTrim) {
+        int startPos = filePaths.size() - numberToTrim;
+        for (int pos = startPos; pos < filePaths.size(); pos++) {
+            File file = new File(filePaths.get(pos));
+            file.delete();
+            PhotosDAO.deleteOnEntryTime(fileTitles.get(pos), mDBHelper);
+        }
     }
 
     public void selectAll() {
@@ -166,7 +193,6 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         private PercentRelativeLayout layoutView;
         private ImageView recentImage;
         private TextView dateView;
-        private ImageView checkCircle;
         private TextView timeView;
 
         public ViewHolder(View itemView) {
@@ -177,8 +203,6 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
             recentImage = (ImageView) itemView.findViewById(R.id.recent_image_view);
             dateView = (TextView) itemView.findViewById(R.id.recent_image_date);
             timeView = (TextView) itemView.findViewById(R.id.recent_image_time);
-            checkCircle = (ImageView) itemView.findViewById(R.id.remove_item_checkbox);
-            checkCircle.setImageResource(R.drawable.ic_check_circle);
         }
 
         @Override
