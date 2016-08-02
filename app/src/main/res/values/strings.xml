@@ -41,6 +41,8 @@
     <string name="select_lang_title">Translated language</string>
     <string name="select_lang_key">select_lang</string>
     <string name="select_lang_summary">%s</string>
+    <string name="google_search_title">Search with Google</string>
+    <string name="google_search_key">google_search</string>
     <string name="search_immediately_title">Search immediately</string>
     <string name="search_immediately_key">search_immediately</string>
     <string name="num_images_title">Number of images</string>

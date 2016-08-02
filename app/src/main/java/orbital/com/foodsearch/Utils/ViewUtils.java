@@ -38,6 +38,17 @@ public class ViewUtils {
         editText.clearFocus();
     }
 
+    public static void searchImmediately(View rootView, String searchParam, Animator.AnimatorListener listener) {
+        Button searchBtn = (Button) rootView.findViewById(R.id.searchbar_start_search);
+        ImageButton translateBtn = (ImageButton) rootView.findViewById(R.id.searchbar_translate_btn);
+        AnimUtils.fadeOut(translateBtn, AnimUtils.FAST_FADE);
+        AnimUtils.showSearchBar(rootView.findViewById(R.id.search_bar_container), listener);
+        EditText editText = (EditText) rootView.findViewById(R.id.searchbar_edit_text);
+        editText.setText(searchParam);
+        editText.clearFocus();
+        searchBtn.performClick();
+    }
+
     public static void showSearchResults(final View rootView, String translatedText) {
         TextView textView = (TextView) rootView.findViewById(R.id.searchbar_translate_text);
         textView.setText(translatedText);

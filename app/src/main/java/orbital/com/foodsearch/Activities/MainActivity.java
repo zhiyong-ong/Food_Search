@@ -79,11 +79,11 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public static String MARKET_CODE;
     public static int IMAGE_RECENTS_COUNT;
     public static int viewType = 0;
-    private static SharedPreferences sharedPreferencesSettings;
     private final String foodSearch = "FoodSearch";
     private final String user = BuildConfig.FIREBASE_USER;
     private final String password = BuildConfig.FIREBASE_PW;
     public boolean savedNewImage = false;
+    private SharedPreferences sharedPreferencesSettings;
     private Uri fileUri = null;
     private FrameLayout mFabOverlay;
     private FloatingActionMenu mFabMenu;

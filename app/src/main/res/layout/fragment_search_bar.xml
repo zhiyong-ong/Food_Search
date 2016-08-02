@@ -75,11 +75,11 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:background="@android:color/transparent"
+            android:fontFamily="sans-serif-condensed"
             android:gravity="center_vertical"
             android:text="@string/translation"
-            android:textAllCaps="true"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/url_font_size" />
+            android:textSize="@dimen/subhead_font_size" />
 
         <TextView
             android:id="@+id/searchbar_translate_text"
@@ -95,15 +95,6 @@
             android:maxLines="1"
             android:textColor="@android:color/white"
             android:textSize="@dimen/subhead_font_size" />
-
-        <ImageButton
-            android:id="@+id/searchbar_translate_copy"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:background="?attr/selectableItemBackground"
-            android:paddingLeft="@dimen/activity_half_margin"
-            android:paddingRight="@dimen/activity_half_margin"
-            android:src="@drawable/ic_copy_white" />
 
         <ImageButton
             android:id="@+id/searchbar_translate_close"

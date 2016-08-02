@@ -14,11 +14,16 @@
     <PreferenceCategory
         android:key="pref_key_search_settings"
         android:title="@string/search_cat_title">
+        <!--<CheckBoxPreference-->
+        <!--android:defaultValue="false"-->
+        <!--android:key="@string/search_immediately_key"-->
+        <!--android:summary="@string/search_immediately_summary"-->
+        <!--android:title="@string/search_immediately_title" />-->
+
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="@string/search_immediately_key"
-            android:summary="@string/search_immediately_summary"
-            android:title="@string/search_immediately_title" />
+            android:key="@string/google_search_key"
+            android:title="@string/google_search_title" />
 
         <ListPreference
             android:defaultValue="5"
