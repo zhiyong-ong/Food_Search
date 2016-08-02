@@ -112,6 +112,62 @@
         <item>yua</item>
     </string-array>
 
+    <string-array name="translationTitle">
+        <item>Vertaling:</item>
+        <item>ترجمة</item>
+        <item>Prijevod:</item>
+        <item>превод:</item>
+        <item>Traducció:</item>
+        <item>翻译:</item>
+        <item>翻譯：</item>
+        <item>Prijevod:</item>
+        <item>Překlad:</item>
+        <item>Oversættelse:</item>
+        <item>Vertaling:</item>
+        <item>Translation:</item>
+        <item>Tõlkimine:</item>
+        <item>Käännös:</item>
+        <item>Traduction:</item>
+        <item>Übersetzung:</item>
+        <item>μετάφραση:</item>
+        <item>Tradiksyon:</item>
+        <item>תִרגוּם</item>
+        <item>अनुवाद:</item>
+        <item>Neeg txhais lus:</item>
+        <item>Fordítás:</item>
+        <item>Terjemahan:</item>
+        <item>Traduzione:</item>
+        <item>翻訳：</item>
+        <item>Tafsiri:</item>
+        <item>MughmeH</item>
+        <item>Translation:</item>
+        <item>번역:</item>
+        <item>Tulkojums:</item>
+        <item>Vertimas:</item>
+        <item>Terjemahan:</item>
+        <item>Traduzzjoni:</item>
+        <item>Oversettelse:</item>
+        <item>ترجمه:</item>
+        <item>Tłumaczenie:</item>
+        <item>Tradução:</item>
+        <item>Traducción:</item>
+        <item>Traducere:</item>
+        <item>Перевод:</item>
+        <item>Превод:</item>
+        <item>Prevod:</item>
+        <item>Preklad:</item>
+        <item>Prevod:</item>
+        <item>Traducción:</item>
+        <item>Översättning:</item>
+        <item>แปล:</item>
+        <item>Çeviri:</item>
+        <item>Переклад:</item>
+        <item>ترجمہ کرنے والا:</item>
+        <item>Dịch:</item>
+        <item>Cyfieithu:</item>
+        <item>Traducción:</item>
+    </string-array>
+
     <string-array name="listNumber">
         <item>1</item>
         <item>2</item>

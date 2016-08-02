@@ -15,7 +15,6 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.transition.Transition;
 import android.view.View;
 import android.view.ViewAnimationUtils;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
@@ -187,7 +186,7 @@ public class AnimUtils {
         Animator anim =
                 null;
         anim = ViewAnimationUtils.createCircularReveal(exitView, cx, cy, initialRadius, 0);
-        anim.setInterpolator(new AccelerateDecelerateInterpolator());
+//        anim.setInterpolator(new AccelerateDecelerateInterpolator());
 
         // make the view invisible when the animation is done
         anim.addListener(new AnimatorListenerAdapter() {

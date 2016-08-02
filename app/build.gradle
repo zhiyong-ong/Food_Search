@@ -15,7 +15,7 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            shrinkResources true
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
 
@@ -34,13 +34,13 @@ android {
 
 def getPw() {
     def Properties props = new Properties()
-    props.load(new FileInputStream(new File('secret.properties')))
+    props.load(new FileInputStream(new File('app/secret.properties')))
     return props['FIREBASE_PW']
 }
 
 def getUser() {
     def Properties props = new Properties()
-    props.load(new FileInputStream(new File('secret.properties')))
+    props.load(new FileInputStream(new File('app/secret.properties')))
     return props['FIREBASE_USER']
 }
 

@@ -2,6 +2,7 @@ package orbital.com.foodsearch.Fragments;
 
 
 import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -29,6 +30,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import me.zhanghai.android.materialprogressbar.IndeterminateHorizontalProgressDrawable;
+import orbital.com.foodsearch.Activities.MainActivity;
 import orbital.com.foodsearch.Activities.OcrActivity;
 import orbital.com.foodsearch.Helpers.BingTranslate;
 import orbital.com.foodsearch.R;
@@ -44,6 +46,8 @@ public class SearchBarFragment extends Fragment {
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
     private ImageButton translateBtn;
+    private String[] listLanguages;
+    private String[] translationTitles;
 
 
     public SearchBarFragment() {
@@ -79,7 +83,6 @@ public class SearchBarFragment extends Fragment {
         final TextView translateTextView = (TextView) searchBar.findViewById(R.id.searchbar_translate_text);
         translateBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_btn);
         final ImageButton translateCloseBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_close);
-        final ImageButton copyBtn = (ImageButton) searchBar.findViewById(R.id.searchbar_translate_copy);
         final InputMethodManager imm = (InputMethodManager) getActivity()
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -138,11 +141,12 @@ public class SearchBarFragment extends Fragment {
                             searchButton.setEnabled(false);
                             editText.clearFocus();
                             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                            ((OcrActivity) getActivity()).startBingImageSearch(getActivity(), editText.getText().toString().trim());
+                            ((OcrActivity) getActivity()).startSearch(getActivity(), editText.getText().toString().trim());
                         }
                         break;
                     case R.id.searchbar_translate_btn:
                         editText.clearFocus();
+                        translateTitleView.setText(getTitle());
                         AnimUtils.circularReveal(v, translateLayout, searchBar, null);
                         translateOpen = true;
                         break;
@@ -153,30 +157,14 @@ public class SearchBarFragment extends Fragment {
                             translateOpen = false;
                         }
                         break;
-                    case R.id.searchbar_translate_copy:
                     case R.id.searchbar_translate_text:
                     case R.id.searchbar_translate_title:
                         if (translateOpen) {
                             editText.clearFocus();
-                            AnimUtils.exitReveal(translateLayout, editText, new Animator.AnimatorListener() {
-                                @Override
-                                public void onAnimationStart(Animator animator) {
-
-                                }
-
+                            AnimUtils.exitReveal(translateLayout, editText, new AnimatorListenerAdapter() {
                                 @Override
                                 public void onAnimationEnd(Animator animator) {
                                     AnimUtils.fadeIn(editText, AnimUtils.TEXT_UPDATE);
-                                }
-
-                                @Override
-                                public void onAnimationCancel(Animator animator) {
-
-                                }
-
-                                @Override
-                                public void onAnimationRepeat(Animator animator) {
-
                                 }
                             });
                             editText.setText(translateTextView.getText());
@@ -194,7 +182,6 @@ public class SearchBarFragment extends Fragment {
         translateCloseBtn.setOnClickListener(listener);
         translateTextView.setOnClickListener(listener);
         translateTitleView.setOnClickListener(listener);
-        copyBtn.setOnClickListener(listener);
         translateBtn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
@@ -232,6 +219,22 @@ public class SearchBarFragment extends Fragment {
         }
         popup.show();
 
+    }
+
+    private String getTitle() {
+        if (listLanguages == null) {
+            listLanguages = getResources().getStringArray(R.array.listLanguagesValues);
+        }
+        if (translationTitles == null) {
+            translationTitles = getResources().getStringArray(R.array.translationTitle);
+        }
+        int selectedIndex = 11;
+        for (int i = 0; i < listLanguages.length; i++) {
+            if (MainActivity.BASE_LANGUAGE.equals(listLanguages[i])) {
+                selectedIndex = i;
+            }
+        }
+        return translationTitles[selectedIndex];
     }
 
     /**
@@ -278,16 +281,6 @@ public class SearchBarFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
             ((TextView) rootView.findViewById(R.id.searchbar_translate_text)).setText(result);
-            translateBtn.setEnabled(true);
-            translateBtn.performClick();
-            translateBtn.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    Log.e(LOG_TAG, "on long click pressed");
-                    showPopup(view);
-                    return true;
-                }
-            });
             translateBtn.setEnabled(true);
             translateBtn.performClick();
             super.onPostExecute(result);

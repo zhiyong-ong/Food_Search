@@ -1,6 +1,7 @@
 package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -96,8 +97,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private static BingImageDAO imgDAO = null;
     private static ImageSearchResponse searchResponse;
     private static ImageSearchResponse searchResponseDB;
-    private static SharedPreferences sharedPreferencesSettings;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
+    private SharedPreferences sharedPreferencesSettings;
     private String mFilePath = null;
     private String mJson = null;
     private boolean animating = false;
@@ -388,7 +389,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         snackbar.show();
     }
 
-    public void startBingImageSearch(final Context context, final String searchParam) {
+    public void startSearch(final Context context, final String searchParam) {
         if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
             searchImageResponse(context, searchParam);
         } else {
@@ -397,7 +398,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             snackbar.setAction(R.string.retry, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startBingImageSearch(context, searchParam);
+                    startSearch(context, searchParam);
                 }
             });
             snackbar.show();
@@ -514,6 +515,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * @param searchParam String to be searched for
      */
     private void searchImageResponse(final Context context, final String searchParam) {
+        if (searchParam.trim().isEmpty()) {
+            return;
+        }
+        if (sharedPreferencesSettings.getBoolean(getString(R.string.google_search_key), false)) {
+            googleSearch(searchParam);
+            return;
+        }
         mQuery = searchParam;
         final View rootView = findViewById(R.id.activity_ocr);
         AnimUtils.containerSlideDown(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
@@ -601,6 +609,12 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         };
         ref.addListenerForSingleValueEvent(listener);
         runningDBListeners.put(ref, listener);
+    }
+
+    private void googleSearch(String searchParam) {
+        Intent intent = new Intent(Intent.ACTION_WEB_SEARCH);
+        intent.putExtra(SearchManager.QUERY, searchParam);
+        startActivity(intent);
     }
 
     private void enqueueOcr(final byte[] compressedImage) {
@@ -703,6 +717,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * @param response
      */
     private void saveOcrResponse(BingOcrResponse response) {
+        if (!sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), true)) {
+            return;
+        }
+        ocrSaved = true;
         PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
         Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
         String fileName = null;
@@ -944,9 +962,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
             ViewUtils.finishOcrProgress(rootView);
-
             saveOcrResponse(bingOcrResponse);
-            ocrSaved = true;
         }
 
         @Override
