@@ -1006,7 +1006,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
 
-    private class DrawableTouchListener implements View.OnTouchListener {
+    private class DrawableTouchListener implements View.OnTouchListener, View.OnLongClickListener{
         private View rootView;
         private DrawableView mDrawableView = null;
 
@@ -1033,6 +1033,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             return v.performClick();
         }
 
+        @Override
+        public boolean onLongClick(View view) {
+            return false;
+        }
+
         private void chooseRect(int i) {
             mDrawableView.chooseRect(i);
             // Display the string in a snackbar and allow for search
@@ -1044,6 +1049,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 ViewUtils.showSearchBar(rootView, searchParam, new IsAnimatingListener(rootView));
             }
         }
+
+
     }
 
     private class ApiKeySyncTask extends AsyncTask<Void, Void, Boolean> {

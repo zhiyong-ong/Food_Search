@@ -50,7 +50,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 
-import orbital.com.foodsearch.BuildConfig;
 import orbital.com.foodsearch.DAO.PhotosContract;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
@@ -80,8 +79,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public static int IMAGE_RECENTS_COUNT;
     public static int viewType = 0;
     private final String foodSearch = "FoodSearch";
-    private final String user = BuildConfig.FIREBASE_USER;
-    private final String password = BuildConfig.FIREBASE_PW;
+    private String user;
+    private String password;
     public boolean savedNewImage = false;
     private SharedPreferences sharedPreferencesSettings;
     private Uri fileUri = null;
@@ -102,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
+        user = GlobalVar.getUser();
+        password = GlobalVar.getPassword();
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         LocaleUtils.getBaseLanguage(this, sharedPreferencesSettings);
         LocaleUtils.getMarketCode();
