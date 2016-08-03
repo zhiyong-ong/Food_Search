@@ -34,13 +34,13 @@ android {
 
 def getPw() {
     def Properties props = new Properties()
-    props.load(new FileInputStream(new File('app/secret.properties')))
+    props.load(new FileInputStream(new File('secret.properties')))
     return props['FIREBASE_PW']
 }
 
 def getUser() {
     def Properties props = new Properties()
-    props.load(new FileInputStream(new File('app/secret.properties')))
+    props.load(new FileInputStream(new File('secret.properties')))
     return props['FIREBASE_USER']
 }
 
