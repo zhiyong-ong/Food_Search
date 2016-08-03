@@ -2,7 +2,6 @@ package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -389,16 +388,16 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         snackbar.show();
     }
 
-    public void startSearch(final Context context, final String searchParam) {
+    public void startSearch(final String searchParam) {
         if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
-            searchImageResponse(context, searchParam);
+            searchImageResponse(searchParam);
         } else {
             Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr),
                     R.string.internet_error_text, Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.retry, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startSearch(context, searchParam);
+                    startSearch(searchParam);
                 }
             });
             snackbar.show();
@@ -514,7 +513,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      *
      * @param searchParam String to be searched for
      */
-    private void searchImageResponse(final Context context, final String searchParam) {
+    private void searchImageResponse(final String searchParam) {
         if (searchParam.trim().isEmpty()) {
             return;
         }
@@ -550,7 +549,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     for (int i = 0; i < expectedResultCount; i++) {
                         ImageValue imgVal = searchResponseDB.getImageValues().get(i);
                         searchFragment.updateRecyclerList(imgVal);
-                        searchImageInsights(context, imgVal);
+                        searchImageInsights(imgVal);
                     }
                 }
                 enqueueTranslate(searchParam);
@@ -571,7 +570,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * This method is called after onresponse for imagesearch callback in order to prevent duplicates from being
      * persisted into the database. Flag used is imageExists
      */
-    private void searchImageInsights(final Context context, final ImageValue imgVal) {
+    private void searchImageInsights(final ImageValue imgVal) {
         dispatchedInsightCount++;
         if (dispatchedInsightCount > expectedInsightCount) {
             return;
@@ -597,7 +596,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         return;
                     }
 //                    Log.e(LOG_TAG, "Insights DB count: " + receivedInsightsCount);
-                    new CompleteTask(context, rootView, FRAGMENT_MANAGER)
+                    new CompleteTask(rootView, FRAGMENT_MANAGER)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -647,7 +646,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             BingSearch bingImg = new BingSearch(searchParam, String.valueOf(IMAGES_COUNT_MAX));
             Call<ImageSearchResponse> call = bingImg.buildCall();
             runningCalls.add(call);
-            call.enqueue(new ImageSearchCallback(OcrActivity.this, findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
+            call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
         } else {
             new ApiKeySyncTask() {
                 @Override
@@ -695,7 +694,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             ImageInsights imageInsights = new ImageInsights(mQuery, imgVal.getImageInsightsToken(), "");
             Call<ImageInsightsResponse> call = imageInsights.buildCall();
             runningCalls.add(call);
-            call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
+            call.enqueue(new ImageInsightCallback(findViewById(R.id.activity_ocr),
                     FRAGMENT_MANAGER,
                     imgVal));
         } else {
@@ -775,12 +774,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
     private class CompleteTask extends AsyncTask<Void, Void, Boolean> {
-        Context context = null;
         View rootView = null;
         FragmentManager fm = null;
 
-        CompleteTask(Context context, View rootView, FragmentManager fm) {
-            this.context = context;
+        CompleteTask(View rootView, FragmentManager fm) {
             this.rootView = rootView;
             this.fm = fm;
         }
@@ -832,13 +829,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * Callback class for ImageInsightCallback.
      */
     private class ImageInsightCallback implements Callback<ImageInsightsResponse> {
-        private Context context = null;
         private View rootView = null;
         private FragmentManager fm = null;
         private ImageValue imageValue = null;
 
-        ImageInsightCallback(Context context, View rootView, FragmentManager fm, ImageValue imageValue) {
-            this.context = context;
+        ImageInsightCallback(View rootView, FragmentManager fm, ImageValue imageValue) {
             this.rootView = rootView;
             this.fm = fm;
             this.imageValue = imageValue;
@@ -857,7 +852,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 return;
             }
             // Once we have collated X imageinsights count, start CompleteTask to synchronize all tasks
-            new CompleteTask(context, rootView, fm)
+            new CompleteTask(rootView, fm)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
@@ -872,7 +867,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 return;
             }
             // Failed to get the IMAGE_KEY insights so display snackbar error dialog
-            new CompleteTask(context, rootView, fm)
+            new CompleteTask(rootView, fm)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
@@ -882,12 +877,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      */
     private class ImageSearchCallback implements Callback<ImageSearchResponse> {
         private View rootView = null;
-        private Context context = null;
         private FragmentManager fm = null;
         private String searchParam = null;
 
-        ImageSearchCallback(Context context, View rootView, FragmentManager fm, String searchParam) {
-            this.context = context;
+        ImageSearchCallback(View rootView, FragmentManager fm, String searchParam) {
             this.rootView = rootView;
             this.fm = fm;
             this.searchParam = searchParam;
@@ -917,7 +910,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 for (int i = 0; i < expectedResultCount; i++) {
                     ImageValue imgVal = imageValues.get(i);
                     searchFragment.updateRecyclerList(imgVal);
-                    searchImageInsights(context, imgVal);
+                    searchImageInsights(imgVal);
                 }
             } else {
                 ViewUtils.terminateSearchProgress(rootView);
