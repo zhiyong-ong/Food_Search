@@ -31,6 +31,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -260,6 +261,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
                         @Override
                         public void onError() {
+                            FirebaseCrash.report(new Exception("Picasso load failed!"));
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 startPostponedEnterTransition();
                             }
@@ -756,7 +758,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         if (fileToDelete != null) {
             File file = new File(root, fileToDelete);
             file.delete();
-            Log.e(LOG_TAG, "FILE: " + fileToDelete + " DELETED");
+            //Log.e(LOG_TAG, "FILE: " + fileToDelete + " DELETED");
         }
 
         String fname = currentTime;
@@ -770,6 +772,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         } catch (Exception e) {
             e.printStackTrace();
+            FirebaseCrash.report(e);
         }
     }
 
@@ -799,6 +802,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     count++;
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    FirebaseCrash.report(e);
                     e.printStackTrace();
                 }
             }
@@ -810,6 +814,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         protected void onPostExecute(Boolean successful) {
             runningTasks.remove(this);
             if (!successful) {
+                FirebaseCrash.report(new Exception(getString(R.string.translate_fail)));
                 Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
                 return;
             }
@@ -866,7 +871,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             if (receivedInsightsCount < expectedInsightCount) {
                 return;
             }
-            // Failed to get the IMAGE_KEY insights so display snackbar error dialog
+            FirebaseCrash.report(t);
             new CompleteTask(rootView, fm)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
@@ -892,9 +897,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             searchResponse = response.body();
             if (searchResponse == null) {
                 try {
+                    FirebaseCrash.report(new Exception(response.errorBody().string()));
                     Log.e(LOG_TAG, response.errorBody().string());
                     return;
                 } catch (IOException e) {
+                    FirebaseCrash.report(e);
                     e.printStackTrace();
                 }
             }
@@ -928,6 +935,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         .show();
                 ViewUtils.terminateSearchProgress(rootView);
                 Log.e(LOG_TAG, t.getMessage());
+                FirebaseCrash.report(t);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
         }
@@ -966,6 +974,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.OCRFailed,
                         Snackbar.LENGTH_LONG)
                         .show();
+                FirebaseCrash.report(t);
                 Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
             }
         }
@@ -1063,12 +1072,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             while (!GlobalVar.hasKeyValues()) {
                 // Wait 10 seconds max for API keys, modify the max here
                 if (count > 50) {
+                    FirebaseCrash.report(new Exception("Global var no key values > 10seconds"));
                     return false;
                 }
                 try {
                     count++;
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
+                    FirebaseCrash.report(e);
                     e.printStackTrace();
                 }
             }

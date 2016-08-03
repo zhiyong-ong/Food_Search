@@ -107,12 +107,12 @@
 
         <ImageButton
             android:id="@+id/close_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_alignRight="@id/card_image"
+            android:layout_marginRight="@dimen/activity_half_margin"
             android:background="@drawable/btn_ripple_bg"
             android:padding="@dimen/activity_horizontal_margin"
-            android:paddingBottom="20dp"
             android:src="@drawable/btn_close_card" />
 
         <FrameLayout
