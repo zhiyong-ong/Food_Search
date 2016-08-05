@@ -207,7 +207,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
                 //current time
                 Calendar cal = Calendar.getInstance();
-                currentTime = FileUtils.getTimeStamp(cal);
+                currentTime = FileUtils.getTimeStamp(cal) + ".jpg";
                 formattedDate = FileUtils.getFormattedDate(cal);
                 formattedTime = FileUtils.getFormattedTime(cal);
                 return null;
@@ -745,13 +745,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
             PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
             cursor.close();
-            // Log.e(LOG_TAG, "TIME STAMP: " + currentTime);
-            // Log.e(LOG_TAG, "INSERTED ROW ID: " + newRowID);
         }
         //save the lines to local DB
         Gson gson = new Gson();
         String json = gson.toJson(response);
-        long newRowID = PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
+        PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
         saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
     }
 
@@ -1024,8 +1022,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     private class DrawableTouchListener implements View.OnTouchListener{
         private View rootView;
-        private DrawableView mDrawableView = null;
-
         DrawableTouchListener(View rootView) {
             this.rootView = rootView;
         }
@@ -1037,7 +1033,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 Log.e(LOG_TAG, "close search results");
             }
             Log.e(LOG_TAG, "tapped");
-            mDrawableView = (DrawableView) v;
             gestureDetector.onTouchEvent(event);
             return true;
         }

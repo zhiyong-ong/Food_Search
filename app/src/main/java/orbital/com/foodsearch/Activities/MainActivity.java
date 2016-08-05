@@ -170,6 +170,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
         db.execSQL("DROP TABLE IF EXISTS " + PhotosContract.PhotosEntry.TABLE_NAME);
         mDbHelper.onCreate(db);
+        db.close();
     }
 
     private void signInFirebase() {
