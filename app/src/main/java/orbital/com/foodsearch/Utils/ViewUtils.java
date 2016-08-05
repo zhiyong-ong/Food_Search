@@ -3,11 +3,14 @@ package orbital.com.foodsearch.Utils;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.res.Resources;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 import orbital.com.foodsearch.R;
 
@@ -18,6 +21,7 @@ import orbital.com.foodsearch.R;
 public class ViewUtils {
     public static final int GRID_VIEW_ID = 0;
     public static final int LIST_VIEW_ID = 1;
+    public static ArrayList<String> multStringQuery = new ArrayList<>();
 
     public static void startSearchProgress(View rootView) {
         AnimUtils.fadeIn(rootView.findViewById(R.id.drawable_overlay), AnimUtils.OVERLAY_DURATION);
@@ -29,13 +33,46 @@ public class ViewUtils {
         rootView.findViewById(R.id.searchbar_progress).setVisibility(View.GONE);
     }
 
-    public static void showSearchBar(View rootView, String searchParam, Animator.AnimatorListener listener) {
+    public static void showSearchBar(View rootView, String searchParam, Animator.AnimatorListener listener, Boolean mult) {
         ImageButton translateBtn = (ImageButton) rootView.findViewById(R.id.searchbar_translate_btn);
         AnimUtils.fadeOut(translateBtn, AnimUtils.FAST_FADE);
         AnimUtils.showSearchBar(rootView.findViewById(R.id.search_bar_container), listener);
+        for(int i = 0; i < multStringQuery.size(); i++) {
+            Log.e("FOODIES", "create search bar: " + multStringQuery.get(i));
+        }
         EditText editText = (EditText) rootView.findViewById(R.id.searchbar_edit_text);
         editText.setText(searchParam);
         editText.clearFocus();
+        if(mult) {
+            multStringQuery.add(searchParam);
+        }
+    }
+
+    public static void appendSearchBar(View rootView, String appendParam) {
+        multStringQuery.add(appendParam);
+        EditText editText = (EditText) rootView.findViewById(R.id.searchbar_edit_text);
+        editText.append(" " + appendParam);
+        editText.clearFocus();
+        for(int i = 0; i < multStringQuery.size(); i++) {
+            Log.e("FOODIES", "append search bar: " + multStringQuery.get(i));
+        }
+    }
+
+    public static void deleteSearchQuery(View rootView, String deleteParam) {
+        multStringQuery.remove(deleteParam);
+        for(int i = 0; i < multStringQuery.size(); i++) {
+            Log.e("FOODIES", "arraylist: " + multStringQuery.get(i));
+        }
+        EditText editText = (EditText) rootView.findViewById(R.id.searchbar_edit_text);
+        editText.clearComposingText();
+        editText.setText(multStringQuery.get(0));
+        for(int i = 1; i < multStringQuery.size(); i++) {
+            editText.append(" " + multStringQuery.get(i));
+        }
+        editText.clearFocus();
+    }
+    public static void clearSearch() {
+        multStringQuery.clear();
     }
 
     public static void searchImmediately(View rootView, String searchParam, Animator.AnimatorListener listener) {

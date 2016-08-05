@@ -30,8 +30,6 @@ public class DrawableView extends FrameLayout {
     private List<Rect> mRects = null;
     private List<String> mLineTexts = null;
 
-    private int selectedIndex = -1;
-
     private int originalWidth = 0;
     private int originalHeight = 0;
     private Matrix mMatrix = new Matrix();
@@ -40,6 +38,8 @@ public class DrawableView extends FrameLayout {
     private Paint greenPaint = null;
     private Paint redPaint = null;
 
+    private Boolean multRect = false;
+    private ArrayList<Integer> selectedRects = new ArrayList<>();
     public DrawableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRects = new ArrayList<>();
@@ -63,14 +63,18 @@ public class DrawableView extends FrameLayout {
                 Rect rect = mRects.get(i);
                 canvas.save();
                 canvas.rotate(mAngle, rect.centerX(), rect.centerY());
-                if (i == selectedIndex) {
+                if (selectedRects.contains(i)) {
                     canvas.drawRect(rect, redPaint);
+                    if(!multRect) {
+                        selectedRects.clear();
+                    }
                 } else {
                     canvas.drawRect(rect, greenPaint);
                 }
                 canvas.restore();
             }
         }
+
     }
 
     /**
@@ -100,11 +104,22 @@ public class DrawableView extends FrameLayout {
         invalidate();
     }
 
-    public void chooseRect(int selectedIndex) {
-        this.selectedIndex = selectedIndex;
+    public boolean chooseRect(int selectedIndex, boolean multRect) {
+        if(selectedRects.contains(selectedIndex)) {
+            selectedRects.remove((Integer)selectedIndex);
+            this.invalidate();
+            return false;
+        }
+        selectedRects.add(selectedIndex);
+        this.multRect = multRect;
         this.invalidate();
+        return true;
     }
 
+    public void clearSelectedRects() {
+        selectedRects.clear();
+        invalidate();
+    }
     /**
      * This private method adds the drawables in the list by parsing the boundary
      * parameters and then scaling it and setting them as the drawables' bounds.
@@ -173,9 +188,6 @@ public class DrawableView extends FrameLayout {
         redPaint.setColor(ContextCompat.getColor(context, R.color.colorPrimaryLight));
     }
 
-    public void selectIndex(int selectedIndex) {
-        this.selectedIndex = selectedIndex;
-    }
 
     public List<Rect> getmRects() {
         return mRects;

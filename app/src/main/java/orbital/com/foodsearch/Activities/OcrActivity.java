@@ -18,11 +18,17 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.transition.Transition;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.GestureDetector;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -31,6 +37,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -113,6 +120,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private String formattedDate;
     private String formattedTime;
     private String mQuery;
+    private GestureDetectorCompat gestureDetector;
+    private ActionMode actionMode = null;
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -338,6 +347,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     private void initializeDrawView() {
         final DrawableView drawableView = (DrawableView) findViewById(R.id.drawable_view);
+        gestureDetector = new GestureDetectorCompat(this, new GestureListener(drawableView, findViewById(R.id.activity_ocr), this));
         drawableView.setOnTouchListener(new DrawableTouchListener(findViewById(R.id.activity_ocr)));
     }
 
@@ -483,6 +493,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * This method closes both search bar and search results.
      */
     public void cancelSearch() {
+        if(actionMode != null) {
+            actionMode.finish();
+        }
         endAllThreads();
         View rootView = findViewById(R.id.activity_ocr);
         rootView.findViewById(R.id.searchbar_progress).setVisibility(View.GONE);
@@ -1006,7 +1019,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
 
-    private class DrawableTouchListener implements View.OnTouchListener, View.OnLongClickListener{
+    private class DrawableTouchListener implements View.OnTouchListener{
         private View rootView;
         private DrawableView mDrawableView = null;
 
@@ -1016,41 +1029,155 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            if (!animating) {
+            if (!animating && findViewById(R.id.search_frag_container).getTranslationY() == 0) {
                 ViewUtils.closeSearchResults(rootView, new IsAnimatingListener(rootView), rootView.getHeight());
+                Log.e(LOG_TAG, "close search results");
             }
+            Log.e(LOG_TAG, "tapped");
             mDrawableView = (DrawableView) v;
+            gestureDetector.onTouchEvent(event);
+            return true;
+        }
+
+
+    }
+
+    private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
+        private DrawableView mDrawableView = null;
+        private View rootView = null;
+        private Context context = null;
+        private int numSelected = 0;
+        private boolean longpress = false;
+
+        public GestureListener(DrawableView view, View rootView, Context context) {
+            mDrawableView = view;
+            this.context = context;
+            this.rootView = rootView;
+        }
+
+        @Override
+        public boolean onDown(MotionEvent event) {
             List<Rect> rects = mDrawableView.getmRects();
             int x = (int) event.getX();
             int y = (int) event.getY();
             for (int i = 0; i < rects.size(); i++) {
                 Rect rect = rects.get(i);
                 if (rect.contains(x, y)) {
-                    chooseRect(i);
+                    if(longpress) {
+                        chooseMultRect(i);
+                    }
+                    else {
+                        chooseRect(i);
+                    }
                     return true;
                 }
             }
-            return v.performClick();
+            if(!longpress) {
+                cancelSearch();
+                mDrawableView.clearSelectedRects();
+            }
+            return super.onDown(event);
         }
-
         @Override
-        public boolean onLongClick(View view) {
-            return false;
+        public void onLongPress(MotionEvent event) {
+            List<Rect> rects = mDrawableView.getmRects();
+            int x = (int) event.getX();
+            int y = (int) event.getY();
+            for (int i = 0; i < rects.size(); i++) {
+                Rect rect = rects.get(i);
+                if (rect.contains(x, y)) {
+                    actionMode = startActionMode(new actionModeCallback());
+                    chooseMultRect(i);
+                    Toast.makeText(context, "Line selected", Toast.LENGTH_SHORT).show();
+                    longpress = true;
+                }
+            }
+            super.onLongPress(event);
         }
 
         private void chooseRect(int i) {
-            mDrawableView.chooseRect(i);
+            mDrawableView.chooseRect(i, false);
             // Display the string in a snackbar and allow for search
-            String searchParam = mDrawableView.getmLineTexts().get(i).toLowerCase();
-            searchParam = searchParam.substring(0, 1).toUpperCase() + searchParam.substring(1);
+            String searchParam = mDrawableView.getmLineTexts().get(i).trim();
+            //searchParam = searchParam.substring(0, 1).toUpperCase() + searchParam.substring(1);
             View searchBar = findViewById(R.id.search_bar_container);
             // if !Animating or searchbar is already up, show searchbar with new search param.
             if (!animating || searchBar.getTranslationY() == 0) {
-                ViewUtils.showSearchBar(rootView, searchParam, new IsAnimatingListener(rootView));
+                ViewUtils.showSearchBar(rootView, searchParam, new IsAnimatingListener(rootView), false);
+            }
+        }
+        private void chooseMultRect(int i) {
+            boolean rectAdded = mDrawableView.chooseRect(i, true);
+            String searchParam = mDrawableView.getmLineTexts().get(i).trim();
+            Log.e(LOG_TAG, "search param: " + searchParam);
+            if(rectAdded) {
+                numSelected++;
+            }
+            else {
+                numSelected--;
+                if(numSelected == 0) {
+                    actionMode.finish();
+                    return;
+                }
+                ViewUtils.deleteSearchQuery(rootView, searchParam);
+                String title = getString(R.string.selected_count, String.valueOf(numSelected));
+                actionMode.setTitle(title);
+                return;
+            }
+            String title = getString(R.string.selected_count, String.valueOf(numSelected));
+            actionMode.setTitle(title);
+            // Display the string in a snackbar and allow for search
+
+//            searchParam = searchParam.substring(0, 1).toUpperCase() + searchParam.substring(1);
+            View searchBar = findViewById(R.id.search_bar_container);
+            if(numSelected > 1) {
+                ViewUtils.appendSearchBar(rootView, searchParam);
+            }
+            else {
+                // if !Animating or searchbar is already up, show searchbar with new search param.
+                if (!animating || searchBar.getTranslationY() == 0) {
+                    ViewUtils.showSearchBar(rootView, searchParam, new IsAnimatingListener(rootView), true);
+                }
             }
         }
 
+        private class actionModeCallback implements ActionMode.Callback {
 
+            // Called when the action mode is created; startActionMode() was called
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                // Inflate a menu resource providing context menu items
+                MenuInflater inflater = mode.getMenuInflater();
+                inflater.inflate(R.menu.menu_cab_select_menu, menu);
+                return true;
+            }
+
+            // Called each time the action mode is shown. Always called after onCreateActionMode, but
+            // may be called multiple times if the mode is invalidated.
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false; // Return false if nothing is done
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                return false;
+            }
+
+
+            // Called when the user exits the action mode
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                if(actionMode != null) {
+                    mDrawableView.clearSelectedRects();
+                    ViewUtils.clearSearch();
+                    longpress = false;
+                    numSelected = 0;
+                    actionMode = null;
+                    cancelSearch();
+                }
+            }
+        };
     }
 
     private class ApiKeySyncTask extends AsyncTask<Void, Void, Boolean> {
