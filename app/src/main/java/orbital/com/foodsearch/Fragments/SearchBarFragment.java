@@ -41,14 +41,13 @@ import orbital.com.foodsearch.Utils.AnimUtils;
  */
 public class SearchBarFragment extends Fragment {
 
+    private static final String LOG_TAG = "FOODIES";
     private SharedPreferences sharedPreferencesSettings = null;
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
     private ImageButton translateBtn;
     private String[] listLanguages;
     private String[] translationTitles;
-
-    private static final String LOG_TAG = "FOODIES";
 
     public SearchBarFragment() {
     }
@@ -141,7 +140,7 @@ public class SearchBarFragment extends Fragment {
                             searchButton.setEnabled(false);
                             editText.clearFocus();
                             imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-                            ((OcrActivity) getActivity()).startSearch(getActivity(), editText.getText().toString().trim());
+                            ((OcrActivity) getActivity()).startSearch(editText.getText().toString().trim());
                         }
                         break;
                     case R.id.searchbar_translate_btn:

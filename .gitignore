@@ -7,4 +7,5 @@
 .DS_Store
 /build
 /captures
-/secret.properties
+/app/app-release-unaligned.apk
+/app/app-release.apk

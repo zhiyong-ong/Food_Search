@@ -2,7 +2,6 @@ package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
 import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -39,6 +38,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.crash.FirebaseCrash;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -270,6 +270,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
                         @Override
                         public void onError() {
+                            FirebaseCrash.report(new Exception("Picasso load failed!"));
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 startPostponedEnterTransition();
                             }
@@ -399,16 +400,16 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         snackbar.show();
     }
 
-    public void startSearch(final Context context, final String searchParam) {
+    public void startSearch(final String searchParam) {
         if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
-            searchImageResponse(context, searchParam);
+            searchImageResponse(searchParam);
         } else {
             Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr),
                     R.string.internet_error_text, Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.retry, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    startSearch(context, searchParam);
+                    startSearch(searchParam);
                 }
             });
             snackbar.show();
@@ -527,7 +528,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      *
      * @param searchParam String to be searched for
      */
-    private void searchImageResponse(final Context context, final String searchParam) {
+    private void searchImageResponse(final String searchParam) {
         if (searchParam.trim().isEmpty()) {
             return;
         }
@@ -563,7 +564,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     for (int i = 0; i < expectedResultCount; i++) {
                         ImageValue imgVal = searchResponseDB.getImageValues().get(i);
                         searchFragment.updateRecyclerList(imgVal);
-                        searchImageInsights(context, imgVal);
+                        searchImageInsights(imgVal);
                     }
                 }
                 enqueueTranslate(searchParam);
@@ -584,7 +585,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * This method is called after onresponse for imagesearch callback in order to prevent duplicates from being
      * persisted into the database. Flag used is imageExists
      */
-    private void searchImageInsights(final Context context, final ImageValue imgVal) {
+    private void searchImageInsights(final ImageValue imgVal) {
         dispatchedInsightCount++;
         if (dispatchedInsightCount > expectedInsightCount) {
             return;
@@ -610,7 +611,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         return;
                     }
 //                    Log.e(LOG_TAG, "Insights DB count: " + receivedInsightsCount);
-                    new CompleteTask(context, rootView, FRAGMENT_MANAGER)
+                    new CompleteTask(rootView, FRAGMENT_MANAGER)
                             .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -660,7 +661,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             BingSearch bingImg = new BingSearch(searchParam, String.valueOf(IMAGES_COUNT_MAX));
             Call<ImageSearchResponse> call = bingImg.buildCall();
             runningCalls.add(call);
-            call.enqueue(new ImageSearchCallback(OcrActivity.this, findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
+            call.enqueue(new ImageSearchCallback(findViewById(R.id.activity_ocr), FRAGMENT_MANAGER, searchParam));
         } else {
             new ApiKeySyncTask() {
                 @Override
@@ -708,7 +709,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             ImageInsights imageInsights = new ImageInsights(mQuery, imgVal.getImageInsightsToken(), "");
             Call<ImageInsightsResponse> call = imageInsights.buildCall();
             runningCalls.add(call);
-            call.enqueue(new ImageInsightCallback(this, findViewById(R.id.activity_ocr),
+            call.enqueue(new ImageInsightCallback(findViewById(R.id.activity_ocr),
                     FRAGMENT_MANAGER,
                     imgVal));
         } else {
@@ -770,7 +771,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         if (fileToDelete != null) {
             File file = new File(root, fileToDelete);
             file.delete();
-            Log.e(LOG_TAG, "FILE: " + fileToDelete + " DELETED");
+            //Log.e(LOG_TAG, "FILE: " + fileToDelete + " DELETED");
         }
 
         String fname = currentTime;
@@ -784,16 +785,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         } catch (Exception e) {
             e.printStackTrace();
+            FirebaseCrash.report(e);
         }
     }
 
     private class CompleteTask extends AsyncTask<Void, Void, Boolean> {
-        Context context = null;
         View rootView = null;
         FragmentManager fm = null;
 
-        CompleteTask(Context context, View rootView, FragmentManager fm) {
-            this.context = context;
+        CompleteTask(View rootView, FragmentManager fm) {
             this.rootView = rootView;
             this.fm = fm;
         }
@@ -815,6 +815,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     count++;
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
+                    FirebaseCrash.report(e);
                     e.printStackTrace();
                 }
             }
@@ -826,6 +827,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         protected void onPostExecute(Boolean successful) {
             runningTasks.remove(this);
             if (!successful) {
+                FirebaseCrash.report(new Exception(getString(R.string.translate_fail)));
                 Snackbar.make(rootView, R.string.translate_fail, Snackbar.LENGTH_SHORT);
                 return;
             }
@@ -845,13 +847,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * Callback class for ImageInsightCallback.
      */
     private class ImageInsightCallback implements Callback<ImageInsightsResponse> {
-        private Context context = null;
         private View rootView = null;
         private FragmentManager fm = null;
         private ImageValue imageValue = null;
 
-        ImageInsightCallback(Context context, View rootView, FragmentManager fm, ImageValue imageValue) {
-            this.context = context;
+        ImageInsightCallback(View rootView, FragmentManager fm, ImageValue imageValue) {
             this.rootView = rootView;
             this.fm = fm;
             this.imageValue = imageValue;
@@ -870,7 +870,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 return;
             }
             // Once we have collated X imageinsights count, start CompleteTask to synchronize all tasks
-            new CompleteTask(context, rootView, fm)
+            new CompleteTask(rootView, fm)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
 
@@ -884,8 +884,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             if (receivedInsightsCount < expectedInsightCount) {
                 return;
             }
-            // Failed to get the IMAGE_KEY insights so display snackbar error dialog
-            new CompleteTask(context, rootView, fm)
+            FirebaseCrash.report(t);
+            new CompleteTask(rootView, fm)
                     .executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         }
     }
@@ -895,12 +895,10 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      */
     private class ImageSearchCallback implements Callback<ImageSearchResponse> {
         private View rootView = null;
-        private Context context = null;
         private FragmentManager fm = null;
         private String searchParam = null;
 
-        ImageSearchCallback(Context context, View rootView, FragmentManager fm, String searchParam) {
-            this.context = context;
+        ImageSearchCallback(View rootView, FragmentManager fm, String searchParam) {
             this.rootView = rootView;
             this.fm = fm;
             this.searchParam = searchParam;
@@ -912,9 +910,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             searchResponse = response.body();
             if (searchResponse == null) {
                 try {
+                    FirebaseCrash.report(new Exception(response.errorBody().string()));
                     Log.e(LOG_TAG, response.errorBody().string());
                     return;
                 } catch (IOException e) {
+                    FirebaseCrash.report(e);
                     e.printStackTrace();
                 }
             }
@@ -930,7 +930,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 for (int i = 0; i < expectedResultCount; i++) {
                     ImageValue imgVal = imageValues.get(i);
                     searchFragment.updateRecyclerList(imgVal);
-                    searchImageInsights(context, imgVal);
+                    searchImageInsights(imgVal);
                 }
             } else {
                 ViewUtils.terminateSearchProgress(rootView);
@@ -948,6 +948,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         .show();
                 ViewUtils.terminateSearchProgress(rootView);
                 Log.e(LOG_TAG, t.getMessage());
+                FirebaseCrash.report(t);
                 Snackbar.make(rootView, R.string.no_image_found, Snackbar.LENGTH_LONG).show();
             }
         }
@@ -986,6 +987,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 Snackbar.make(rootView.findViewById(R.id.activity_ocr), R.string.OCRFailed,
                         Snackbar.LENGTH_LONG)
                         .show();
+                FirebaseCrash.report(t);
                 Log.e(LOG_TAG, "POST Call Failed!" + t.getMessage());
             }
         }
@@ -1197,12 +1199,14 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             while (!GlobalVar.hasKeyValues()) {
                 // Wait 10 seconds max for API keys, modify the max here
                 if (count > 50) {
+                    FirebaseCrash.report(new Exception("Global var no key values > 10seconds"));
                     return false;
                 }
                 try {
                     count++;
                     Thread.sleep(200);
                 } catch (InterruptedException e) {
+                    FirebaseCrash.report(e);
                     e.printStackTrace();
                 }
             }

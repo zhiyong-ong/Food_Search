@@ -25,7 +25,7 @@
             android:layout_height="128dp"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="150dp"
-            android:src="@drawable/ic_history_grey" />
+            android:src="@drawable/ic_history_grey_128dp" />
 
         <TextView
             android:id="@+id/empty_recents_title"

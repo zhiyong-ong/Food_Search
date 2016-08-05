@@ -72,7 +72,7 @@
             android:id="@+id/start_image_pick_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_folder_image_white"
+            android:src="@drawable/ic_folder_white"
             app:fab_colorNormal="@color/colorFabPick"
             app:fab_colorPressed="@color/colorFabPicked"
             app:fab_label="@string/image_pick_fab_label"

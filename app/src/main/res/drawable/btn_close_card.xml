@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_cancel_black_36px"
+    <item android:drawable="@drawable/ic_close_circle_black"
         android:state_pressed="true" /> <!-- pressed -->
     <item android:drawable="@drawable/ic_close_circle_translucent"
         android:state_focused="true" /> <!-- focused -->
