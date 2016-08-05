@@ -2,6 +2,7 @@ package orbital.com.foodsearch.Activities;
 
 import android.animation.Animator;
 import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
