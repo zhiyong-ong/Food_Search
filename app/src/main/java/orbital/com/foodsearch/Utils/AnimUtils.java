@@ -186,7 +186,6 @@ public class AnimUtils {
         Animator anim =
                 null;
         anim = ViewAnimationUtils.createCircularReveal(exitView, cx, cy, initialRadius, 0);
-//        anim.setInterpolator(new AccelerateDecelerateInterpolator());
 
         // make the view invisible when the animation is done
         anim.addListener(new AnimatorListenerAdapter() {

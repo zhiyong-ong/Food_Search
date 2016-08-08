@@ -78,11 +78,26 @@
         <item quantity="one">%d photo deleted</item>
         <item quantity="other">%d photos deleted</item>
     </plurals>
+    <string name="send_feedback_title">Send feedback</string>
 
+    <!--For selecting view type-->
     <string name="time_text">at %1$s</string>
     <string name="grid_view">Grid view</string>
     <string name="list_view">List view</string>
     <string name="choose_view_type">Choose view type</string>
+
+    <!--For onboarding-->
+    <string name="label_button_cta">GET STARTED</string>
+    <string name="intro_slide_title">Welcome</string>
+    <string name="intro_slide_desc">Lets walk you through the basics. FoodSearch lets you scan a menu in 3 simple steps</string>
+    <string name="fab_slide_title">Snap </string>
+    <string name="fab_slide_desc">GET STARTED</string>
+    <string name="ocr_slide_title">GET STARTED</string>
+    <string name="ocr_slide_desc">GET STARTED</string>
+    <string name="images_slide_title">GET STARTED</string>
+    <string name="images_slide_desc">GET STARTED</string>
+    <string name="recents_slide_title">GET STARTED</string>
+    <string name="recents_slide_desc">GET STARTED</string>
 
     <!--&lt;!&ndash;String for languages&ndash;&gt;-->
     <!--<string name="Afrikaans">Afrikaans</string>-->

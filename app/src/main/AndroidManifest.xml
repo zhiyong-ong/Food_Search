@@ -49,6 +49,9 @@
             android:label="@string/crop_image_activity_title"
             android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activities.IntroActivity"
+            android:theme="@style/Theme.Intro" />
     </application>
 
 </manifest>

@@ -148,6 +148,7 @@ public class RecentsFragment extends android.app.Fragment {
             case ViewUtils.GRID_VIEW_ID:
                 mLayoutManager = new GridLayoutManager(getActivity(), 3);
                 animator = new FadeInDownAnimator();
+                animator.setMoveDuration(AnimUtils.FAST_FADE);
                 mRecyclerView.setItemAnimator(animator);
                 break;
             case ViewUtils.LIST_VIEW_ID:
@@ -224,6 +225,10 @@ public class RecentsFragment extends android.app.Fragment {
                     mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
                     mAdapter.trimData(numberToTrim);
                     mAdapter.notifyItemRangeRemoved(removeLastFiles(numberToTrim), numberToTrim);
+                    if (mAdapter.getItemCount() == 0) {
+                        View recentsOverlay = getView().findViewById(R.id.empty_recents_layout);
+                        AnimUtils.fadeIn(recentsOverlay, AnimUtils.OVERLAY_DURATION);
+                    }
                     return true;
                 }
             });

@@ -37,14 +37,14 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     private Context mContext;
     private RecentsFragment mRecentsFragment;
     private List<String> filePaths;
-    private List<String> fileTitles;
+    private List<String> fileNames;
     private int currentViewType = 1;
     private SparseBooleanArray selectedItems;
     private PhotosDBHelper mDBHelper;
 
     public RecentImageAdapter(Context context, RecentsFragment recentsFragment, List<String> FilePaths, List<String> TimeStamps) {
         this.filePaths = FilePaths;
-        this.fileTitles = TimeStamps;
+        this.fileNames = TimeStamps;
         mContext = context;
         mRecentsFragment = recentsFragment;
         mDBHelper = new PhotosDBHelper(context);
@@ -84,7 +84,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         final ImageView recentImageView = holder.recentImage;
         TextView timestamp = holder.dateView;
         //Log.e(LOG_TAG, "position is: " + position);
-        String title = fileTitles.get(position);
+        String title = fileNames.get(position);
         //Log.e(LOG_TAG, "title is:" + title);
         timestamp.setText(title);
         Cursor cursor = PhotosDAO.readDatabaseGetRow(title, mDBHelper);
@@ -120,9 +120,9 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     private void deleteData(int pos) {
         File file = new File(filePaths.get(pos));
         file.delete();
-        PhotosDAO.deleteOnEntryTime(fileTitles.get(pos), mDBHelper);
+        PhotosDAO.deleteOnEntryTime(fileNames.get(pos), mDBHelper);
         filePaths.remove(pos);
-        fileTitles.remove(pos);
+        fileNames.remove(pos);
         notifyItemRemoved(pos);
     }
 
@@ -131,7 +131,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         for (int pos = startPos; pos < filePaths.size(); pos++) {
             File file = new File(filePaths.get(pos));
             file.delete();
-            PhotosDAO.deleteOnEntryTime(fileTitles.get(pos), mDBHelper);
+            PhotosDAO.deleteOnEntryTime(fileNames.get(pos), mDBHelper);
         }
     }
 

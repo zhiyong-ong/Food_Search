@@ -1,8 +1,6 @@
 package orbital.com.foodsearch.Fragments;
 
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -42,6 +40,7 @@ import orbital.com.foodsearch.Utils.AnimUtils;
 public class SearchBarFragment extends Fragment {
 
     private static final String LOG_TAG = "FOODIES";
+    private static final String TRANSLATED_BEFORE = "FOODIES";
     private SharedPreferences sharedPreferencesSettings = null;
     private String[] langValuesArr = null;
     private String[] langKeysArr = null;
@@ -127,7 +126,7 @@ public class SearchBarFragment extends Fragment {
             private boolean translateOpen = false;
 
             @Override
-            public void onClick(View v) {
+            public void onClick(final View v) {
                 switch (v.getId()) {
                     case R.id.cancel_searchbar:
                         imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
@@ -160,12 +159,7 @@ public class SearchBarFragment extends Fragment {
                     case R.id.searchbar_translate_title:
                         if (translateOpen) {
                             editText.clearFocus();
-                            AnimUtils.exitReveal(translateLayout, editText, new AnimatorListenerAdapter() {
-                                @Override
-                                public void onAnimationEnd(Animator animator) {
-                                    AnimUtils.fadeIn(editText, AnimUtils.TEXT_UPDATE);
-                                }
-                            });
+                            AnimUtils.exitReveal(translateLayout, editText, null);
                             editText.setText(translateTextView.getText());
                             editText.setVisibility(View.INVISIBLE);
                             translateOpen = false;

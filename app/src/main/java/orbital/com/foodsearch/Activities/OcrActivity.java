@@ -438,9 +438,9 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             findViewById(R.id.drawable_view).setVisibility(View.INVISIBLE);
             Intent intent = getIntent();
             if (ocrSaved) {
-                this.setResult(RESULT_OK, intent);
+                setResult(RESULT_OK, intent);
             } else {
-                this.setResult(RESULT_CANCELED, intent);
+                setResult(RESULT_CANCELED, intent);
             }
             supportFinishAfterTransition();
         } else {
