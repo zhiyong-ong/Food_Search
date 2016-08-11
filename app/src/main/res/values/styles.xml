@@ -6,10 +6,18 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:actionModeBackground">@color/colorPrimary</item>
+        <item name="android:actionModeCloseDrawable">@drawable/ic_done</item>
+        <item name="actionModeStyle">@style/ActionModeStyle</item>
+        <item name="actionBarPopupTheme">@style/ThemeOverlay.AppCompat.Light</item>
         <item name="windowActionModeOverlay">true</item>
     </style>
 
-    <style name="actionModeStyle" parent="Base.Widget.AppCompat.ActionMode"></style>
+    <style name="ActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
+        <item name="titleTextStyle">@style/ActionModeTitleStyle</item>
+    </style>
+    <style name="ActionModeTitleStyle" parent="TextAppearance.AppCompat.Widget.ActionMode.Title">
+        <item name="android:textColor">@color/white</item>
+    </style>
 
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless.Colored"></style>
 
@@ -26,5 +34,6 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 
 </resources>
