@@ -39,6 +39,7 @@
             android:label="OCR"
             android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/OcrTheme"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
         <activity
             android:name=".Activities.PhotoViewActivity"

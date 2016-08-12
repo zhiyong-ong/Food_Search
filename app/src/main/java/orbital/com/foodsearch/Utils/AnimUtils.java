@@ -28,8 +28,8 @@ import orbital.com.foodsearch.R;
 
 public class AnimUtils {
     public static final int PROGRESS_BAR_DURATION = 150;
-    public static final int SEARCH_BAR_SHOW = 270;
-    public static final int SEARCH_BAR_HIDE = 350;
+    public static final int SEARCH_BAR_SHOW = 200;
+    public static final int SEARCH_BAR_HIDE = 150;
     public static final int RESULTS_UP_DURATION = 550;
     public static final int RESULTS_DOWN_DURATION = 400;
     public static final int OVERLAY_DURATION = 400;

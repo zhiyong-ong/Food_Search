@@ -53,7 +53,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
 
     public void setViewType(int type) {
         currentViewType = type;
-        notifyDataSetChanged();
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     @Override

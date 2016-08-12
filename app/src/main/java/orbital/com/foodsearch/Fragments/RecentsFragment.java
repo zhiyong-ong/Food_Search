@@ -82,7 +82,7 @@ public class RecentsFragment extends android.app.Fragment {
             switch (menuItem.getItemId()) {
                 case R.id.menu_check_all:
                     mAdapter.selectAll();
-                    String title = getString(R.string.selected_count, String.valueOf(mAdapter.getSelectedItemCount()));
+                    String title = getString(R.string.selected_count, mAdapter.getSelectedItemCount());
                     actionMode.setTitle(title);
                     return true;
                 case R.id.menu_delete:
@@ -150,6 +150,8 @@ public class RecentsFragment extends android.app.Fragment {
                 animator = new FadeInDownAnimator();
                 animator.setMoveDuration(AnimUtils.FAST_FADE);
                 mRecyclerView.setItemAnimator(animator);
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mRecyclerView.getLayoutParams();
+                params.setMargins(ViewUtils.dpToPx(6), ViewUtils.dpToPx(8), ViewUtils.dpToPx(6), ViewUtils.dpToPx(8));
                 break;
             case ViewUtils.LIST_VIEW_ID:
                 mLayoutManager = new LinearLayoutManager(getActivity());
@@ -157,11 +159,11 @@ public class RecentsFragment extends android.app.Fragment {
                 animator = new FadeInLeftAnimator();
                 animator.setMoveDuration(AnimUtils.FAST_FADE);
                 mRecyclerView.setItemAnimator(animator);
+                params = (FrameLayout.LayoutParams) mRecyclerView.getLayoutParams();
+                params.setMargins(ViewUtils.dpToPx(0), ViewUtils.dpToPx(4), ViewUtils.dpToPx(0), ViewUtils.dpToPx(4));
                 break;
         }
         mRecyclerView.setLayoutManager(mLayoutManager);
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mRecyclerView.getLayoutParams();
-        params.setMargins(ViewUtils.dpToPx(8), ViewUtils.dpToPx(8), ViewUtils.dpToPx(8), ViewUtils.dpToPx(8));
         mRecyclerView.requestLayout();
         if (mAdapter != null) {
             mAdapter.setViewType(MainActivity.viewType);
@@ -332,7 +334,7 @@ public class RecentsFragment extends android.app.Fragment {
     private void toggleSelection(int pos) {
         mAdapter.toggleSelection(pos);
         if (actionMode != null) {
-            String title = getString(R.string.selected_count, String.valueOf(mAdapter.getSelectedItemCount()));
+            String title = getString(R.string.selected_count, mAdapter.getSelectedItemCount());
             actionMode.setTitle(title);
         }
     }

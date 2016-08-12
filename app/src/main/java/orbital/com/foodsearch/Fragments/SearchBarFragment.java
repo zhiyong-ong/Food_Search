@@ -161,7 +161,6 @@ public class SearchBarFragment extends Fragment {
                             editText.clearFocus();
                             AnimUtils.exitReveal(translateLayout, editText, null);
                             editText.setText(translateTextView.getText());
-                            editText.setVisibility(View.INVISIBLE);
                             translateOpen = false;
                         }
                         break;

@@ -3,8 +3,8 @@
     <string name="searchbar_text">Tap on a green box to search</string>
     <string name="camFrag">camFragment</string>
     <string name="action_remove">Delete selected</string>
-    <string name="selected_count">%1$s selected</string>
     <string name="check_all">Select all</string>
+    <string name="selected_count">%d selected</string>
     <string name="title_activity_fullscreen">Camera</string>
     <string name="title_activity_google_search">Google search</string>
     <string name="title_activity_ocr">OCR</string>
@@ -78,6 +78,12 @@
         <item quantity="one">%d photo deleted</item>
         <item quantity="other">%d photos deleted</item>
     </plurals>
+
+    <plurals name="selected_line_count">
+        <item quantity="one">%d line selected</item>
+        <item quantity="other">%d lines selected</item>
+    </plurals>
+
     <string name="send_feedback_title">Send feedback</string>
 
     <!--For selecting view type-->
@@ -98,6 +104,12 @@
     <string name="images_slide_desc">GET STARTED</string>
     <string name="recents_slide_title">GET STARTED</string>
     <string name="recents_slide_desc">GET STARTED</string>
+
+    <string name="help">Help</string>
+    <string name="got_it">Got it</string>
+    <string name="help_title">How to select multiple lines</string>
+    <string name="help_message">Select or deselect lines from the menu then click
+        search to start searching for all the text you have highlighted.</string>
 
     <!--&lt;!&ndash;String for languages&ndash;&gt;-->
     <!--<string name="Afrikaans">Afrikaans</string>-->
