@@ -1,5 +1,6 @@
 package orbital.com.foodsearch.Utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,6 +9,8 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
+
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
@@ -21,6 +24,14 @@ public class ImageUtils {
     public static final String COMPRESSED = "(COMPRESSED)";
     private static final float maxHeight = 1280.0f;
     private static final float maxWidth = 1280.0f;
+    private static Picasso picassoInstance;
+
+    public static Picasso getPicassoInstance(Context context) {
+        if (picassoInstance == null) {
+            picassoInstance = Picasso.with(context.getApplicationContext());
+        }
+        return picassoInstance;
+    }
 
     public static byte[] compressImage(String sourcePath, String destPath) {
         Bitmap scaledBitmap = null;
@@ -149,5 +160,23 @@ public class ImageUtils {
         }
 
         return inSampleSize;
+    }
+
+    public static boolean isLandscape(ExifInterface exif) {
+        int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
+        int width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 1);
+        int length = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0);
+        switch (rotation) {
+            case ExifInterface.ORIENTATION_UNDEFINED:
+                if (width > length) {
+                    return true;
+                } else {
+                    return false;
+                }
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return false;
+            default:
+                return true;
+        }
     }
 }
