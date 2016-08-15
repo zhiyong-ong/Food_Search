@@ -19,8 +19,7 @@
         android:gravity="center"
         android:paddingLeft="?actionBarSize"
         android:paddingRight="?actionBarSize"
-        tools:ignore="ContentDescription"
-        tools:src="@android:drawable/sym_action_call" />
+        tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@id/mi_title"
@@ -31,8 +30,7 @@
         android:gravity="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         app:layout_parallaxFactor="0.5"
-        tools:ignore="UnusedAttribute"
-        tools:text="Lorem ipsum" />
+        tools:ignore="UnusedAttribute" />
 
     <TextView
         android:id="@id/mi_description"
@@ -44,7 +42,6 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
         android:textSize="15sp"
         app:layout_parallaxFactor="0.4"
-        tools:ignore="UnusedAttribute"
-        tools:text="Lorem ipsum dolor sit amet, consectetur, adipisci velit, …" />
+        tools:ignore="UnusedAttribute" />
 
 </com.heinrichreimersoftware.materialintro.view.parallax.ParallaxLinearLayout>
