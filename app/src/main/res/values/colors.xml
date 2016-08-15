@@ -10,6 +10,7 @@
     <color name="colorGrey">#212121</color>
     <color name="searchbarColor">#ffffff</color>
     <color name="colorLightGrey">#b2b2b2</color>
+    <color name="colorPrimaryOverlay">#f4d32f2f</color>
 
     <!--For Floating action buttons-->
     <color name="colorPrimaryVeryLight">#ef9a9a</color>
@@ -23,6 +24,9 @@
     <color name="colorFabOverlay">#bfffffff</color>
     <color name="colorLoadOverlay">#34000000</color>
     <color name="white">#ffffff</color>
+
+    <!--Colors for onboarding-->
+    <color name="onboardingBgColor">#ebeef0</color>
 
     <color name="basePaintColor">#76FF03</color>
 </resources>

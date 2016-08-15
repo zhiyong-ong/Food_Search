@@ -51,6 +51,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 
+import de.cketti.mailto.EmailIntentBuilder;
 import orbital.com.foodsearch.DAO.PhotosContract;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int CAMERA_CROP_INTENT_REQUEST_CODE = 300;
     private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
     private static final int OCR_IMAGE_INTENT_CODE = 500;
-    private static final String RECENTS_FRAG_TAG = "recentsFrag";
+    private static final int INTRO_INTENT_CODE = 600;
     private static final String VIEW_TYPE = "viewType";
     private static final String SAVED_URI = "savedUri";
     private static final String LOG_TAG = "FOODIES";
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public static String MARKET_CODE;
     public static int IMAGE_RECENTS_COUNT;
     public static int viewType = 0;
+    private final String FIRST_START_KEY = "firstStart";
     private final String foodSearch = "FoodSearch";
     public boolean savedNewImage = false;
     private String user;
@@ -108,12 +110,24 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         LocaleUtils.getBaseLanguage(this, sharedPreferencesSettings);
         LocaleUtils.getMarketCode();
         PreferenceManager.setDefaultValues(this, R.xml.settings_preference, false);
-        IMAGE_RECENTS_COUNT = Integer.valueOf(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "10"));
+        if (sharedPreferencesSettings.getBoolean(getString(R.string.save_recents_key), true)) {
+            IMAGE_RECENTS_COUNT = Integer.valueOf(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "10"));
+        } else {
+            IMAGE_RECENTS_COUNT = 0;
+        }
         viewType = sharedPreferencesSettings.getInt(VIEW_TYPE, ViewUtils.GRID_VIEW_ID);
-
         setupFab();
         setBottomNavigationBar();
         generateUri();
+//        boolean firstStart = sharedPreferencesSettings.getBoolean(FIRST_START_KEY, true);
+//        if (firstStart) {
+//            startIntroActivity();
+//        }
+    }
+
+    private void startIntroActivity() {
+        Intent intent = new Intent(this, IntroActivity.class);
+        startActivityForResult(intent, INTRO_INTENT_CODE);
     }
 
     @Override
@@ -195,10 +209,17 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         String langKey = getString(R.string.select_lang_key);
         String numRecentsKey = getString(R.string.num_recents_key);
+        String saveRecentskey = getString(R.string.save_recents_key);
         if (langKey.equals(s)) {
             BASE_LANGUAGE = sharedPreferences.getString(langKey, MainActivity.BASE_LANGUAGE);
         } else if (numRecentsKey.equals(s)) {
             IMAGE_RECENTS_COUNT = Integer.valueOf(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "10"));
+        } else if (saveRecentskey.equals(s)) {
+            if (sharedPreferences.getBoolean(s, true)) {
+                IMAGE_RECENTS_COUNT = Integer.valueOf(sharedPreferencesSettings.getString(getString(R.string.num_recents_key), "10"));
+            } else {
+                IMAGE_RECENTS_COUNT = 0;
+            }
         }
     }
 
@@ -331,6 +352,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         AnimUtils.fadeIn(mFabOverlay, AnimUtils.FAB_OVERLAY_DURATION);
     }
 
+    public void sendFeedback() {
+        EmailIntentBuilder.from(this)
+                .to("abellim1309@gmail.com")
+                .subject("FoodSearch Feedback")
+                .start();
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (fileUri != null) {
@@ -398,6 +426,20 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
+            case INTRO_INTENT_CODE:
+                if (resultCode == RESULT_OK) {
+//                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+//                            .putBoolean(FIRST_START_KEY, false)
+//                            .apply();
+                    break;
+                } else {
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean(FIRST_START_KEY, true)
+                            .apply();
+                    //User cancelled the intro so we'll finish this activity too.
+                    finish();
+                    break;
+                }
             case OCR_IMAGE_INTENT_CODE:
                 if (resultCode == RESULT_OK) {
                     expandAppBar();
@@ -598,6 +640,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         switch (item.getItemId()) {
             case R.id.view_type_btn:
                 showPopup(findViewById(R.id.view_type_btn));
+                return true;
+            case R.id.send_feedback:
+                sendFeedback();
                 return true;
         }
         return false;

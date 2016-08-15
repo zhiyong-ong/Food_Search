@@ -39,6 +39,7 @@
             android:label="OCR"
             android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait"
+            android:theme="@style/OcrTheme"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
         <activity
             android:name=".Activities.PhotoViewActivity"
@@ -49,6 +50,9 @@
             android:label="@string/crop_image_activity_title"
             android:parentActivityName=".Activities.MainActivity"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activities.IntroActivity"
+            android:theme="@style/Theme.Intro" />
     </application>
 
 </manifest>

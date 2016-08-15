@@ -40,6 +40,7 @@ public class DrawableView extends FrameLayout {
 
     private Boolean multRect = false;
     private ArrayList<Integer> selectedRects = new ArrayList<>();
+
     public DrawableView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRects = new ArrayList<>();
@@ -52,6 +53,7 @@ public class DrawableView extends FrameLayout {
      * We draw all the drawables in the list of drawables here.
      * Canvas is rotated to make for the angle. (Using centerX and centerY as pivot is
      * not 100% accurate but it looks close enough for now)
+     *
      * @param canvas
      */
     protected void onDraw(Canvas canvas) {
@@ -65,7 +67,7 @@ public class DrawableView extends FrameLayout {
                 canvas.rotate(mAngle, rect.centerX(), rect.centerY());
                 if (selectedRects.contains(i)) {
                     canvas.drawRect(rect, redPaint);
-                    if(!multRect) {
+                    if (!multRect) {
                         selectedRects.clear();
                     }
                 } else {
@@ -79,10 +81,11 @@ public class DrawableView extends FrameLayout {
 
     /**
      * Draws boxes on drawableView with
-     * @param rootView rootView holding this view
+     *
+     * @param rootView  rootView holding this view
      * @param imagePath Image path for the compressed image file
-     * @param lines list of line to be drawn
-     * @param angle textAngle as received from bing api
+     * @param lines     list of line to be drawn
+     * @param angle     textAngle as received from bing api
      */
     public void drawBoxes(View rootView, String imagePath, List<Line> lines,
                           Float angle, String lang) {
@@ -105,24 +108,35 @@ public class DrawableView extends FrameLayout {
     }
 
     public boolean chooseRect(int selectedIndex, boolean multRect) {
-        if(selectedRects.contains(selectedIndex)) {
-            selectedRects.remove((Integer)selectedIndex);
+        if (selectedRects.contains(selectedIndex)) {
+            selectedRects.remove((Integer) selectedIndex);
             this.invalidate();
             return false;
+        } else {
+            selectedRects.add(selectedIndex);
+            this.multRect = multRect;
+            this.invalidate();
+            return true;
         }
-        selectedRects.add(selectedIndex);
-        this.multRect = multRect;
-        this.invalidate();
-        return true;
+    }
+
+    public int getSelectedCount() {
+        if (selectedRects == null) {
+            return 0;
+        } else {
+            return selectedRects.size();
+        }
     }
 
     public void clearSelectedRects() {
         selectedRects.clear();
         invalidate();
     }
+
     /**
      * This private method adds the drawables in the list by parsing the boundary
      * parameters and then scaling it and setting them as the drawables' bounds.
+     *
      * @param lines List of line to convert into drawables
      */
     private void addLinesForDraw(List<Line> lines, String lang) {
@@ -147,7 +161,7 @@ public class DrawableView extends FrameLayout {
         }
     }
 
-    private void getOriginalDimen(String imagePath){
+    private void getOriginalDimen(String imagePath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(imagePath, options);
@@ -158,8 +172,9 @@ public class DrawableView extends FrameLayout {
     /**
      * This method sets scale on matrix to findXScale and findYScale then
      * maps it to rectF which is then rounded into outputRect
+     *
      * @param outputRect The rect to be used as output for the scaling
-     * @param rectF The input rectF to be mapped
+     * @param rectF      The input rectF to be mapped
      */
     private void scaleRect(Rect outputRect, RectF rectF) {
         mMatrix.setScale(findXScale(), findYScale());
@@ -169,14 +184,14 @@ public class DrawableView extends FrameLayout {
 
     private float findXScale() {
         DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
-        return (float)drawableView.getWidth()/
-                (float)originalWidth;
+        return (float) drawableView.getWidth() /
+                (float) originalWidth;
     }
 
     private float findYScale() {
         DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
-        return (float)drawableView.getHeight()/
-                (float)originalHeight;
+        return (float) drawableView.getHeight() /
+                (float) originalHeight;
     }
 
     private void setupPaints(Context context) {

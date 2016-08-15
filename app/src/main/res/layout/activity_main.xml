@@ -19,7 +19,8 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/colorPrimary"
             android:theme="@style/ToolbarTheme"
-            app:layout_scrollFlags="scroll|enterAlways|snap" />
+            app:layout_scrollFlags="scroll|enterAlways|snap"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
     </android.support.design.widget.AppBarLayout>
 
     <FrameLayout
@@ -44,10 +45,11 @@
 
     <FrameLayout
         android:id="@+id/fab_anchor"
-        android:layout_width="match_parent"
+        android:layout_width="64dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="132dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="108dp"
+        android:layout_marginRight="18dp"
         android:clickable="false"
         android:visibility="gone" />
 

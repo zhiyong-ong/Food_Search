@@ -16,7 +16,7 @@ import java.util.Date;
 public class FileUtils {
     public static String getTimeStamp(Calendar cal) {
         DateFormat df = SimpleDateFormat.getDateTimeInstance();
-        return df.format(cal.getTime());
+        return df.format(cal.getTime()) + ".jpg";
     }
 
     public static String getFormattedDate(Calendar cal) {
