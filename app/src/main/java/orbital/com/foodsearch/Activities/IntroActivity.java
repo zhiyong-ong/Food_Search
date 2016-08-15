@@ -2,7 +2,6 @@ package orbital.com.foodsearch.Activities;
 
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide;
 
@@ -32,45 +31,39 @@ public class IntroActivity extends com.heinrichreimersoftware.materialintro.app.
         addSlide(new SimpleSlide.Builder()
                 .title(R.string.intro_slide_title)
                 .description(R.string.intro_slide_desc)
-                .image(R.drawable.ic_history_grey_128dp)
+                .image(R.mipmap.large_launcher_icon)
                 .background(R.color.white)
-                .backgroundDark(R.color.onboardingBgColor)
+                .backgroundDark(R.color.onboardingGrey)
                 .layout(R.layout.slide_onboarding)
                 .build());
 
         addSlide(new SimpleSlide.Builder()
-                .title(R.string.fab_slide_title)
-                .description(R.string.fab_slide_desc)
+                .title(R.string.snap_slide_title)
+                .description(R.string.snap_slide_desc)
                 .image(R.drawable.ic_history_grey_128dp)
                 .background(R.color.white)
-                .backgroundDark(R.color.onboardingBgColor)
+                .backgroundDark(R.color.onboardingGrey)
                 .layout(R.layout.slide_onboarding)
                 .build());
 
         addSlide(new SimpleSlide.Builder()
-                .title(R.string.ocr_slide_title)
-                .description(R.string.ocr_slide_desc)
+                .title(R.string.search_slide_title)
+                .description(R.string.search_slide_desc)
                 .image(R.drawable.ic_history_grey_128dp)
                 .background(R.color.white)
-                .backgroundDark(R.color.onboardingBgColor)
+                .backgroundDark(R.color.onboardingGrey)
                 .layout(R.layout.slide_onboarding)
                 .build());
 
         addSlide(new SimpleSlide.Builder()
-                .title(R.string.recents_slide_title)
-                .description(R.string.images_slide_desc)
+                .title(R.string.save_slide_title)
+                .description(R.string.save_slide_desc)
                 .image(R.drawable.ic_history_grey_128dp)
                 .background(R.color.white)
-                .backgroundDark(R.color.onboardingBgColor)
+                .backgroundDark(R.color.onboardingGrey)
                 .layout(R.layout.slide_onboarding)
-                .buttonCtaLabel(R.string.label_button_cta)
-                .buttonCtaClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        nextSlide();
-                    }
-                })
                 .build());
+
         autoplay(3500, 0);
     }
 }

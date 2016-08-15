@@ -34,7 +34,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -48,7 +47,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.squareup.picasso.MemoryPolicy;
-import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -181,8 +179,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.setStatusBarColor(Color.BLACK);
         }
         database = FirebaseDatabase.getInstance().getReference();
@@ -233,7 +229,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         mJson = getIntent().getStringExtra(RESPONSE);
         final ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
         if (mJson == null) {
-            Picasso.with(this).load("file://" + mFilePath)
+            ImageUtils.getPicassoInstance(this)
+                    .load("file://" + mFilePath)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .resize(30, 48)
@@ -261,7 +258,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 });
                 postponeEnterTransition();
             }
-            Picasso.with(this).load("file://" + mFilePath)
+            ImageUtils.getPicassoInstance(this)
+                    .load("file://" + mFilePath)
                     .into(previewImageView, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
@@ -277,6 +275,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                             FirebaseCrash.report(new Exception("Picasso load failed!"));
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                 startPostponedEnterTransition();
+                            } else {
+                                AnimUtils.fadeIn(findViewById(R.id.drawable_view), AnimUtils.FASTER_FADE);
                             }
                         }
                     });
@@ -296,6 +296,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      */
     private void drawBoxesRecentImage() {
         DrawableView mDrawableView = (DrawableView) findViewById(R.id.drawable_view);
+        if (mJson == null) {
+            if (!ocrSaved) {
+                return;
+            }
+            PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
+            Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
+            cursor.moveToFirst();
+            mJson = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
+        }
         Gson gson = new Gson();
         BingOcrResponse responseData = gson.fromJson(mJson, BingOcrResponse.class);
         List<Line> lines = responseData.getAllLines();
@@ -362,7 +371,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             protected void onPostExecute(byte[] compressedImage) {
                 super.onPostExecute(compressedImage);
                 ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
-                Picasso.with(OcrActivity.this).load("file://" + mFilePath)
+                ImageUtils.getPicassoInstance(OcrActivity.this)
+                        .load("file://" + mFilePath)
                         .noPlaceholder()
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)

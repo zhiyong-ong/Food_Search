@@ -94,16 +94,16 @@
 
     <!--For onboarding-->
     <string name="label_button_cta">GET STARTED</string>
-    <string name="intro_slide_title">Welcome</string>
-    <string name="intro_slide_desc">Lets walk you through the basics. FoodSearch lets you scan a menu in 3 simple steps</string>
-    <string name="fab_slide_title">Snap </string>
-    <string name="fab_slide_desc">GET STARTED</string>
-    <string name="ocr_slide_title">GET STARTED</string>
-    <string name="ocr_slide_desc">GET STARTED</string>
-    <string name="images_slide_title">GET STARTED</string>
-    <string name="images_slide_desc">GET STARTED</string>
-    <string name="recents_slide_title">GET STARTED</string>
-    <string name="recents_slide_desc">GET STARTED</string>
+    <string name="intro_slide_title">Welcome to FoodSearch</string>
+    <string name="intro_slide_desc">FoodSearch lets you find more about the food on your menus so you can make informed decisions.\n
+        Lets walk you through how it works.</string>
+    <string name="snap_slide_title">Snap it</string>
+    <string name="snap_slide_desc">Take a photo of any food menu to scan it</string>
+    <string name="search_slide_title">Search</string>
+    <string name="search_slide_desc">Once scanned, choose any of the food items to bring up quick images and translations for
+        all your food items\n</string>
+    <string name="save_slide_title">All your menus saved right here</string>
+    <string name="save_slide_desc">Once scanned, menus are saved right here and accessible from here again when you need them</string>
 
     <string name="help">Help</string>
     <string name="got_it">Got it</string>

@@ -26,7 +26,7 @@
     <color name="white">#ffffff</color>
 
     <!--Colors for onboarding-->
-    <color name="onboardingBgColor">#ebeef0</color>
+    <color name="onboardingGrey">#ebeef0</color>
 
     <color name="basePaintColor">#76FF03</color>
 </resources>

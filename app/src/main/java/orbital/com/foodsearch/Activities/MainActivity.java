@@ -59,6 +59,7 @@ import orbital.com.foodsearch.Fragments.SettingFragment;
 import orbital.com.foodsearch.Misc.GlobalVar;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
+import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.LocaleUtils;
 import orbital.com.foodsearch.Utils.ViewUtils;
 
@@ -119,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setupFab();
         setBottomNavigationBar();
         generateUri();
-//        boolean firstStart = sharedPreferencesSettings.getBoolean(FIRST_START_KEY, true);
+        boolean firstStart = sharedPreferencesSettings.getBoolean(FIRST_START_KEY, true);
 //        if (firstStart) {
 //            startIntroActivity();
 //        }
@@ -297,7 +298,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         mFabMenu = (FloatingActionMenu) findViewById(R.id.start_fab);
         mFabMenu.setClosedOnTouchOutside(false);
         AnimUtils.setFabMenuIcon(this, mFabMenu);
-        mFabMenu.getIconToggleAnimatorSet();
         mFabOverlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -452,9 +452,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                     ExifInterface exif;
                     try {
                         exif = new ExifInterface(fileUri.getPath());
-                        int width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 1);
-                        int length = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0);
-                        if (width > length) {
+                        if (ImageUtils.isLandscape(exif)) {
                             startCropActivity(fileUri, true);
                         } else {
                             startOcrActivity();

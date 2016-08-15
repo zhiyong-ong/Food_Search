@@ -130,7 +130,7 @@ public class DrawableView extends FrameLayout {
 
     public void clearSelectedRects() {
         selectedRects.clear();
-        invalidate();
+        //invalidate();
     }
 
     /**
@@ -142,6 +142,7 @@ public class DrawableView extends FrameLayout {
     private void addLinesForDraw(List<Line> lines, String lang) {
         mLineTexts.clear();
         mRects.clear();
+        mMatrix.setScale(findXScale(), findYScale());
         for (Line line : lines) {
             String text = line.getText(lang);
             if (text.trim().isEmpty()) {
@@ -177,7 +178,6 @@ public class DrawableView extends FrameLayout {
      * @param rectF      The input rectF to be mapped
      */
     private void scaleRect(Rect outputRect, RectF rectF) {
-        mMatrix.setScale(findXScale(), findYScale());
         mMatrix.mapRect(rectF);
         rectF.round(outputRect);
     }
