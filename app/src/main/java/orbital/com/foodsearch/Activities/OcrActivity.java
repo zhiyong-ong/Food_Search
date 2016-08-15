@@ -146,16 +146,16 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             mJson = savedInstanceState.getString(DATA);
         }
         // To restore boxes in the event that ocr activity gets destroyed
-        final View previewImageView = findViewById(R.id.ocr_preview_image);
-        previewImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                previewImageView.getViewTreeObserver().removeOnPreDrawListener(this);
-                drawBoxesRecentImage();
-                findViewById(R.id.drawable_view).setVisibility(View.VISIBLE);
-                return true;
-            }
-        });
+//        final View previewImageView = findViewById(R.id.ocr_preview_image);
+//        previewImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+//            @Override
+//            public boolean onPreDraw() {
+//                previewImageView.getViewTreeObserver().removeOnPreDrawListener(this);
+//                drawBoxesRecentImage();
+//                findViewById(R.id.drawable_view).setVisibility(View.VISIBLE);
+//                return true;
+//            }
+//        });
     }
 
     @Override
@@ -296,15 +296,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      */
     private void drawBoxesRecentImage() {
         DrawableView mDrawableView = (DrawableView) findViewById(R.id.drawable_view);
-        if (mJson == null) {
-            if (!ocrSaved) {
-                return;
-            }
-            PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
-            Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
-            cursor.moveToFirst();
-            mJson = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
-        }
+//        if (mJson == null) {
+//            if (!ocrSaved) {
+//                return;
+//            }
+//            PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
+//            Cursor cursor = PhotosDAO.readDatabaseAllRows(mDBHelper);
+//            cursor.moveToFirst();
+//            mJson = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
+//        }
         Gson gson = new Gson();
         BingOcrResponse responseData = gson.fromJson(mJson, BingOcrResponse.class);
         List<Line> lines = responseData.getAllLines();

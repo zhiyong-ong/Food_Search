@@ -24,6 +24,7 @@ public class IntroActivity extends com.heinrichreimersoftware.materialintro.app.
 
         setPageScrollDuration(500);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            getWindow().setStatusBarColor(Color.WHITE);
             setPageScrollInterpolator(android.R.interpolator.fast_out_slow_in);
         }
         /**

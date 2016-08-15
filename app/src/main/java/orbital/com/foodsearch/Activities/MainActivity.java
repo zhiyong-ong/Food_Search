@@ -121,9 +121,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setBottomNavigationBar();
         generateUri();
         boolean firstStart = sharedPreferencesSettings.getBoolean(FIRST_START_KEY, true);
-//        if (firstStart) {
-//            startIntroActivity();
-//        }
+        if (firstStart) {
+            startIntroActivity();
+        }
     }
 
     private void startIntroActivity() {
