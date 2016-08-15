@@ -16,6 +16,7 @@ public class IntroActivity extends com.heinrichreimersoftware.materialintro.app.
         setButtonBackVisible(false);
         setButtonNextVisible(false);
         setButtonCtaVisible(false);
+
 //        setButtonCtaTintMode(BUTTON_CTA_TINT_MODE_BACKGROUND);
 //        TypefaceSpan labelSpan = new TypefaceSpan(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ? "sans-serif-medium" : "sans serif");
 //        SpannableString label = SpannableString.valueOf(getString(R.string.label_button_cta));

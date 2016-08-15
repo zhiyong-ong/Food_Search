@@ -196,7 +196,7 @@ public class SearchBarFragment extends Fragment {
         }
         PopupMenu popup = new PopupMenu(getActivity(), anchoredView);
         popup.setOnMenuItemClickListener(new LanguageMenuListener());
-        anchoredView.setOnTouchListener(popup.getDragToOpenListener());
+        //anchoredView.setOnTouchListener(popup.getDragToOpenListener());
         Menu menu = popup.getMenu();
         String currentLangValue = sharedPreferencesSettings.getString(getActivity().getString(R.string.select_lang_key), "en");
         Log.e(LOG_TAG, "current lang: " + currentLangValue);

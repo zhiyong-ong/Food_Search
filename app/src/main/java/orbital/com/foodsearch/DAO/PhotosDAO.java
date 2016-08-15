@@ -32,7 +32,7 @@ public class PhotosDAO {
         return c;
     }
 
-    public static Cursor readDatabaseAllRowsOrderByTime(PhotosDBHelper mDBHelper) {
+    public static Cursor readDatabaseAllRows(PhotosDBHelper mDBHelper) {
         SQLiteDatabase db = mDBHelper.getReadableDatabase();
         String[] results = {
                 PhotosEntry._ID,
@@ -47,7 +47,7 @@ public class PhotosDAO {
                 null,
                 null,
                 null,
-                PhotosEntry.COLUMN_NAME_ENTRY_TIME);
+                null);
         return c;
     }
 

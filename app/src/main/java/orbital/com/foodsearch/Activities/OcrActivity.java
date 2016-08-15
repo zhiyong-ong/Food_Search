@@ -753,7 +753,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
         ocrSaved = true;
         PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
-        Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
+        Cursor cursor = PhotosDAO.readDatabaseAllRows(mDBHelper);
         String fileName = null;
         //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
         if (cursor.getCount() >= MainActivity.IMAGE_RECENTS_COUNT) {
