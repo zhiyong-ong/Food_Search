@@ -41,10 +41,10 @@ public class ViewUtils {
             Log.e("FOODIES", "create search bar: " + multStringQuery.get(i));
         }
         EditText editText = (EditText) rootView.findViewById(R.id.searchbar_edit_text);
-        editText.setText(searchParam);
+        editText.setText(searchParam.toLowerCase());
         editText.clearFocus();
         if(mult) {
-            multStringQuery.add(searchParam);
+            multStringQuery.add(searchParam.toLowerCase());
         }
     }
 

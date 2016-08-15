@@ -207,7 +207,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
                 //current time
                 Calendar cal = Calendar.getInstance();
-                currentTime = FileUtils.getTimeStamp(cal) + ".jpg";
+                currentTime = FileUtils.getTimeStamp(cal);
                 formattedDate = FileUtils.getFormattedDate(cal);
                 formattedTime = FileUtils.getFormattedTime(cal);
                 return null;
@@ -737,11 +737,11 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
         ocrSaved = true;
         PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
-        Cursor cursor = PhotosDAO.readDatabaseAllRowsOrderByTime(mDBHelper);
-        String fileName = null;
-        //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
-        if (cursor.getCount() >= MainActivity.IMAGE_RECENTS_COUNT) {
-            cursor.moveToFirst();
+        Cursor cursor = PhotosDAO.readDatabaseAllRows(mDBHelper);
+            String fileName = null;
+            //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
+            if (cursor.getCount() >= MainActivity.IMAGE_RECENTS_COUNT) {
+                cursor.moveToFirst();
             fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
             PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
             cursor.close();
@@ -1045,7 +1045,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         private View rootView = null;
         private Context context = null;
         private int numSelected = 0;
-        private boolean longpress = false;
 
         public GestureListener(DrawableView view, View rootView, Context context) {
             mDrawableView = view;
@@ -1061,7 +1060,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             for (int i = 0; i < rects.size(); i++) {
                 Rect rect = rects.get(i);
                 if (rect.contains(x, y)) {
-                    if(longpress) {
+                    if(actionMode != null) {
                         chooseMultRect(i);
                     }
                     else {
@@ -1070,7 +1069,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     return true;
                 }
             }
-            if(!longpress) {
+            if(actionMode == null) {
                 cancelSearch();
                 mDrawableView.clearSelectedRects();
             }
@@ -1087,7 +1086,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     actionMode = startActionMode(new actionModeCallback());
                     chooseMultRect(i);
                     Toast.makeText(context, "Line selected", Toast.LENGTH_SHORT).show();
-                    longpress = true;
                 }
             }
             super.onLongPress(event);
@@ -1169,7 +1167,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 if(actionMode != null) {
                     mDrawableView.clearSelectedRects();
                     ViewUtils.clearSearch();
-                    longpress = false;
                     numSelected = 0;
                     actionMode = null;
                     cancelSearch();
