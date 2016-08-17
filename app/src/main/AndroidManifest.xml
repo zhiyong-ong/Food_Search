@@ -52,7 +52,12 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".Activities.IntroActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.Intro" />
+        <activity
+            android:name=".Activities.SplashActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme" />
     </application>
 
 </manifest>

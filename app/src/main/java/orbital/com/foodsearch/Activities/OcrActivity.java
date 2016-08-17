@@ -47,6 +47,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import okhttp3.ResponseBody;
 import orbital.com.foodsearch.DAO.BingImageDAO;
 import orbital.com.foodsearch.DAO.PhotosContract;
 import orbital.com.foodsearch.DAO.PhotosDAO;
@@ -145,7 +147,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         if (savedInstanceState.containsKey(DATA)) {
             mJson = savedInstanceState.getString(DATA);
         }
-//         To restore boxes in the event that ocr activity gets destroyed
+        // To restore boxes in the event that ocr activity gets destroyed
         final View previewImageView = findViewById(R.id.ocr_preview_image);
         previewImageView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
@@ -229,7 +231,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         mJson = getIntent().getStringExtra(RESPONSE);
         final ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
         if (mJson == null) {
-            ImageUtils.getPicassoInstance(this)
+            Picasso.with(this)
                     .load("file://" + mFilePath)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -258,7 +260,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 });
                 postponeEnterTransition();
             }
-            ImageUtils.getPicassoInstance(this)
+            Picasso.with(this)
                     .load("file://" + mFilePath)
                     .into(previewImageView, new com.squareup.picasso.Callback() {
                         @Override
@@ -371,7 +373,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             protected void onPostExecute(byte[] compressedImage) {
                 super.onPostExecute(compressedImage);
                 ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
-                ImageUtils.getPicassoInstance(OcrActivity.this)
+                Picasso.with(OcrActivity.this)
                         .load("file://" + mFilePath)
                         .noPlaceholder()
                         .fit()
@@ -875,6 +877,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         @Override
         public void onResponse(Call<ImageInsightsResponse> call, Response<ImageInsightsResponse> response) {
             runningCalls.remove(call);
+            ResponseBody errorBody = response.errorBody();
+            if (errorBody != null) {
+                try {
+                    FirebaseCrash.log(errorBody.string());
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             // Get response body, persist to DB then complete task
             ImageInsightsResponse insightsResponse = response.body();
             imageValue.setInsightsResponse(insightsResponse);
@@ -922,17 +933,16 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         @Override
         public void onResponse(Call<ImageSearchResponse> call, Response<ImageSearchResponse> response) {
             runningCalls.remove(call);
-            searchResponse = response.body();
-            if (searchResponse == null) {
+            ResponseBody errorBody = response.errorBody();
+            if (errorBody != null) {
                 try {
-                    FirebaseCrash.report(new Exception(response.errorBody().string()));
-                    Log.e(LOG_TAG, response.errorBody().string());
+                    FirebaseCrash.log(errorBody.string());
                     return;
                 } catch (IOException e) {
-                    FirebaseCrash.report(e);
                     e.printStackTrace();
                 }
             }
+            searchResponse = response.body();
             searchResponse.setSearchQuery(searchParam);
             List<ImageValue> imageValues = searchResponse.getImageValues();
             // IMAGE_KEY search results received, now enqueueImageInsightCall with received value
@@ -985,6 +995,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         @Override
         public void onResponse(Call<BingOcrResponse> call, Response<BingOcrResponse> response) {
             runningCalls.remove(call);
+            ResponseBody errorBody = response.errorBody();
+            if (errorBody != null) {
+                try {
+                    FirebaseCrash.log(errorBody.string());
+                    return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             BingOcrResponse bingOcrResponse = response.body();
             List<Line> lines = bingOcrResponse.getAllLines();
             mDrawableView.drawBoxes(rootView, mFilePath, lines,

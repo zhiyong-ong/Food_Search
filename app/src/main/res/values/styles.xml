@@ -15,6 +15,8 @@
         <item name="android:actionModeCloseDrawable">@drawable/ic_done</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme"></style>
+
     <style name="ActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
         <item name="titleTextStyle">@style/ActionModeTitleStyle</item>
     </style>
@@ -25,8 +27,7 @@
 
     <style name="BorderlessButton" parent="Widget.AppCompat.Button.Borderless.Colored"></style>
 
-    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
-    </style>
+    <style name="ToolbarTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar"></style>
 
     <style name="popupStyle" parent="Widget.AppCompat.Light.PopupMenu"></style>
 

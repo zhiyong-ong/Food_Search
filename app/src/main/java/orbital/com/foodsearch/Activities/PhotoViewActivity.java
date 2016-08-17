@@ -19,10 +19,10 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
-import orbital.com.foodsearch.Utils.ImageUtils;
 import uk.co.senab.photoview.PhotoView;
 
 public class PhotoViewActivity extends AppCompatActivity {
@@ -83,7 +83,7 @@ public class PhotoViewActivity extends AppCompatActivity {
                     supportFinishAfterTransition();
                 } else if (finishedEnter) {
                     AnimUtils.fadeIn(infoView, AnimUtils.FAST_FADE);
-                    ImageUtils.getPicassoInstance(PhotoViewActivity.this)
+                    Picasso.with(PhotoViewActivity.this)
                             .load(getIntent().getStringExtra(URL))
                             .noFade()
                             .noPlaceholder()
@@ -95,7 +95,7 @@ public class PhotoViewActivity extends AppCompatActivity {
         // Use picasso to load thumbnail into image view for shared element transition first
         // On success, load full res into photo view and start transition animation.
         // On success of full res, set placeholder imageview to INVISIBLE.
-        ImageUtils.getPicassoInstance(this)
+        Picasso.with(this)
                 .load(getIntent().getStringExtra(THUMBURL))
                 .noPlaceholder()
                 .into(photoView, new Callback() {
@@ -105,7 +105,7 @@ public class PhotoViewActivity extends AppCompatActivity {
                             startPostponedEnterTransition();
                         } else {
                             AnimUtils.fadeIn(infoView, AnimUtils.FAST_FADE);
-                            ImageUtils.getPicassoInstance((PhotoViewActivity.this))
+                            Picasso.with((PhotoViewActivity.this))
                                     .load(url)
                                     .noFade()
                                     .noPlaceholder()

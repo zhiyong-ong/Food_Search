@@ -27,6 +27,9 @@
 
     <!--Colors for onboarding-->
     <color name="onboardingGrey">#ebeef0</color>
-
+    <color name="searchSlideBg">#f9f9f9</color>
+    <color name="searchSlideDarkBg">#ebeef0</color>
+    <color name="saveSlideBg">#ffffff</color>
+    <color name="saveSlideDarkBg">#ebeef0</color>
     <color name="basePaintColor">#76FF03</color>
 </resources>

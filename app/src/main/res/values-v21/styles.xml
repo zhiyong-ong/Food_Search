@@ -16,6 +16,10 @@
         <item name="android:actionModeCloseDrawable">@drawable/ic_done</item>
     </style>
 
+    <style name="SplashTheme" parent="AppTheme">
+        <item name="android:statusBarColor">@color/onboardingGrey</item>
+    </style>
+
     <style name="ActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
         <item name="titleTextStyle">@style/ActionModeTitleStyle</item>
     </style>

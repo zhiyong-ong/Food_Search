@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int GALLERY_CROP_INTENT_REQUEST_CODE = 400;
     private static final int OCR_IMAGE_INTENT_CODE = 500;
     private static final int INTRO_INTENT_CODE = 600;
+    private static final int SPLASH_INTENT_CODE = 650;
     private static final String VIEW_TYPE = "viewType";
     private static final String SAVED_URI = "savedUri";
     private static final String LOG_TAG = "FOODIES";
@@ -102,6 +103,10 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            getWindow().setExitTransition(null);
+            getWindow().setEnterTransition(null);
+        }
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
 
@@ -122,13 +127,19 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         generateUri();
         boolean firstStart = sharedPreferencesSettings.getBoolean(FIRST_START_KEY, true);
         if (firstStart) {
-            startIntroActivity();
+            startSplashActivity();
         }
+    }
+
+    private void startSplashActivity() {
+        Intent intent = new Intent(this, SplashActivity.class);
+        startActivityForResult(intent, SPLASH_INTENT_CODE);
     }
 
     private void startIntroActivity() {
         Intent intent = new Intent(this, IntroActivity.class);
         startActivityForResult(intent, INTRO_INTENT_CODE);
+        overridePendingTransition(0, 0);
     }
 
     @Override
@@ -426,6 +437,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
+            case SPLASH_INTENT_CODE:
+                startIntroActivity();
+                break;
             case INTRO_INTENT_CODE:
                 if (resultCode == RESULT_OK) {
 //                    PreferenceManager.getDefaultSharedPreferences(this).edit()

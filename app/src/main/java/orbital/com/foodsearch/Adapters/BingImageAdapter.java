@@ -19,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -31,7 +33,6 @@ import orbital.com.foodsearch.Models.ImageInsightsPOJO.ImageCaption;
 import orbital.com.foodsearch.Models.ImageSearchPOJO.ImageValue;
 import orbital.com.foodsearch.R;
 import orbital.com.foodsearch.Utils.AnimUtils;
-import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.NetworkUtils;
 
 /**
@@ -90,7 +91,7 @@ public class BingImageAdapter
 
         // Set IMAGE_KEY using IMAGE_KEY url
         ImageView cardImageView = holder.imageView;
-        ImageUtils.getPicassoInstance(mContext)
+        Picasso.with(mContext)
                 .load(thumbUrl)
                 .fit()
                 .centerCrop()

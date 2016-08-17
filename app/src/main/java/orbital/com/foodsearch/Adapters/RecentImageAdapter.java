@@ -14,6 +14,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +26,6 @@ import orbital.com.foodsearch.DAO.PhotosDAO;
 import orbital.com.foodsearch.DAO.PhotosDBHelper;
 import orbital.com.foodsearch.Fragments.RecentsFragment;
 import orbital.com.foodsearch.R;
-import orbital.com.foodsearch.Utils.ImageUtils;
 import orbital.com.foodsearch.Utils.ViewUtils;
 
 /**
@@ -106,7 +107,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
             typedArray.recycle();
         }
 
-        ImageUtils.getPicassoInstance(mContext)
+        Picasso.with(mContext)
                 .load("file://" + path)
                 .fit()
                 .into(recentImageView);

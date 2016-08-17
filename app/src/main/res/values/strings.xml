@@ -95,20 +95,19 @@
     <!--For onboarding-->
     <string name="label_button_cta">GET STARTED</string>
     <string name="intro_slide_title">Welcome to FoodSearch</string>
-    <string name="intro_slide_desc">FoodSearch lets you find more about the food on your menus so you can make informed decisions.\n
-        Lets walk you through how it works.</string>
-    <string name="snap_slide_title">Snap it</string>
-    <string name="snap_slide_desc">Take a photo of any food menu to scan it</string>
-    <string name="search_slide_title">Search</string>
-    <string name="search_slide_desc">Once scanned, choose any of the food items to bring up quick images and translations for
-        all your food items\n</string>
+    <string name="intro_slide_desc">FoodSearch lets you find out more about the food on your menus so you can make the best food decisions.</string>
+    <string name="snap_slide_title">Start by taking a photo</string>
+    <string name="snap_slide_desc">Snap a photo of any food menu to scan it.</string>
+    <string name="search_slide_title">Get rich search results</string>
+    <string name="search_slide_desc">Once scanned, click any of the food items to bring up images and quick translations for that item.</string>
     <string name="save_slide_title">All your menus saved right here</string>
-    <string name="save_slide_desc">Once scanned, menus are saved right here and accessible from here again when you need them</string>
+    <string name="save_slide_desc">Scanned menus are saved right on your device and accessible from the
+        recents screen when you need them again.</string>
 
     <string name="help">Help</string>
     <string name="got_it">Got it</string>
     <string name="help_title">How to select multiple lines</string>
-    <string name="help_message">Select or deselect lines from the menu then click
+    <string name="help_message">Click to select or deselect lines from the menu then click
         search to start searching for all the text you have highlighted.</string>
 
     <!--&lt;!&ndash;String for languages&ndash;&gt;-->
