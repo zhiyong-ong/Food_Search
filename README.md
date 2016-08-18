@@ -25,5 +25,5 @@ It is an Android app that uses OCR to convert physical food menus into a digital
 
 ##Disclaimer
 Data submitted to MenuSnap may be retained by Microsoft for service improvement purposes.
-For more information, see the Microsoft Cognitive Services Preview Terms and the Developer Code Of Conduct 
-for Microsoft Cognitive Services
+For more information, see the [Microsoft Cognitive Services Preview Terms](http://research.microsoft.com/en-us/UM/legal/DeveloperCodeofConductforCognitiveServices.htm) and the 
+[Developer Code Of Conduct](http://research.microsoft.com/en-us/UM/legal/CognitiveServicesTerms20160330.htm) for Microsoft Cognitive Services
