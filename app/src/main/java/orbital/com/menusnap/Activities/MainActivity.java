@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         generateUri();
         boolean firstStart = sharedPreferencesSettings.getBoolean(FIRST_START_KEY, true);
         if (firstStart) {
-            startSplashActivity();
+            startIntroActivity();
         }
     }
 
@@ -442,9 +442,9 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 break;
             case INTRO_INTENT_CODE:
                 if (resultCode == RESULT_OK) {
-//                    PreferenceManager.getDefaultSharedPreferences(this).edit()
-//                            .putBoolean(FIRST_START_KEY, false)
-//                            .apply();
+                    PreferenceManager.getDefaultSharedPreferences(this).edit()
+                            .putBoolean(FIRST_START_KEY, false)
+                            .apply();
                     break;
                 } else {
                     PreferenceManager.getDefaultSharedPreferences(this).edit()

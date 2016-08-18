@@ -2,26 +2,28 @@ package orbital.com.menusnap.Activities;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.view.ViewPager;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import com.heinrichreimersoftware.materialintro.slide.SimpleSlide;
+import com.heinrichreimersoftware.materialintro.slide.Slide;
+import com.heinrichreimersoftware.materialintro.view.FadeableViewPager;
 
 import orbital.com.menusnap.R;
+import orbital.com.menusnap.Utils.AnimUtils;
 
 public class IntroActivity extends com.heinrichreimersoftware.materialintro.app.IntroActivity {
-    private final Handler waitHandler = new Handler();
-    private final Runnable waitCallback = new Runnable() {
-        @Override
-        public void run() {
-        }
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        waitHandler.postDelayed(waitCallback, 2000);
 
         setButtonBackVisible(false);
         setButtonNextVisible(false);
         setButtonCtaVisible(false);
+        setButtonCtaLabel(R.string.label_button_cta);
 
 //        setPagerIndicatorVisible(false);
 
@@ -30,14 +32,15 @@ public class IntroActivity extends com.heinrichreimersoftware.materialintro.app.
         /**
          * Standard slide (like Google's intros)
          */
-        addSlide(new SimpleSlide.Builder()
+        Slide slide = new SimpleSlide.Builder()
                 .title(R.string.intro_slide_title)
                 .description(R.string.intro_slide_desc)
                 .image(R.drawable.large_launcher_icon)
                 .background(R.color.white)
                 .backgroundDark(R.color.onboardingGrey)
                 .layout(R.layout.slide_onboarding)
-                .build());
+                .build();
+        addSlide(slide);
 
         addSlide(new SimpleSlide.Builder()
                 .title(R.string.snap_slide_title)
@@ -63,21 +66,35 @@ public class IntroActivity extends com.heinrichreimersoftware.materialintro.app.
                 .image(R.drawable.save_slide_image)
                 .background(R.color.saveSlideBg)
                 .backgroundDark(R.color.saveSlideDarkBg)
-//                .buttonCtaLabel(R.string.label_button_cta)
-//                .buttonCtaClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View view) {
-//                        nextSlide();
-//                    }
-//                })
                 .layout(R.layout.slide_onboarding)
                 .build());
-        autoplay(2500, 1);
+        addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
+            @Override
+            public void onPageSelected(int position) {
+                if (position == 3){
+                    cancelAutoplay();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            setButtonCtaVisible(true);
+                        }
+                    }, 2000);
+                }
+            }
+        });
+        final FadeableViewPager pager = (FadeableViewPager) findViewById(R.id.mi_pager);
+        pager.setVisibility(View.INVISIBLE);
+        AnimUtils.fadeIn(pager, 1500);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                autoplay(3000, 1);
+            }
+        }, 1500);
     }
 
     @Override
     protected void onDestroy() {
-        waitHandler.removeCallbacks(waitCallback);
         super.onDestroy();
     }
 
