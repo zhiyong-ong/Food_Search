@@ -22,3 +22,8 @@ It is an Android app that uses OCR to convert physical food menus into a digital
 <img src="/screenshots/Screenshot_20160802-134252.png" width="250">
 <img src="/screenshots/Screenshot_20160802-144359.png" width="250">
 <img src="/screenshots/Screenshot_20160802-134312.png" width="250">
+
+##Disclaimer
+Data submitted to MenuSnap may be retained by Microsoft for service improvement purposes.
+For more information, see the Microsoft Cognitive Services Preview Terms and the Developer Code Of Conduct 
+for Microsoft Cognitive Services
