@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="orbital.com.foodsearch">
+    package="orbital.com.menusnap">
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Activities.MainActivity"
+            android:name="orbital.com.menusnap.Activities.MainActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,32 +30,32 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activities.GoogleSearchActivity"
+            android:name="orbital.com.menusnap.Activities.GoogleSearchActivity"
             android:label="@string/title_activity_google_search"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName="orbital.com.menusnap.Activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.OcrActivity"
+            android:name="orbital.com.menusnap.Activities.OcrActivity"
             android:label="OCR"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName="orbital.com.menusnap.Activities.MainActivity"
             android:screenOrientation="portrait"
             android:theme="@style/OcrTheme"
             android:windowSoftInputMode="adjustPan|stateAlwaysHidden" />
         <activity
-            android:name=".Activities.PhotoViewActivity"
-            android:parentActivityName=".Activities.OcrActivity"
+            android:name="orbital.com.menusnap.Activities.PhotoViewActivity"
+            android:parentActivityName="orbital.com.menusnap.Activities.OcrActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.CropActivity"
+            android:name="orbital.com.menusnap.Activities.CropActivity"
             android:label="@string/crop_image_activity_title"
-            android:parentActivityName=".Activities.MainActivity"
+            android:parentActivityName="orbital.com.menusnap.Activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activities.IntroActivity"
+            android:name="orbital.com.menusnap.Activities.IntroActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Intro" />
         <activity
-            android:name=".Activities.SplashActivity"
+            android:name="orbital.com.menusnap.Activities.SplashActivity"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme" />
     </application>

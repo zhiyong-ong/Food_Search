@@ -4,14 +4,14 @@
     android:id="@+id/search_fragment_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="orbital.com.foodsearch.Fragments.SearchResultsFragment">
+    tools:context="orbital.com.menusnap.Fragments.SearchResultsFragment">
 
     <FrameLayout
         android:id="@+id/results_margin_frame"
         android:layout_width="match_parent"
         app:layout_heightPercent="11%" />
 
-    <orbital.com.foodsearch.Views.SnappyRecyclerView
+    <orbital.com.menusnap.Views.SnappyRecyclerView
         android:id="@+id/results_recycler_view"
         android:layout_width="match_parent"
         android:layout_below="@id/results_margin_frame"

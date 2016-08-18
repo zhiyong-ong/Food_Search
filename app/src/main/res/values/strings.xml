@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FoodSearch</string>
+    <string name="app_name">MenuSnap</string>
     <string name="searchbar_text">Tap on a green box to search</string>
     <string name="camFrag">camFragment</string>
     <string name="action_remove">Delete selected</string>
@@ -66,8 +66,8 @@
     <string name="empty_recents_title_string">No menus saved yet</string>
     <string name="empty_recents_text">You haven\'t saved any menus yet\nStart by scanning one</string>
 
-    <string name="fab_menu_behavior">orbital.com.foodsearch.Misc.FloatingActionMenuBehavior</string>
-    <string name="searchbar_behavior">orbital.com.foodsearch.Misc.SearchbarBehavior</string>
+    <string name="fab_menu_behavior">orbital.com.menusnap.Misc.FloatingActionMenuBehavior</string>
+    <string name="searchbar_behavior">orbital.com.menusnap.Misc.SearchbarBehavior</string>
 
     <string name="fullscreen_transition_name">fullscreenTransition</string>
     <string name="recents_transition_name">recentsTransition</string>
@@ -94,11 +94,11 @@
 
     <!--For onboarding-->
     <string name="label_button_cta">GET STARTED</string>
-    <string name="intro_slide_title">Welcome to FoodSearch</string>
-    <string name="intro_slide_desc">FoodSearch lets you find out more about the food on your menus so you can make the best food decisions.</string>
+    <string name="intro_slide_title">Welcome to MenuSnap</string>
+    <string name="intro_slide_desc">MenuSnap lets you find out more about the food on your menus so you can make the best food decisions.</string>
     <string name="snap_slide_title">Start by taking a photo</string>
     <string name="snap_slide_desc">Snap a photo of any food menu to scan it.</string>
-    <string name="search_slide_title">Get rich search results</string>
+    <string name="search_slide_title">Get relevant images and translations</string>
     <string name="search_slide_desc">Once scanned, click any of the food items to bring up images and quick translations for that item.</string>
     <string name="save_slide_title">All your menus saved right here</string>
     <string name="save_slide_desc">Scanned menus are saved right on your device and accessible from the
