@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "311505204860",
-    "firebase_url": "https://foodies-3c752.firebaseio.com",
-    "project_id": "foodies-3c752",
-    "storage_bucket": "foodies-3c752.appspot.com"
+    "project_number": "538747848489",
+    "firebase_url": "https://foodies-a5c9c.firebaseio.com",
+    "project_id": "foodies-a5c9c",
+    "storage_bucket": "foodies-a5c9c.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:311505204860:android:ea07e4231fadc146",
+        "mobilesdk_app_id": "1:538747848489:android:eec8f99cbda68883",
         "android_client_info": {
           "package_name": "orbital.com.menusnap"
         }
       },
       "oauth_client": [
         {
-          "client_id": "311505204860-bkdfebqm3mhebqtf5e2nbi55vcar391p.apps.googleusercontent.com",
+          "client_id": "538747848489-td6f23943q89mp1gprka218j56qqeb6f.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCpl5Nirtp_gtIYHM__322Y9iIBmEtukV8"
+          "current_key": "AIzaSyDrnu-ymYSmkFM1aFwXEZD6Dh9GBJRzP0I"
         }
       ],
       "services": {
