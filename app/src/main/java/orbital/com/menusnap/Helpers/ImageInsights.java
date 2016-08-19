@@ -9,7 +9,6 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
-import orbital.com.menusnap.Misc.GlobalVar;
 import orbital.com.menusnap.Models.ImageInsightsPOJO.ImageInsightsResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;

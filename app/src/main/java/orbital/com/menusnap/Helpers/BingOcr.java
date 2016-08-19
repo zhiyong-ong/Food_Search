@@ -8,7 +8,6 @@ import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import orbital.com.menusnap.Misc.GlobalVar;
 import orbital.com.menusnap.Models.OcrPOJO.BingOcrResponse;
 import retrofit2.Call;
 import retrofit2.Retrofit;

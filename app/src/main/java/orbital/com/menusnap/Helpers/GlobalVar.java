@@ -1,4 +1,4 @@
-package orbital.com.menusnap.Misc;
+package orbital.com.menusnap.Helpers;
 
 import orbital.com.menusnap.BuildConfig;
 

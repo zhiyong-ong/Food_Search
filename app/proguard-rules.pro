@@ -16,55 +16,55 @@
 #   public *;
 #}
 
--optimizationpasses 5
--dontusemixedcaseclassnames
--dontskipnonpubliclibraryclasses
--dontpreverify
--verbose
--optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
+#-optimizationpasses 5
+#-dontusemixedcaseclassnames
+#-dontskipnonpubliclibraryclasses
+#-dontpreverify
+#-verbose
+#-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*
 
--keep public class * extends android.app.Activity
--keep public class * extends android.app.Application
--keep public class * extends android.app.Service
--keep public class * extends android.content.BroadcastReceiver
--keep public class * extends android.content.ContentProvider
--keep public class * extends android.app.backup.BackupAgentHelper
--keep public class * extends android.preference.Preference
--keep public class com.android.vending.licensing.ILicensingService
+#-keep public class * extends android.app.Activity
+#-keep public class * extends android.app.Application
+#-keep public class * extends android.app.Service
+#-keep public class * extends android.content.BroadcastReceiver
+#-keep public class * extends android.content.ContentProvider
+#-keep public class * extends android.app.backup.BackupAgentHelper
+#-keep public class * extends android.preference.Preference
+#-keep public class com.android.vending.licensing.ILicensingService
+#
+#-keepclasseswithmembernames class * {
+#    native <methods>;
+#}
+#
+#-keepclasseswithmembers class * {
+#    public <init>(android.content.Context, android.util.AttributeSet);
+#}
+#
+#-keepclasseswithmembers class * {
+#    public <init>(android.content.Context, android.util.AttributeSet, int);
+#}
+#
+#-keepclassmembers class * extends android.app.Activity {
+#   public void *(android.view.View);
+#}
+#
+#-keepclassmembers enum * {
+#    public static **[] values();
+#    public static ** valueOf(java.lang.String);
+#}
+#
+#-keep class * implements android.os.Parcelable {
+#  public static final android.os.Parcelable$Creator *;
+#}
 
--keepclasseswithmembernames class * {
-    native <methods>;
-}
-
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet);
-}
-
--keepclasseswithmembers class * {
-    public <init>(android.content.Context, android.util.AttributeSet, int);
-}
-
--keepclassmembers class * extends android.app.Activity {
-   public void *(android.view.View);
-}
-
--keepclassmembers enum * {
-    public static **[] values();
-    public static ** valueOf(java.lang.String);
-}
-
--keep class * implements android.os.Parcelable {
-  public static final android.os.Parcelable$Creator *;
-}
-
--useuniqueclassmembernames
--keepattributes SourceFile,LineNumberTable
--allowaccessmodification
+#-useuniqueclassmembernames
+#-keepattributes SourceFile,LineNumberTable
+#-allowaccessmodification
 
 
 
 # Keep the pojos used by GSON or Jackson
--keep class orbital.com.foodsearch.models.** { *; }
+-keep class orbital.com.menusnap.Models.** { *; }
 
 # Keep GSON stuff
 -keep class sun.misc.Unsafe { *; }
@@ -74,54 +74,57 @@
 
 # Keep these for GSON and Jackson
 -keepattributes Signature
--keepattributes *Annotation*
--keepattributes EnclosingMethod
+#-keepattributes *Annotation*
+#-keepattributes EnclosingMethod
 
--keepattributes Signature
--keepattributes Exceptions
--keepattributes JNINamespace
--keepattributes CalledByNative
--keepattributes *Annotation*
--keepattributes EnclosingMethod
+#-keepattributes Exceptions
+#-keepattributes JNINamespace
+#-keepattributes CalledByNative
+
 
 # Keep Retrofit
--keep class retrofit.** { *; }
--keepclasseswithmembers class * {
-    @retrofit.** *;
-}
--keepclassmembers class * {
-    @retrofit.** *;
-}
+#-keep class retrofit.** { *; }
+#-keepclasseswithmembers class * {
+#    @retrofit.** *;
+#}
+#-keepclassmembers class * {
+#    @retrofit.** *;
+#}
+#
+## Keep Picasso
+#-keep class com.squareup.picasso.** { *; }
+#-keepclasseswithmembers class * {
+#    @com.squareup.picasso.** *;
+#}
+#-keepclassmembers class * {
+#    @com.squareup.picasso.** *;
+#}
 
-# Keep Picasso
--keep class com.squareup.picasso.** { *; }
--keepclasseswithmembers class * {
-    @com.squareup.picasso.** *;
-}
--keepclassmembers class * {
-    @com.squareup.picasso.** *;
-}
+#-adaptresourcefilenames    **.properties,**.gif,**.jpg
+#-adaptresourcefilecontents **.properties,META-INF/MANIFEST.MF
 
--adaptresourcefilenames    **.properties,**.gif,**.jpg
--adaptresourcefilecontents **.properties,META-INF/MANIFEST.MF
-
-
-
--keep class android.content.Intent
--keep class com.sec.android.gallery3d.app.** { *; }
+# Keep External Libraries
+#-keep interface android.** { *; }
+-keep interface android.content.** { *; }
+-keep interface android.support.** { *; }
+#-keep class android.** { *; }
+-keep class android.content.** { *; }
+-keep class android.support.** { *; }
+-keep class sec.android.gallery3d.app.** { *; }
 -keep class org.apache.http.** { *; }
 -keep class okio.** { *; }
 -keep class retrofit2.** { *; }
 -keep class com.squareup.** { *; }
--keep class firebase.** { *; }
--keep class com.android.** { *; }
+-keep class com.google.** { *; }
 -keep class jp.wasabeef.** { *; }
 -keep class com.mikhaellopez.** { *; }
--keep class com.theartofdev.** { *; }
 -keep class me.everything.** { *; }
 -keep class com.github.** { *; }
 -keep class com.aurelhubert.** { *; }
 -keep class me.zhanghai.** { *; }
+-keep class com.theartofdev.edmodo.** { *; }
+-keep class de.cketti.mailto.** {*;}
+-keep class com.heinrichreimersoftware.** { *; }
 -dontwarn okio.**
 -dontwarn com.squareup.picasso.**
 -dontwarn retrofit2.**

@@ -56,7 +56,7 @@ import orbital.com.menusnap.DAO.PhotosContract;
 import orbital.com.menusnap.DAO.PhotosDBHelper;
 import orbital.com.menusnap.Fragments.RecentsFragment;
 import orbital.com.menusnap.Fragments.SettingFragment;
-import orbital.com.menusnap.Misc.GlobalVar;
+import orbital.com.menusnap.Helpers.GlobalVar;
 import orbital.com.menusnap.R;
 import orbital.com.menusnap.Utils.AnimUtils;
 import orbital.com.menusnap.Utils.ImageUtils;

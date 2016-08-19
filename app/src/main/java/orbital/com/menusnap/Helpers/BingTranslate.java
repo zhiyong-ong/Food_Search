@@ -4,7 +4,6 @@ import android.util.Log;
 
 import orbital.com.menusnap.Activities.MainActivity;
 import orbital.com.menusnap.Helpers.BingTranslateMemetix.translate.Translate;
-import orbital.com.menusnap.Misc.GlobalVar;
 
 /**
  * Created by zhiyong on 1/7/2016.

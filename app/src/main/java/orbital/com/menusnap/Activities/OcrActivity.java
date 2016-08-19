@@ -70,7 +70,7 @@ import orbital.com.menusnap.Helpers.BingOcr;
 import orbital.com.menusnap.Helpers.BingSearch;
 import orbital.com.menusnap.Helpers.BingTranslate;
 import orbital.com.menusnap.Helpers.ImageInsights;
-import orbital.com.menusnap.Misc.GlobalVar;
+import orbital.com.menusnap.Helpers.GlobalVar;
 import orbital.com.menusnap.Models.ImageInsightsPOJO.ImageInsightsResponse;
 import orbital.com.menusnap.Models.ImageSearchPOJO.ImageSearchResponse;
 import orbital.com.menusnap.Models.ImageSearchPOJO.ImageValue;
@@ -183,6 +183,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             Window window = getWindow();
             window.setStatusBarColor(Color.BLACK);
         }
+        Log.e(LOG_TAG, "FILE PATH: " + mFilePath);
         database = FirebaseDatabase.getInstance().getReference();
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         onCreateBackground();
