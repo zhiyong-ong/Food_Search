@@ -72,6 +72,7 @@ dependencies {
     compile 'jp.wasabeef:recyclerview-animators:2.2.3'
     compile 'de.cketti.mailto:email-intent-builder:1.0.0'
     compile 'com.heinrichreimersoftware:material-intro:1.5.7'
+    compile 'com.github.hotchemi:android-rate:1.0.1'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

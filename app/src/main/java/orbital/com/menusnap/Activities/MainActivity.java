@@ -52,6 +52,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 
 import de.cketti.mailto.EmailIntentBuilder;
+import hotchemi.android.rate.AppRate;
+import hotchemi.android.rate.OnClickButtonListener;
 import orbital.com.menusnap.DAO.PhotosContract;
 import orbital.com.menusnap.DAO.PhotosDBHelper;
 import orbital.com.menusnap.Fragments.RecentsFragment;
@@ -74,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     private static final int OCR_IMAGE_INTENT_CODE = 500;
     private static final int INTRO_INTENT_CODE = 600;
     private static final int SPLASH_INTENT_CODE = 650;
+    private static final String PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=orbital.com.menusnap";
     private static final String VIEW_TYPE = "viewType";
     private static final String SAVED_URI = "savedUri";
     private static final String LOG_TAG = "FOODIES";
@@ -125,15 +128,36 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         setupFab();
         setBottomNavigationBar();
         generateUri();
+        setupAppRate();
         boolean firstStart = sharedPreferencesSettings.getBoolean(FIRST_START_KEY, true);
         if (firstStart) {
             startIntroActivity();
         }
     }
 
-    private void startSplashActivity() {
-        Intent intent = new Intent(this, SplashActivity.class);
-        startActivityForResult(intent, SPLASH_INTENT_CODE);
+    private void setupAppRate(){
+        AppRate.with(this)
+                .setInstallDays(2) // default 10, 0 means install day.
+                .setLaunchTimes(5) // default 10
+                .setRemindInterval(3) // default 1
+                .setShowNeverButton(false)
+                .setDebug(false) // default false
+                .setMessage(R.string.rate_message)
+                .setOnClickButtonListener(new OnClickButtonListener() { // callback listener.
+                    @Override
+                    public void onClickButton(int which) {
+                        if (which == 0) {
+                            Intent browserIntent = new Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(PLAY_STORE_URL));
+                            startActivity(browserIntent);
+                        }
+                    }
+                })
+                .monitor();
+
+        // Show a dialog if meets conditions
+        AppRate.showRateDialogIfMeetsConditions(this);
     }
 
     private void startIntroActivity() {
