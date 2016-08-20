@@ -57,9 +57,6 @@ public class ViewUtils {
         EditText editText = (EditText) rootView.findViewById(R.id.searchbar_edit_text);
         editText.append(" " + appendParam);
         editText.clearFocus();
-        for (int i = 0; i < multStringQuery.size(); i++) {
-            Log.e("FOODIES", "append search bar: " + multStringQuery.get(i));
-        }
     }
 
     public static void deleteSearchQuery(View rootView, String deleteParam) {

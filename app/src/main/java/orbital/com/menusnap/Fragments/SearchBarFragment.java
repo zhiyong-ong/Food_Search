@@ -199,13 +199,11 @@ public class SearchBarFragment extends Fragment {
         //anchoredView.setOnTouchListener(popup.getDragToOpenListener());
         Menu menu = popup.getMenu();
         String currentLangValue = sharedPreferencesSettings.getString(getActivity().getString(R.string.select_lang_key), "en");
-        Log.e(LOG_TAG, "current lang: " + currentLangValue);
         for (int i = 0; i < langKeysArr.length; i++) {
             String key = langKeysArr[i];
             String value = langValuesArr[i];
             MenuItem item = menu.add(Menu.NONE, i, i, key);
             if (value.equals(currentLangValue)) {
-                Log.e(LOG_TAG, "current value: " + value);
                 item.setCheckable(true).setChecked(true);
             }
         }
