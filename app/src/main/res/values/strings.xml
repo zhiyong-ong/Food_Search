@@ -109,6 +109,8 @@
     <string name="help_title">How to select multiple lines</string>
     <string name="help_message">Click to select or deselect lines from the menu then click
         search to start searching for all the text you have highlighted.</string>
+    <string name="rate_message">Thank you for downloading FoodSearch!
+        \nIf you enjoyed using the app, would you mind taking a moment to give us a rating on the Play Store?</string>
 
     <!--&lt;!&ndash;String for languages&ndash;&gt;-->
     <!--<string name="Afrikaans">Afrikaans</string>-->

@@ -13,7 +13,6 @@ public class BingTranslate {
 
     private static final String LOG_TAG = "FOODIES";
     public static String getTranslatedText(String txt) {
-        Log.e(LOG_TAG, "MAIN activity base lang: " + MainActivity.BASE_LANGUAGE);
         Translate.setClientId("foodies1");
         Translate.setClientSecret(GlobalVar.getTranslateKey());
         String translation = null;
@@ -23,7 +22,6 @@ public class BingTranslate {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.e(LOG_TAG, "Translated text from: " + txt + "  to: " + translation);
         return translation;
     }
 
@@ -37,7 +35,6 @@ public class BingTranslate {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        Log.e(LOG_TAG, "Translated text from: " + txt + "  to: " + translation);
         return translation;
     }
 }

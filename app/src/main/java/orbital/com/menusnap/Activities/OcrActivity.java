@@ -183,7 +183,6 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             Window window = getWindow();
             window.setStatusBarColor(Color.BLACK);
         }
-        Log.e(LOG_TAG, "FILE PATH: " + mFilePath);
         database = FirebaseDatabase.getInstance().getReference();
         sharedPreferencesSettings = PreferenceManager.getDefaultSharedPreferences(this);
         onCreateBackground();
