@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -50,8 +52,11 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -59,6 +64,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import okhttp3.ResponseBody;
+import orbital.com.menusnap.BuildConfig;
 import orbital.com.menusnap.DAO.BingImageDAO;
 import orbital.com.menusnap.DAO.PhotosContract;
 import orbital.com.menusnap.DAO.PhotosDAO;
@@ -90,7 +96,7 @@ import retrofit2.Response;
 public class OcrActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static final String RESPONSE = "dataResponse";
-    public static final String FILE_PATH = "FILEPATH";
+    public static final String FILE_URI = "FILEURI";
     private static final String DATA = "DATA";
     private static final String LOG_TAG = "FOODIES";
     private static final String SEARCH_FRAGMENT_TAG = "SEARCHFRAGMENT";
@@ -110,7 +116,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     private static ImageSearchResponse searchResponseDB;
     private final FragmentManager FRAGMENT_MANAGER = getSupportFragmentManager();
     private SharedPreferences sharedPreferencesSettings;
-    private String mFilePath = null;
+    private Uri mFileUri = null;
     private String mJson = null;
     private boolean animating = false;
     private boolean leavingActivity = false;
@@ -129,8 +135,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (mFilePath != null) {
-            outState.putString(FILE_PATH, mFilePath);
+        if (mFileUri != null) {
+            outState.putParcelable(FILE_URI, mFileUri);
         }
         if (mJson != null) {
             outState.putString(DATA, mJson);
@@ -141,8 +147,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        if (savedInstanceState.containsKey(FILE_PATH)) {
-            mFilePath = savedInstanceState.getString(FILE_PATH);
+        if (savedInstanceState.containsKey(FILE_URI)) {
+            mFileUri = savedInstanceState.getParcelable(FILE_URI);
         }
         if (savedInstanceState.containsKey(DATA)) {
             mJson = savedInstanceState.getString(DATA);
@@ -176,8 +182,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ocr);
-        if (mFilePath == null) {
-            mFilePath = getIntent().getStringExtra(FILE_PATH);
+        if (mFileUri == null) {
+            mFileUri = getIntent().getParcelableExtra(FILE_URI);
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -232,7 +238,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         final ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
         if (mJson == null) {
             Picasso.with(this)
-                    .load("file://" + mFilePath)
+                    .load(mFileUri)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .resize(30, 48)
@@ -261,7 +267,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 postponeEnterTransition();
             }
             Picasso.with(this)
-                    .load("file://" + mFilePath)
+                    .load(mFileUri)
                     .into(previewImageView, new com.squareup.picasso.Callback() {
                         @Override
                         public void onSuccess() {
@@ -310,7 +316,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         Gson gson = new Gson();
         BingOcrResponse responseData = gson.fromJson(mJson, BingOcrResponse.class);
         List<Line> lines = responseData.getAllLines();
-        mDrawableView.drawBoxes(findViewById(R.id.activity_ocr), mFilePath, lines,
+        mDrawableView.drawBoxes(this, findViewById(R.id.activity_ocr),
+                mFileUri, lines,
                 responseData.getTextAngle().floatValue(),
                 responseData.getLanguage());
     }
@@ -374,7 +381,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 super.onPostExecute(compressedImage);
                 ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
                 Picasso.with(OcrActivity.this)
-                        .load("file://" + mFilePath)
+                        .load(mFileUri)
                         .noPlaceholder()
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
@@ -382,7 +389,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 dispatchOcr(compressedImage);
             }
         };
-        compressTask.execute(mFilePath, mFilePath);
+        compressTask.execute(mFileUri);
     }
 
     private void dispatchOcr(final byte[] compressedImage){
@@ -777,28 +784,28 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         ocrSaved = true;
         PhotosDBHelper mDBHelper = new PhotosDBHelper(this);
         Cursor cursor = PhotosDAO.readDatabaseAllRows(mDBHelper);
-        String fileName = null;
+        String fileToDelete = null;
         //Log.e(LOG_TAG, "cursor count: " + cursor.getCount());
         if (cursor.getCount() >= MainActivity.IMAGE_RECENTS_COUNT) {
             cursor.moveToFirst();
-            fileName = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
-            PhotosDAO.deleteOnEntryTime(fileName, mDBHelper);
+            fileToDelete = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME));
+            PhotosDAO.deleteOnEntryTime(fileToDelete, mDBHelper);
             cursor.close();
         }
         //save the lines to local DB
         Gson gson = new Gson();
         String json = gson.toJson(response);
         PhotosDAO.writeToDatabase(currentTime, json, formattedDate, formattedTime, mDBHelper);
-        saveImage(BitmapFactory.decodeFile(mFilePath), fileName);
+        saveImage(fileToDelete);
     }
 
     /**
      * Saves a duplicate of the image into the recent images folder.
      * Name of the image would be the timestamp.
      *
-     * @param finalBitmap
+     * @param fileToDelete
      */
-    private void saveImage(Bitmap finalBitmap, String fileToDelete) {
+    private void saveImage(String fileToDelete) {
         File root = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "Recent_Images");
         if (!root.exists()) {
             if (!root.mkdirs()) {
@@ -808,16 +815,32 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
         if (fileToDelete != null) {
             File file = new File(root, fileToDelete);
-            file.delete();
+            Uri fileUri = FileProvider.getUriForFile(this,
+                    BuildConfig.APPLICATION_ID + ".provider",
+                    file);
+            getContentResolver().delete(fileUri, null, null);
             //Log.e(LOG_TAG, "FILE: " + fileToDelete + " DELETED");
+        }
+        Bitmap bmp = null;
+        try {
+            InputStream imageStream = getContentResolver().openInputStream(mFileUri);
+            bmp = BitmapFactory.decodeStream(imageStream);
+        } catch (FileNotFoundException e) {
+            FirebaseCrash.report(e);
+            return;
         }
 
         String fname = currentTime;
         File file = new File(root, fname);
-        if (file.exists()) file.delete();
+        Uri fileUri = FileProvider.getUriForFile(this,
+                BuildConfig.APPLICATION_ID + ".provider",
+                file);
+        if (file.exists()) {
+            getContentResolver().delete(fileUri, null, null);
+        }
         try {
             FileOutputStream out = new FileOutputStream(file);
-            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            bmp.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
             out.close();
 
@@ -1027,7 +1050,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             }
             BingOcrResponse bingOcrResponse = response.body();
             List<Line> lines = bingOcrResponse.getAllLines();
-            mDrawableView.drawBoxes(rootView, mFilePath, lines,
+            mDrawableView.drawBoxes(OcrActivity.this, rootView, mFileUri, lines,
                     bingOcrResponse.getTextAngle().floatValue(),
                     bingOcrResponse.getLanguage());
             ViewUtils.finishOcrProgress(rootView);
@@ -1052,7 +1075,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
      * This async task is used to compress the IMAGE_KEY to be sent in the
      * background thread using ImageUtils.compressImage
      */
-    private class CompressAsyncTask extends AsyncTask<String, Integer, byte[]> {
+    private class CompressAsyncTask extends AsyncTask<Uri, Integer, byte[]> {
         View mRootView = null;
 
         CompressAsyncTask(View rootView) {
@@ -1065,8 +1088,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
 
         @Override
-        protected byte[] doInBackground(String... params) {
-            return ImageUtils.compressImage(params[0], params[1]);
+        protected byte[] doInBackground(Uri... params) {
+            try {
+                return ImageUtils.compressImage(OcrActivity.this, params[0]);
+            } catch (FileNotFoundException e) {
+                FirebaseCrash.report(e);
+                return null;
+            }
         }
 
         @Override

@@ -2,10 +2,12 @@ package orbital.com.menusnap.Fragments;
 
 
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.GridLayoutManager;
@@ -29,6 +31,7 @@ import jp.wasabeef.recyclerview.animators.FadeInDownAnimator;
 import jp.wasabeef.recyclerview.animators.FadeInLeftAnimator;
 import orbital.com.menusnap.Activities.MainActivity;
 import orbital.com.menusnap.Adapters.RecentImageAdapter;
+import orbital.com.menusnap.BuildConfig;
 import orbital.com.menusnap.DAO.PhotosContract;
 import orbital.com.menusnap.DAO.PhotosDAO;
 import orbital.com.menusnap.DAO.PhotosDBHelper;
@@ -46,7 +49,7 @@ public class RecentsFragment extends android.app.Fragment {
     protected RecyclerView mRecyclerView;
     protected RecyclerView.LayoutManager mLayoutManager;
     private RecentImageAdapter mAdapter;
-    private List<String> filePaths;
+    private List<Uri> fileUris;
     private List<String> fileNames;
     private ActionMode actionMode;
     private int bottomNavHeight = -1;
@@ -103,7 +106,7 @@ public class RecentsFragment extends android.app.Fragment {
             if (!deleted) {
                 mAdapter.notifyDataSetChanged();
             }
-            if (filePaths.isEmpty()) {
+            if (fileUris.isEmpty()) {
                 View recentsOverlay = getView().findViewById(R.id.empty_recents_layout);
                 AnimUtils.fadeIn(recentsOverlay, AnimUtils.OVERLAY_DURATION);
             }
@@ -128,16 +131,16 @@ public class RecentsFragment extends android.app.Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_recents, container, false);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recent_images_recycler);
-        filePaths = new ArrayList<>();
+        fileUris = new ArrayList<>();
         fileNames = new ArrayList<>();
 
-        mAdapter = new RecentImageAdapter(getActivity(), this, filePaths, fileNames);
+        mAdapter = new RecentImageAdapter(getActivity(), this, fileUris, fileNames);
         setRecyclerLayout();
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.scrollToPosition(0);
         initializeFiles();
 
-//        Log.e(LOG_TAG, "file paths: " + filePaths.size());
+//        Log.e(LOG_TAG, "file paths: " + fileUris.size());
 //        Log.e(LOG_TAG, "file names: " + fileNames.size());
         return rootView;
     }
@@ -252,36 +255,42 @@ public class RecentsFragment extends android.app.Fragment {
 
     private void addAllFiles(File[] files) {
         for (File file : files) {
-            filePaths.add(file.getAbsolutePath());
+            Uri fileUri = FileProvider.getUriForFile(getActivity(),
+                    BuildConfig.APPLICATION_ID + ".provider",
+                    file);
+            fileUris.add(fileUri);
             fileNames.add(file.getName());
         }
     }
 
     private void addFile(File file) {
-        filePaths.add(0, file.getAbsolutePath());
+        Uri fileUri = FileProvider.getUriForFile(getActivity(),
+                BuildConfig.APPLICATION_ID + ".provider",
+                file);
+        fileUris.add(0, fileUri);
         fileNames.add(0, file.getName());
     }
 
     private int removeLastFiles(int deleteNumber) {
-        int deletedIndex = filePaths.size() - deleteNumber;
-        filePaths.subList(deletedIndex, filePaths.size()).clear();
+        int deletedIndex = fileUris.size() - deleteNumber;
+        fileUris.subList(deletedIndex, fileUris.size()).clear();
         fileNames.subList(deletedIndex, fileNames.size()).clear();
         return deletedIndex;
     }
 
     private void clearFiles() {
-        filePaths.clear();
+        fileUris.clear();
         fileNames.clear();
     }
 
     public void smoothScrollToTop() {
-        if (filePaths.size() > 0) {
+        if (fileUris.size() > 0) {
             mRecyclerView.smoothScrollToPosition(0);
         }
     }
 
     public void scrollToTop() {
-        if (filePaths.size() > 0) {
+        if (fileUris.size() > 0) {
             mRecyclerView.scrollToPosition(0);
         }
     }
@@ -321,7 +330,7 @@ public class RecentsFragment extends android.app.Fragment {
             String data = cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_DATA));
 //            Log.e(LOG_TAG, "ENTRY TIME: " + cursor.getString(cursor.getColumnIndexOrThrow(PhotosContract.PhotosEntry.COLUMN_NAME_ENTRY_TIME)));
             cursor.close();
-            ((MainActivity) getActivity()).openRecentPhoto(itemView, filePaths.get(position), data);
+            ((MainActivity) getActivity()).openRecentPhoto(itemView, fileUris.get(position), data);
         }
     }
 
