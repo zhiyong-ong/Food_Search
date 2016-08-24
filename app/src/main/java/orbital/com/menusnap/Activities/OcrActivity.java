@@ -417,19 +417,33 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
     public void startSearch(final String searchParam) {
-        if (NetworkUtils.isNetworkAvailable(this) && NetworkUtils.isOnline()) {
-            searchImageResponse(searchParam);
-        } else {
-            Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr),
-                    R.string.internet_error_text, Snackbar.LENGTH_LONG);
-            snackbar.setAction(R.string.retry, new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startSearch(searchParam);
+        NetworkCheckAsyncTask networkTask = new NetworkCheckAsyncTask(){
+            @Override
+            protected void onPreExecute() {
+                runningTasks.add(this);
+                ViewUtils.startSearchProgress(findViewById(R.id.activity_ocr));
+            }
+
+            @Override
+            protected void onPostExecute(Boolean isConnected) {
+                runningTasks.remove(this);
+                if (isConnected) {
+                    searchImageResponse(searchParam);
+                } else {
+                    ViewUtils.terminateSearchProgress(findViewById(R.id.activity_ocr));
+                    Snackbar snackbar = Snackbar.make(findViewById(R.id.activity_ocr),
+                            R.string.internet_error_text, Snackbar.LENGTH_LONG);
+                    snackbar.setAction(R.string.retry, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            startSearch(searchParam);
+                        }
+                    });
+                    snackbar.show();
                 }
-            });
-            snackbar.show();
-        }
+            }
+        };
+        networkTask.execute();
     }
 
     /**
@@ -1054,6 +1068,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         }
     }
 
+    private class NetworkCheckAsyncTask extends AsyncTask<Void, Void, Boolean>{
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            return NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline();
+        }
+    }
 
     private class DrawableTouchListener implements View.OnTouchListener {
         private View rootView;
