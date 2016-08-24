@@ -1093,10 +1093,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
     private class DrawableTouchListener implements View.OnTouchListener {
-        private View rootView;
 
         DrawableTouchListener(View rootView) {
-            this.rootView = rootView;
         }
 
         @Override
