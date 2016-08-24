@@ -8,8 +8,8 @@ public final class BuildConfig {
   public static final String APPLICATION_ID = "orbital.com.menusnap";
   public static final String BUILD_TYPE = "debug";
   public static final String FLAVOR = "";
-  public static final int VERSION_CODE = 4;
-  public static final String VERSION_NAME = "1.0.3";
+  public static final int VERSION_CODE = 5;
+  public static final String VERSION_NAME = "1.0.4";
   // Fields from the variant
   public static final String FIREBASE_PW = "Orbital123";
   public static final String FIREBASE_USER = "foodies@firebase.com";

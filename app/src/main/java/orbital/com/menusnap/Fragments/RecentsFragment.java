@@ -212,7 +212,7 @@ public class RecentsFragment extends android.app.Fragment {
                         }
                         mAdapter.notifyItemInserted(0);
                     }
-                }, 400);
+                }, 550);
             }
             getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
         }
