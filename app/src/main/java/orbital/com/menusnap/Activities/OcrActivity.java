@@ -237,7 +237,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
                     .resize(30, 48)
                     .into(previewImageView);
-            prepareOcrService();
+            setupOcr();
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 findViewById(R.id.ocr_progress_bar).setVisibility(View.GONE);
@@ -367,7 +367,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         drawableView.setOnTouchListener(new DrawableTouchListener(findViewById(R.id.activity_ocr)));
     }
 
-    private void prepareOcrService() {
+    private void setupOcr() {
         CompressAsyncTask compressTask = new CompressAsyncTask(findViewById(R.id.activity_ocr)) {
             @Override
             protected void onPostExecute(byte[] compressedImage) {
@@ -379,6 +379,17 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                         .fit()
                         .memoryPolicy(MemoryPolicy.NO_CACHE)
                         .into(previewImageView);
+                dispatchOcr(compressedImage);
+            }
+        };
+        compressTask.execute(mFilePath, mFilePath);
+    }
+
+    private void dispatchOcr(final byte[] compressedImage){
+        NetworkCheckAsyncTask networkTask = new NetworkCheckAsyncTask(){
+            @Override
+            protected void onPostExecute(Boolean isConnected) {
+                super.onPostExecute(isConnected);
                 if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
                     enqueueOcr(compressedImage);
                 } else {
@@ -386,7 +397,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
                 }
             }
         };
-        compressTask.execute(mFilePath, mFilePath);
+        networkTask.execute();
     }
 
     /**
@@ -405,11 +416,7 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             @Override
             public void onClick(View v) {
                 ViewUtils.startOcrProgress(rootView);
-                if (NetworkUtils.isNetworkAvailable(OcrActivity.this) && NetworkUtils.isOnline()) {
-                    enqueueOcr(compressedImage);
-                } else {
-                    onHoldEnqueueOcr(compressedImage);
-                }
+                dispatchOcr(compressedImage);
 
             }
         });
@@ -420,13 +427,13 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         NetworkCheckAsyncTask networkTask = new NetworkCheckAsyncTask(){
             @Override
             protected void onPreExecute() {
-                runningTasks.add(this);
+                super.onPreExecute();
                 ViewUtils.startSearchProgress(findViewById(R.id.activity_ocr));
             }
 
             @Override
             protected void onPostExecute(Boolean isConnected) {
-                runningTasks.remove(this);
+                super.onPostExecute(isConnected);
                 if (isConnected) {
                     searchImageResponse(searchParam);
                 } else {
@@ -1069,6 +1076,15 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
     }
 
     private class NetworkCheckAsyncTask extends AsyncTask<Void, Void, Boolean>{
+        @Override
+        protected void onPreExecute() {
+            runningTasks.add(this);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            runningTasks.remove(this);
+        }
 
         @Override
         protected Boolean doInBackground(Void... voids) {
