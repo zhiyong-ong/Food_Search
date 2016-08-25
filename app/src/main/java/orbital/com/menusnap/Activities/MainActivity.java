@@ -497,6 +497,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                             exif = new ExifInterface(imageStream);
                         } else {
                             exif = new ExifInterface(fileUri.getPath());
+                            Log.e(LOG_TAG, "path is: " + fileUri.getPath());
                         }
                         if (ImageUtils.isLandscape(exif)) {
                             startCropActivity(fileUri, true);
@@ -592,11 +593,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    public void goSearch(View view) {
-        Intent intent = new Intent(this, GoogleSearchActivity.class);
-        startActivity(intent);
-    }
-
     /**
      * This method dispatches the camera intent
      */
@@ -669,10 +665,16 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 return;
             }
         }
-        File imageFile = new File(mediaStorageDir, PHOTO_FILE_NAME);
-        fileUri = FileProvider.getUriForFile(this,
-                BuildConfig.APPLICATION_ID + ".provider",
-                imageFile);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            File imageFile = new File(mediaStorageDir, PHOTO_FILE_NAME);
+            fileUri = FileProvider.getUriForFile(this,
+                    BuildConfig.APPLICATION_ID + ".provider",
+                    imageFile);
+        }
+        else {
+            fileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
+                    + File.separator + PHOTO_FILE_NAME));
+        }
     }
 
     @Override
