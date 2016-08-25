@@ -490,15 +490,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 break;
             case OCR_CAMERA_INTENT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
-                    ExifInterface exif;
                     try {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                            InputStream imageStream = getContentResolver().openInputStream(fileUri);
-                            exif = new ExifInterface(imageStream);
-                        } else {
-                            exif = new ExifInterface(fileUri.getPath());
-                        }
-                        if (ImageUtils.isLandscape(exif)) {
+                        if (ImageUtils.isLandscape(MainActivity.this, fileUri)) {
                             startCropActivity(fileUri, true);
                         } else {
                             startOcrActivity();

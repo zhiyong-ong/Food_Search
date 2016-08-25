@@ -1,6 +1,7 @@
 package orbital.com.menusnap.Utils;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,6 +12,7 @@ import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -174,17 +176,33 @@ public class ImageUtils {
         return inSampleSize;
     }
 
-    public static boolean isLandscape(ExifInterface exif) {
-        int rotation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
-        int width = exif.getAttributeInt(ExifInterface.TAG_IMAGE_WIDTH, 1);
-        int length = exif.getAttributeInt(ExifInterface.TAG_IMAGE_LENGTH, 0);
-        switch (rotation) {
+    public static boolean isLandscape(Context context, Uri imageUri) {
+        String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION,
+        };
+        Cursor c = context.getContentResolver().query(imageUri, projection, null, null, null);
+        int orientation = ExifInterface.ORIENTATION_UNDEFINED;
+        if (c != null){
+            if(c.getColumnCount() != 0){
+                orientation = c.getInt(0);
+            }
+            c.close();
+        }
+        int height;
+        int width;
+        try {
+            InputStream imageStream = context.getContentResolver().openInputStream(imageUri);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeStream(imageStream, null, options);
+            height = options.outHeight;
+            width = options.outWidth;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return true;
+        }
+        switch (orientation) {
             case ExifInterface.ORIENTATION_UNDEFINED:
-                if (width > length) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return width > height;
             case ExifInterface.ORIENTATION_ROTATE_90:
                 return false;
             default:
