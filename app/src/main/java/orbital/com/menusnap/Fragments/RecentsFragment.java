@@ -140,8 +140,6 @@ public class RecentsFragment extends android.app.Fragment {
         mRecyclerView.scrollToPosition(0);
         initializeFiles();
 
-//        Log.e(LOG_TAG, "file paths: " + fileUris.size());
-//        Log.e(LOG_TAG, "file names: " + fileNames.size());
         return rootView;
     }
 
@@ -215,7 +213,7 @@ public class RecentsFragment extends android.app.Fragment {
                         }
                         mAdapter.notifyItemInserted(0);
                     }
-                }, 550);
+                }, 1000);
             }
             getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
         }

@@ -585,11 +585,6 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         }
     }
 
-    public void goSearch(View view) {
-        Intent intent = new Intent(this, GoogleSearchActivity.class);
-        startActivity(intent);
-    }
-
     /**
      * This method dispatches the camera intent
      */
