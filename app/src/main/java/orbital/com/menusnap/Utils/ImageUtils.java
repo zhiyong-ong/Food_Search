@@ -1,5 +1,6 @@
 package orbital.com.menusnap.Utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -8,10 +9,15 @@ import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
+import android.net.Uri;
+import android.os.Build;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Created by Abel on 6/7/2016.
@@ -22,12 +28,13 @@ public class ImageUtils {
     private static final float maxHeight = 1280.0f;
     private static final float maxWidth = 1280.0f;
 
-    public static byte[] compressImage(String sourcePath, String destPath) {
+    public static byte[] compressImage(Context context, Uri imageUri) throws FileNotFoundException {
         Bitmap scaledBitmap = null;
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        Bitmap bmp = BitmapFactory.decodeFile(sourcePath, options);
+        InputStream imageStream = context.getContentResolver().openInputStream(imageUri);
+        Bitmap bmp = BitmapFactory.decodeStream(imageStream, null, options);
 
         int actualHeight = options.outHeight;
         int actualWidth = options.outWidth;
@@ -56,9 +63,18 @@ public class ImageUtils {
         options.inTempStorage = new byte[16 * 1024];
 
         try {
-            bmp = BitmapFactory.decodeFile(sourcePath, options);
+            imageStream = context.getContentResolver().openInputStream(imageUri);
+            bmp = BitmapFactory.decodeStream(imageStream, null, options);
         } catch (OutOfMemoryError exception) {
             exception.printStackTrace();
+
+        try {
+            if (imageStream != null) {
+                imageStream.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         }
         try {
@@ -81,7 +97,12 @@ public class ImageUtils {
 
         ExifInterface exif;
         try {
-            exif = new ExifInterface(sourcePath);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                imageStream = context.getContentResolver().openInputStream(imageUri);
+                exif = new ExifInterface(imageStream);
+            } else {
+                exif = new ExifInterface(imageUri.getPath());
+            }
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
             Matrix matrix = new Matrix();
             if (orientation == 6) {
@@ -102,7 +123,7 @@ public class ImageUtils {
         scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 85, out);
         byte[] coloredResult = out.toByteArray();
         try {
-            writeFile(coloredResult, destPath);
+            writeFile(context, coloredResult, imageUri);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -125,10 +146,12 @@ public class ImageUtils {
         return bmpGrayscale;
     }
 
-    public static void writeFile(byte[] data, String fileName) throws IOException{
-        FileOutputStream out = new FileOutputStream(fileName);
-        out.write(data);
-        out.close();
+    public static void writeFile(Context context, byte[] data, Uri outputUri) throws IOException {
+        OutputStream out = context.getContentResolver().openOutputStream(outputUri);
+        if (out != null) {
+            out.write(data);
+            out.close();
+        }
     }
 
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {

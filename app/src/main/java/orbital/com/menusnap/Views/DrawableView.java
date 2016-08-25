@@ -8,12 +8,18 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import com.google.firebase.crash.FirebaseCrash;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,11 +89,11 @@ public class DrawableView extends FrameLayout {
      * Draws boxes on drawableView with
      *
      * @param rootView  rootView holding this view
-     * @param imagePath Image path for the compressed image file
+     * @param imageUri Image uri for the compressed image file
      * @param lines     list of line to be drawn
      * @param angle     textAngle as received from bing api
      */
-    public void drawBoxes(View rootView, String imagePath, List<Line> lines,
+    public void drawBoxes(Context context, View rootView, Uri imageUri, List<Line> lines,
                           Float angle, String lang) {
         if (lines == null || lines.isEmpty()) {
             Snackbar.make(this, R.string.no_text_found, Snackbar.LENGTH_LONG).show();
@@ -102,7 +108,12 @@ public class DrawableView extends FrameLayout {
             mMatrix.reset();
         }
         mRootView = rootView;
-        getOriginalDimen(imagePath);
+        try {
+            getOriginalDimen(context, imageUri);
+        } catch (FileNotFoundException e) {
+            FirebaseCrash.report(e);
+            return;
+        }
         addLinesForDraw(lines, lang);
         invalidate();
     }
@@ -162,12 +173,18 @@ public class DrawableView extends FrameLayout {
         }
     }
 
-    private void getOriginalDimen(String imagePath) {
+    private void getOriginalDimen(Context context, Uri imageUri) throws FileNotFoundException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(imagePath, options);
+        InputStream imageStream = context.getContentResolver().openInputStream(imageUri);
+        BitmapFactory.decodeStream(imageStream, null, options);
         originalHeight = options.outHeight;
         originalWidth = options.outWidth;
+        try {
+            imageStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

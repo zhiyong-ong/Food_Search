@@ -20,6 +20,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -50,10 +51,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
+import java.io.InputStream;
 
 import de.cketti.mailto.EmailIntentBuilder;
 import hotchemi.android.rate.AppRate;
 import hotchemi.android.rate.OnClickButtonListener;
+import orbital.com.menusnap.BuildConfig;
 import orbital.com.menusnap.DAO.PhotosContract;
 import orbital.com.menusnap.DAO.PhotosDBHelper;
 import orbital.com.menusnap.Fragments.RecentsFragment;
@@ -397,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (fileUri != null) {
-            outState.putString(SAVED_URI, fileUri.toString());
+            outState.putParcelable(SAVED_URI, fileUri);
         }
         super.onSaveInstanceState(outState);
     }
@@ -406,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if (savedInstanceState.containsKey(SAVED_URI)) {
-            fileUri = Uri.parse(savedInstanceState.getString(SAVED_URI));
+            fileUri = savedInstanceState.getParcelable(SAVED_URI);
         }
     }
 
@@ -489,7 +492,12 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                 if (resultCode == RESULT_OK) {
                     ExifInterface exif;
                     try {
-                        exif = new ExifInterface(fileUri.getPath());
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            InputStream imageStream = getContentResolver().openInputStream(fileUri);
+                            exif = new ExifInterface(imageStream);
+                        } else {
+                            exif = new ExifInterface(fileUri.getPath());
+                        }
                         if (ImageUtils.isLandscape(exif)) {
                             startCropActivity(fileUri, true);
                         } else {
@@ -529,19 +537,19 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
      */
     private void startOcrActivity() {
         Intent intent = new Intent(this, OcrActivity.class);
-        intent.putExtra(OcrActivity.FILE_PATH, fileUri.getPath());
+        intent.putExtra(OcrActivity.FILE_URI, fileUri);
         switchToRecent();
         startActivityForResult(intent, OCR_IMAGE_INTENT_CODE);
 
     }
 
-    public void openRecentPhoto(View itemView, String path, String data) {
+    public void openRecentPhoto(View itemView, Uri uri, String data) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setExitTransition(null);
             getWindow().setEnterTransition(null);
         }
         Intent intent = new Intent(this, OcrActivity.class);
-        intent.putExtra(OcrActivity.FILE_PATH, path);
+        intent.putExtra(OcrActivity.FILE_URI, uri);
         intent.putExtra(OcrActivity.RESPONSE, data);
         ImageView recentsImage = (ImageView) itemView.findViewById(R.id.recent_image_view);
         String transName = getString(R.string.recents_transition_name);
@@ -658,10 +666,13 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
                 Log.e(LOG_TAG, getString(R.string.mkdir_fail_text));
+                return;
             }
         }
-        fileUri = Uri.fromFile(new File(mediaStorageDir.getPath()
-                + File.separator + PHOTO_FILE_NAME));
+        File imageFile = new File(mediaStorageDir, PHOTO_FILE_NAME);
+        fileUri = FileProvider.getUriForFile(this,
+                BuildConfig.APPLICATION_ID + ".provider",
+                imageFile);
     }
 
     @Override

@@ -1,8 +1,10 @@
 package orbital.com.menusnap.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.percent.PercentRelativeLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
@@ -36,14 +38,14 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
     private static String LOG_TAG = "FOODIES";
     private Context mContext;
     private RecentsFragment mRecentsFragment;
-    private List<String> filePaths;
+    private List<Uri> imageUris;
     private List<String> fileNames;
     private int currentViewType = 1;
     private SparseBooleanArray selectedItems;
     private PhotosDBHelper mDBHelper;
 
-    public RecentImageAdapter(Context context, RecentsFragment recentsFragment, List<String> FilePaths, List<String> TimeStamps) {
-        this.filePaths = FilePaths;
+    public RecentImageAdapter(Context context, RecentsFragment recentsFragment, List<Uri> imageUris, List<String> TimeStamps) {
+        this.imageUris = imageUris;
         this.fileNames = TimeStamps;
         mContext = context;
         mRecentsFragment = recentsFragment;
@@ -95,7 +97,7 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         cursor.close();
         holder.timeView.setText(mContext.getResources().getString(R.string.time_text, formattedTime));
 
-        String path = filePaths.get(position);
+        Uri imageUri = imageUris.get(position);
         //Log.e(LOG_TAG, "path is: " + path);
         if (selectedItems.get(position, false)) {
             holder.layoutView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorSelected));
@@ -108,36 +110,36 @@ public class RecentImageAdapter extends RecyclerView.Adapter<RecentImageAdapter.
         }
 
         Picasso.with(mContext)
-                .load("file://" + path)
+                .load(imageUri)
                 .fit()
                 .into(recentImageView);
     }
 
     @Override
     public int getItemCount() {
-        return filePaths.size();
+        return imageUris.size();
     }
 
     private void deleteData(int pos) {
-        File file = new File(filePaths.get(pos));
-        file.delete();
+        Uri imageUri = imageUris.get(pos);
+        mContext.getContentResolver().delete(imageUri, null, null);
         PhotosDAO.deleteOnEntryTime(fileNames.get(pos), mDBHelper);
-        filePaths.remove(pos);
+        imageUris.remove(pos);
         fileNames.remove(pos);
         notifyItemRemoved(pos);
     }
 
     public void trimData(int numberToTrim) {
-        int startPos = filePaths.size() - numberToTrim;
-        for (int pos = startPos; pos < filePaths.size(); pos++) {
-            File file = new File(filePaths.get(pos));
-            file.delete();
+        int startPos = imageUris.size() - numberToTrim;
+        for (int pos = startPos; pos < imageUris.size(); pos++) {
+            Uri imageUri = imageUris.get(pos);
+            mContext.getContentResolver().delete(imageUri, null, null);
             PhotosDAO.deleteOnEntryTime(fileNames.get(pos), mDBHelper);
         }
     }
 
     public void selectAll() {
-        int total = filePaths.size();
+        int total = imageUris.size();
         for (int pos = 0; pos < total; pos++) {
             selectedItems.put(pos, true);
         }

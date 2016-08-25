@@ -109,6 +109,9 @@ public class ViewUtils {
 
     public static void closeSearchResults(View rootView, Animator.AnimatorListener listener, int containerTransY) {
         View containerView = rootView.findViewById(R.id.search_frag_container);
+        if (containerView == null){
+            return;
+        }
         // If container is at the center position, slide it down t0 containerTransY.
         if (containerView.getTranslationY() == 0) {
             AnimUtils.containerSlideDown(rootView, listener, containerTransY);

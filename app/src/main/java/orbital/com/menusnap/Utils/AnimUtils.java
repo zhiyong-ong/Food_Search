@@ -114,9 +114,11 @@ public class AnimUtils {
     }
 
     public static void hideSearchBar(View searchBar, int searchbarTrans) {
-        searchBar.animate().translationY(searchbarTrans)
-                .setDuration(SEARCH_BAR_HIDE)
-                .start();
+        if (searchBar!=null){
+            searchBar.animate().translationY(searchbarTrans)
+                    .setDuration(SEARCH_BAR_HIDE)
+                    .start();
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
