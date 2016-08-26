@@ -83,6 +83,7 @@ public class ImageUtils {
             scaledBitmap = Bitmap.createBitmap(actualWidth, actualHeight, Bitmap.Config.ARGB_8888);
         } catch (OutOfMemoryError exception) {
             exception.printStackTrace();
+            return null;
         }
 
         float ratioX = actualWidth / (float) options.outWidth;
@@ -157,7 +158,8 @@ public class ImageUtils {
 
     public static boolean isLandscape(Context context, Uri imageUri) {
         int orientation = ExifInterface.ORIENTATION_UNDEFINED;
-        int height, width;
+        int height = 0;
+        int width = 1;
         InputStream imageStream;
         Metadata metadata;
         ExifIFD0Directory ifd0Directory;
@@ -174,19 +176,22 @@ public class ImageUtils {
         } catch (MetadataException e) {
             e.printStackTrace();
         }
-        try {
-            imageStream = context.getContentResolver().openInputStream(imageUri);
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(imageStream, null, options);
-            height = options.outHeight;
-            width = options.outWidth;
-            if (imageStream != null) {
-                imageStream.close();
+        // If orientation is undefined, use width and height to find orientation
+        if(orientation == ExifInterface.ORIENTATION_UNDEFINED){
+            try {
+                imageStream = context.getContentResolver().openInputStream(imageUri);
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(imageStream, null, options);
+                height = options.outHeight;
+                width = options.outWidth;
+                if (imageStream != null) {
+                    imageStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                return true;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return true;
         }
         switch (orientation) {
             case ExifInterface.ORIENTATION_UNDEFINED:
