@@ -125,6 +125,9 @@
 -keep class com.theartofdev.edmodo.** { *; }
 -keep class de.cketti.mailto.** {*;}
 -keep class com.heinrichreimersoftware.** { *; }
+-keep class com.drew.** { *; }
+-keep interface com.drew.** { *; }
+-keep enum com.drew.** { *; }
 -dontwarn okio.**
 -dontwarn com.squareup.picasso.**
 -dontwarn retrofit2.**

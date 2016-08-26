@@ -1,7 +1,6 @@
 package orbital.com.menusnap.Utils;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,12 +10,15 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
-import android.provider.MediaStore;
+
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -55,7 +57,6 @@ public class ImageUtils {
             } else {
                 actualHeight = (int) maxHeight;
                 actualWidth = (int) maxWidth;
-
             }
         }
 
@@ -69,7 +70,7 @@ public class ImageUtils {
             bmp = BitmapFactory.decodeStream(imageStream, null, options);
         } catch (OutOfMemoryError exception) {
             exception.printStackTrace();
-
+        }
         try {
             if (imageStream != null) {
                 imageStream.close();
@@ -78,7 +79,6 @@ public class ImageUtils {
             e.printStackTrace();
         }
 
-        }
         try {
             scaledBitmap = Bitmap.createBitmap(actualWidth, actualHeight, Bitmap.Config.ARGB_8888);
         } catch (OutOfMemoryError exception) {
@@ -97,27 +97,6 @@ public class ImageUtils {
         canvas.setMatrix(scaleMatrix);
         canvas.drawBitmap(bmp, middleX - bmp.getWidth() / 2, middleY - bmp.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG));
 
-        ExifInterface exif;
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                imageStream = context.getContentResolver().openInputStream(imageUri);
-                exif = new ExifInterface(imageStream);
-            } else {
-                exif = new ExifInterface(imageUri.getPath());
-            }
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 0);
-            Matrix matrix = new Matrix();
-            if (orientation == 6) {
-                matrix.postRotate(90);
-            } else if (orientation == 3) {
-                matrix.postRotate(180);
-            } else if (orientation == 8) {
-                matrix.postRotate(270);
-            }
-            scaledBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         ByteArrayOutputStream greyOut = new ByteArrayOutputStream();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Bitmap greyScaleBmp = toGrayscale(scaledBitmap);
@@ -177,26 +156,35 @@ public class ImageUtils {
     }
 
     public static boolean isLandscape(Context context, Uri imageUri) {
-        String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION,
-        };
-        Cursor c = context.getContentResolver().query(imageUri, projection, null, null, null);
         int orientation = ExifInterface.ORIENTATION_UNDEFINED;
-        if (c != null){
-            if(c.getColumnCount() != 0){
-                orientation = c.getInt(0);
-            }
-            c.close();
-        }
-        int height;
-        int width;
+        int height, width;
+        InputStream imageStream;
+        Metadata metadata;
+        ExifIFD0Directory ifd0Directory;
         try {
-            InputStream imageStream = context.getContentResolver().openInputStream(imageUri);
+            imageStream = context.getContentResolver().openInputStream(imageUri);
+            metadata = ImageMetadataReader.readMetadata(imageStream);
+            ifd0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
+        } catch (ImageProcessingException | IOException e) {
+            e.printStackTrace();
+            return true;
+        }
+        try{
+            orientation = ifd0Directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+        } catch (MetadataException e) {
+            e.printStackTrace();
+        }
+        try {
+            imageStream = context.getContentResolver().openInputStream(imageUri);
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(imageStream, null, options);
             height = options.outHeight;
             width = options.outWidth;
-        } catch (FileNotFoundException e) {
+            if (imageStream != null) {
+                imageStream.close();
+            }
+        } catch (IOException e) {
             e.printStackTrace();
             return true;
         }

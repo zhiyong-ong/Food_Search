@@ -73,6 +73,7 @@ dependencies {
     compile 'de.cketti.mailto:email-intent-builder:1.0.0'
     compile 'com.heinrichreimersoftware:material-intro:1.5.7'
     compile 'com.github.hotchemi:android-rate:1.0.1'
+    compile 'com.drewnoakes:metadata-extractor:2.9.1'
     testCompile 'junit:junit:4.12'
 }
 apply plugin: 'com.google.gms.google-services'

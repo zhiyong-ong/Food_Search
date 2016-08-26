@@ -46,6 +46,7 @@ import orbital.com.menusnap.Utils.ViewUtils;
 public class RecentsFragment extends android.app.Fragment {
 
     private static final String LOG_TAG = "FOODIES";
+    private final int POST_OCR_DELAY = 500;
     protected RecyclerView mRecyclerView;
     protected RecyclerView.LayoutManager mLayoutManager;
     private RecentImageAdapter mAdapter;
@@ -213,7 +214,7 @@ public class RecentsFragment extends android.app.Fragment {
                         }
                         mAdapter.notifyItemInserted(0);
                     }
-                }, 1000);
+                }, POST_OCR_DELAY);
             }
             getView().findViewById(R.id.empty_recents_layout).setVisibility(View.INVISIBLE);
         }
