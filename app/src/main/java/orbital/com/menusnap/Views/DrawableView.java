@@ -39,7 +39,9 @@ public class DrawableView extends FrameLayout {
     private int originalWidth = 0;
     private int originalHeight = 0;
     private Matrix mMatrix = new Matrix();
-    private Float mAngle = 0.f;
+    private Float mAngle = 0f;
+    private float xScale = 0f;
+    private float yScale = 0f;
 
     private Paint greenPaint = null;
     private Paint redPaint = null;
@@ -67,10 +69,10 @@ public class DrawableView extends FrameLayout {
         // To draw all the rects
         if (mRects != null && !mRects.isEmpty()) {
             canvas.drawColor(Color.TRANSPARENT);
+            canvas.save();
+            canvas.rotate(mAngle, getPivotX(), getPivotY());
             for (int i = 0; i < mRects.size(); i++) {
                 Rect rect = mRects.get(i);
-                canvas.save();
-                canvas.rotate(mAngle, rect.centerX(), rect.centerY());
                 if (selectedRects.contains(i)) {
                     canvas.drawRect(rect, redPaint);
                     if (!multRect) {
@@ -79,8 +81,8 @@ public class DrawableView extends FrameLayout {
                 } else {
                     canvas.drawRect(rect, greenPaint);
                 }
-                canvas.restore();
             }
+            canvas.restore();
         }
 
     }
@@ -166,7 +168,7 @@ public class DrawableView extends FrameLayout {
             int width = Integer.parseInt(bounds[2]);
             int height = Integer.parseInt(bounds[3]);
             // Scale using matrix. Rotation can still be improved using matrix transform
-            Rect drawRect = new Rect();
+            Rect drawRect = new Rect(x, y, x + width, y + height);
             RectF rectF = new RectF(x, y, x + width, y + height);
             scaleRect(drawRect, rectF);
             mRects.add(drawRect);
@@ -201,14 +203,16 @@ public class DrawableView extends FrameLayout {
 
     private float findXScale() {
         DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
-        return (float) drawableView.getWidth() /
+        xScale = (float) drawableView.getWidth() /
                 (float) originalWidth;
+        return xScale;
     }
 
     private float findYScale() {
         DrawableView drawableView = (DrawableView) mRootView.findViewById(R.id.drawable_view);
-        return (float) drawableView.getHeight() /
+        yScale = (float) drawableView.getHeight() /
                 (float) originalHeight;
+        return yScale;
     }
 
     private void setupPaints(Context context) {
