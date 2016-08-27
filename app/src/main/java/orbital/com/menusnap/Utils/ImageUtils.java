@@ -28,7 +28,6 @@ import java.io.OutputStream;
  */
 
 public class ImageUtils {
-    public static final String COMPRESSED = "(COMPRESSED)";
     private static final float maxHeight = 1280.0f;
     private static final float maxWidth = 1280.0f;
 
@@ -39,7 +38,6 @@ public class ImageUtils {
         options.inJustDecodeBounds = true;
         InputStream imageStream = context.getContentResolver().openInputStream(imageUri);
         Bitmap bmp = BitmapFactory.decodeStream(imageStream, null, options);
-
         int actualHeight = options.outHeight;
         int actualWidth = options.outWidth;
         float imgRatio = (float) actualWidth / (float) actualHeight;
@@ -68,15 +66,11 @@ public class ImageUtils {
         try {
             imageStream = context.getContentResolver().openInputStream(imageUri);
             bmp = BitmapFactory.decodeStream(imageStream, null, options);
-        } catch (OutOfMemoryError exception) {
-            exception.printStackTrace();
-        }
-        try {
             if (imageStream != null) {
                 imageStream.close();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (OutOfMemoryError | IOException exception) {
+            exception.printStackTrace();
         }
 
         try {

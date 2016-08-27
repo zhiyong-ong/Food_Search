@@ -1,6 +1,7 @@
 package orbital.com.menusnap.Helpers;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.Interceptor;
@@ -24,6 +25,11 @@ import retrofit2.http.QueryMap;
 public class BingOcr {
     private static final String OCR_BASE_URL = "https://api.projectoxford.ai/vision/v1.0/ocr/";
 
+    private static final String OCR_KEY_HEADER_NAME = "Ocp-Apim-Subscription-Key";
+    private static final String CONTENT_TYPE_HEADER_NAME = "Content-Type";
+    private static final String ORIENTATION_PARAM_KEY = "detectOrientation";
+    private static final boolean SHOULD_DETECT_ORIENTATION = true;
+    private static final String CONTENT_TYPE = "multipart/form-data";
     private static final Interceptor interceptor = new Interceptor() {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
@@ -34,8 +40,8 @@ public class BingOcr {
             }
             return chain.proceed(originalRequest
                     .newBuilder()
-                    .addHeader("Ocp-Apim-Subscription-Key", GlobalVar.getOcrKey())
-                    .addHeader("Content-Type", "multipart/form-data")
+                    .addHeader(OCR_KEY_HEADER_NAME, GlobalVar.getOcrKey())
+                    .addHeader(CONTENT_TYPE_HEADER_NAME, CONTENT_TYPE)
                     .build());
         }
     };
@@ -57,9 +63,9 @@ public class BingOcr {
         OcrAPI ocrAPI = retrofit.create(OcrAPI.class);
         RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"),
                 rawImage);
-        // For params:
-        // Map<String, String> params = new HashMap<String, String>();
-        return ocrAPI.processImage(requestBody);
+         Map<String, Boolean> params = new HashMap<>();
+        params.put(ORIENTATION_PARAM_KEY, SHOULD_DETECT_ORIENTATION);
+        return ocrAPI.processImage(requestBody, params);
     }
 
     /**
@@ -72,7 +78,7 @@ public class BingOcr {
         @Multipart
         @POST("./")
         Call<BingOcrResponse> processImage(@Part("image") RequestBody image,
-                                           @QueryMap Map<String, String> params);
+                                           @QueryMap Map<String, Boolean> params);
 
         @Multipart
         @POST("./")

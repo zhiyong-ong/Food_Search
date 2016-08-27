@@ -9,3 +9,11 @@
 /captures
 /app/app-release-unaligned.apk
 /app/app-release.apk
+/app/build/
+app/build/
+app/src/main/Assets/
+app/src/main/res/Thumbs.db
+app/src/main/res/drawable/Thumbs.db
+app/src/main/res/mipmap-hdpi/Thumbs.db
+projectFilesBackup1/
+screenshots/Thumbs.db
