@@ -190,7 +190,7 @@ public class ImageUtils {
         switch (orientation) {
             case ExifInterface.ORIENTATION_UNDEFINED:
                 return width > height;
-            case ExifInterface.ORIENTATION_ROTATE_90:
+            case ExifInterface.ORIENTATION_ROTATE_270:
                 return false;
             default:
                 return true;
