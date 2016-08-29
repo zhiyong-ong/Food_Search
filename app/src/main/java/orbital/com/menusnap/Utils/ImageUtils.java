@@ -92,6 +92,16 @@ public class ImageUtils {
         canvas.setMatrix(scaleMatrix);
         canvas.drawBitmap(bmp, middleX - bmp.getWidth() / 2, middleY - bmp.getHeight() / 2, new Paint(Paint.FILTER_BITMAP_FLAG));
 
+        int orientation = getParams(context, imageUri)[0];
+        Matrix matrix = new Matrix();
+        if (orientation == 6) {
+            matrix.postRotate(90);
+        } else if (orientation == 3) {
+            matrix.postRotate(180);
+        } else if (orientation == 8) {
+            matrix.postRotate(270);
+        }
+        scaledBitmap = Bitmap.createBitmap(scaledBitmap, 0, 0, scaledBitmap.getWidth(), scaledBitmap.getHeight(), matrix, true);
         ByteArrayOutputStream greyOut = new ByteArrayOutputStream();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Bitmap greyScaleBmp = toGrayscale(scaledBitmap);
@@ -151,22 +161,39 @@ public class ImageUtils {
     }
 
     public static boolean isLandscape(Context context, Uri imageUri) {
+        int[] params = getParams(context, imageUri);
+        int orientation = params[0];
+        int width = params[1];
+        int height = params[2];
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_UNDEFINED:
+                return width > height;
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return false;
+            default:
+                return true;
+        }
+    }
+
+    public static int[] getParams(Context context, Uri imageUri){
         int orientation = ExifInterface.ORIENTATION_UNDEFINED;
         int height = 0;
         int width = 1;
         InputStream imageStream;
         Metadata metadata;
-        ExifIFD0Directory ifd0Directory;
+        ExifIFD0Directory ifd0Directory = null;
+
         try {
             imageStream = context.getContentResolver().openInputStream(imageUri);
             metadata = ImageMetadataReader.readMetadata(imageStream);
             ifd0Directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
         } catch (ImageProcessingException | IOException e) {
             e.printStackTrace();
-            return true;
         }
         try{
-            orientation = ifd0Directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            if (ifd0Directory != null) {
+                orientation = ifd0Directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            }
         } catch (MetadataException e) {
             e.printStackTrace();
         }
@@ -184,16 +211,8 @@ public class ImageUtils {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                return true;
             }
         }
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_UNDEFINED:
-                return width > height;
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return false;
-            default:
-                return true;
-        }
+        return new int[]{orientation, width, height};
     }
 }

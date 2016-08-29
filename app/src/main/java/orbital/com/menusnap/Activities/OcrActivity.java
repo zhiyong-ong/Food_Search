@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -50,13 +51,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.RequestCreator;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -75,8 +76,8 @@ import orbital.com.menusnap.Fragments.SearchResultsFragment;
 import orbital.com.menusnap.Helpers.BingOcr;
 import orbital.com.menusnap.Helpers.BingSearch;
 import orbital.com.menusnap.Helpers.BingTranslate;
-import orbital.com.menusnap.Helpers.ImageInsights;
 import orbital.com.menusnap.Helpers.GlobalVar;
+import orbital.com.menusnap.Helpers.ImageInsights;
 import orbital.com.menusnap.Models.ImageInsightsPOJO.ImageInsightsResponse;
 import orbital.com.menusnap.Models.ImageSearchPOJO.ImageSearchResponse;
 import orbital.com.menusnap.Models.ImageSearchPOJO.ImageValue;
@@ -237,12 +238,22 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
         mJson = getIntent().getStringExtra(RESPONSE);
         final ImageView previewImageView = (ImageView) findViewById(R.id.ocr_preview_image);
         if (mJson == null) {
-            Picasso.with(this)
+            RequestCreator creator = Picasso.with(this)
                     .load(mFileUri)
                     //.placeholder(R.color.black_overlay)
                     .memoryPolicy(MemoryPolicy.NO_CACHE)
-                    .resize(30, 48)
-                    .into(previewImageView);
+                    .resize(30, 48);
+            int orientation = ImageUtils.getParams(this, mFileUri)[0];
+            if (orientation != ExifInterface.ORIENTATION_UNDEFINED){
+                if (orientation == 6) {
+                    creator.rotate(90);
+                } else if (orientation == 3) {
+                    creator.rotate(180);
+                } else if (orientation == 8) {
+                    creator.rotate(270);
+                }
+            }
+            creator.into(previewImageView);
             setupOcr();
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
