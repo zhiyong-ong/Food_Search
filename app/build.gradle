@@ -8,8 +8,8 @@ android {
         applicationId "orbital.com.menusnap"
         minSdkVersion 19
         targetSdkVersion 24
-        versionCode 13
-        versionName "1.1.5"
+        versionCode 12
+        versionName "1.1.4"
     }
 
     buildTypes {
