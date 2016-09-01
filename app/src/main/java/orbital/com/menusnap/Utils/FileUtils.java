@@ -20,14 +20,7 @@ public class FileUtils {
     private static final String SPECIAL_LOCALE = "speciallocale";
 
     public static String getTimeStamp(SharedPreferences prefs, Calendar cal) {
-        final DateFormat df;
-        boolean specialLocale = prefs.getBoolean(SPECIAL_LOCALE, false);
-        if (!specialLocale) {
-            df = SimpleDateFormat.getDateTimeInstance();
-        } else {
-            df = SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-                    DateFormat.MEDIUM, Locale.ENGLISH);
-        }
+        final DateFormat df = getDateFormat(prefs);
         String timeStamp = df.format(cal.getTime()) + ".jpg";
         if (timeStamp.contains("/")){
             prefs.edit().putBoolean(SPECIAL_LOCALE, true).apply();
@@ -47,14 +40,7 @@ public class FileUtils {
     }
 
     public static void sortFileByTime(SharedPreferences prefs, File[] files) {
-        boolean specialLocale = prefs.getBoolean(SPECIAL_LOCALE, false);
-        final DateFormat df;
-        if (!specialLocale) {
-            df = SimpleDateFormat.getDateTimeInstance();
-        } else {
-            df = SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-                    DateFormat.MEDIUM, Locale.ENGLISH);
-        }
+        final DateFormat df = getDateFormat(prefs);
         Arrays.sort(files, new Comparator<File>() {
             @Override
             public int compare(File file1, File file2) {
@@ -69,5 +55,17 @@ public class FileUtils {
                 return date1 != null ? -date1.compareTo(date2) : 0;
             }
         });
+    }
+
+    private static DateFormat getDateFormat(SharedPreferences prefs){
+        boolean specialLocale = prefs.getBoolean(SPECIAL_LOCALE, false);
+        DateFormat df;
+        if (!specialLocale) {
+            df = SimpleDateFormat.getDateTimeInstance();
+        } else {
+            df = SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+                    DateFormat.MEDIUM, Locale.ENGLISH);
+        }
+        return df;
     }
 }
