@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceManager;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
@@ -248,7 +249,8 @@ public class RecentsFragment extends android.app.Fragment {
             }
         }
         File[] files = root.listFiles();
-        FileUtils.sortFileByTime(files);
+        FileUtils.sortFileByTime(PreferenceManager.getDefaultSharedPreferences(getActivity()),
+                files);
         return files;
     }
 

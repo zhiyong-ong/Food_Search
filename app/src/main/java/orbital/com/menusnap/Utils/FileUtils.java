@@ -1,5 +1,7 @@
 package orbital.com.menusnap.Utils;
 
+import android.content.SharedPreferences;
+
 import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -8,15 +10,30 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by Abel on 7/24/2016.
  */
 
 public class FileUtils {
-    public static String getTimeStamp(Calendar cal) {
-        DateFormat df = SimpleDateFormat.getDateTimeInstance();
-        return df.format(cal.getTime()) + ".jpg";
+    private static final String SPECIAL_LOCALE = "speciallocale";
+
+    public static String getTimeStamp(SharedPreferences prefs, Calendar cal) {
+        final DateFormat df;
+        boolean specialLocale = prefs.getBoolean(SPECIAL_LOCALE, false);
+        if (!specialLocale) {
+            df = SimpleDateFormat.getDateTimeInstance();
+        } else {
+            df = SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+                    DateFormat.MEDIUM, Locale.ENGLISH);
+        }
+        String timeStamp = df.format(cal.getTime()) + ".jpg";
+        if (timeStamp.contains("/")){
+            prefs.edit().putBoolean(SPECIAL_LOCALE, true).apply();
+            return getTimeStamp(prefs, cal);
+        }
+        return timeStamp;
     }
 
     public static String getFormattedDate(Calendar cal) {
@@ -29,8 +46,15 @@ public class FileUtils {
         return tf.format(cal.getTime());
     }
 
-    public static void sortFileByTime(File[] files) {
-        final DateFormat df = SimpleDateFormat.getDateTimeInstance();
+    public static void sortFileByTime(SharedPreferences prefs, File[] files) {
+        boolean specialLocale = prefs.getBoolean(SPECIAL_LOCALE, false);
+        final DateFormat df;
+        if (!specialLocale) {
+            df = SimpleDateFormat.getDateTimeInstance();
+        } else {
+            df = SimpleDateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+                    DateFormat.MEDIUM, Locale.ENGLISH);
+        }
         Arrays.sort(files, new Comparator<File>() {
             @Override
             public int compare(File file1, File file2) {

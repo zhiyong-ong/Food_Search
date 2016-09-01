@@ -215,7 +215,8 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
 
                 //current time
                 Calendar cal = Calendar.getInstance();
-                currentTime = FileUtils.getTimeStamp(cal);
+                currentTime = FileUtils.getTimeStamp(sharedPreferencesSettings,
+                        cal);
                 formattedDate = FileUtils.getFormattedDate(cal);
                 formattedTime = FileUtils.getFormattedTime(cal);
                 return null;
@@ -841,23 +842,21 @@ public class OcrActivity extends AppCompatActivity implements SharedPreferences.
             return;
         }
 
-        String fname = currentTime;
-        File file = new File(root, fname);
+        String fileName = currentTime;
+        File saveFile = new File(root, fileName);
         Uri fileUri = FileProvider.getUriForFile(this,
                 BuildConfig.APPLICATION_ID + ".provider",
-                file);
-        if (file.exists()) {
+                saveFile);
+        if (saveFile.exists()) {
             getContentResolver().delete(fileUri, null, null);
         }
         try {
-            FileOutputStream out = new FileOutputStream(file);
+            FileOutputStream out = new FileOutputStream(saveFile);
             bmp.compress(Bitmap.CompressFormat.JPEG, 90, out);
             out.flush();
             out.close();
-
         } catch (Exception e) {
-            e.printStackTrace();
-            FirebaseCrash.report(e);
+
         }
     }
 
