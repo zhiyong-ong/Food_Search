@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -32,7 +31,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -51,7 +49,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
-import java.io.InputStream;
 
 import de.cketti.mailto.EmailIntentBuilder;
 import hotchemi.android.rate.AppRate;
@@ -237,8 +234,8 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         // signed in user can be handled in the listener.
                         if (!task.isSuccessful()) {
                             Log.e(LOG_TAG, "signInWithEmail", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(MainActivity.this, "Authentication failed.",
+//                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -316,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
+                        mFabMenu.showMenuButton(true);
                         return true;
                     case 1:
                         mSettingFrag = new SettingFragment();
@@ -323,6 +321,7 @@ public class MainActivity extends AppCompatActivity implements SharedPreferences
                         //noinspection WrongConstant
                         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                         ft.commit();
+                        mFabMenu.hideMenuButton(true);
                         return true;
                 }
                 return false;

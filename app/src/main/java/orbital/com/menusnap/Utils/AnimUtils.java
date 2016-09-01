@@ -15,6 +15,7 @@ import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.transition.Transition;
 import android.view.View;
 import android.view.ViewAnimationUtils;
+import android.view.ViewPropertyAnimator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.FrameLayout;
 
@@ -39,6 +40,8 @@ public class AnimUtils {
     public static final int SEARCH_BAR_RAISE = 450;
     public static final int SEARCH_BAR_DROP = 400;
     public static final int TEXT_UPDATE = 500;
+    private static final int REVEAL_DURATION = 250;
+    private static final int EXIT_DURATION = 250;
     public static final int FAST_FADE = 200;
     public static final int FASTER_FADE = 100;
 
@@ -114,11 +117,32 @@ public class AnimUtils {
     }
 
     public static void hideSearchBar(View searchBar, int searchbarTrans) {
-        if (searchBar!=null){
+        if (searchBar != null) {
             searchBar.animate().translationY(searchbarTrans)
                     .setDuration(SEARCH_BAR_HIDE)
                     .start();
         }
+    }
+
+    public static void scaleUp(View view, float scale, AnimatorListenerAdapter listener){
+        int duration = REVEAL_DURATION;
+        ViewPropertyAnimator anim = view.animate()
+                .scaleX(scale).scaleY(scale)
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .setDuration(duration);
+        if(listener!=null){
+            anim.setListener(listener);
+        }
+        anim.start();
+    }
+
+    public static void scaleDown(View view, AnimatorListenerAdapter listener) {
+        ViewPropertyAnimator anim = view.animate()
+                .scaleX(0).scaleY(0)
+                .setInterpolator(new FastOutSlowInInterpolator())
+                .setDuration(EXIT_DURATION);
+        anim.setListener(listener);
+        anim.start();
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
